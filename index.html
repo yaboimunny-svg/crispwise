@@ -246,6 +246,33 @@ details.tests[open]{display:flex;flex-direction:column;gap:8px}
   input,select,textarea{font-size:16px!important}
 }
 button,.grow,.hcard,.tile,.srow{touch-action:manipulation}
+.phone{isolation:isolate}
+.para{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:visible}
+.para svg{position:absolute;fill:none;stroke:var(--green);stroke-width:.6;opacity:.07;stroke-linecap:round;stroke-linejoin:round}
+.para svg:nth-child(1){width:220px;height:220px;right:-60px;top:120px;transform:rotate(-18deg)}
+.para svg:nth-child(2){width:150px;height:150px;left:-50px;top:420px;transform:rotate(12deg)}
+.para svg:nth-child(3){width:180px;height:180px;right:-40px;top:720px;transform:rotate(8deg)}
+.para svg:nth-child(4){width:120px;height:120px;left:-30px;top:980px;transform:rotate(-10deg)}
+.top,.scr,.act,.tabbar{position:relative;z-index:1}
+.top{transition:box-shadow .2s,background-color .2s}
+.top.stuck{background:var(--bg);box-shadow:0 1px 0 var(--line)}
+.top h2{transform-origin:left center;will-change:transform}
+.btn,.sm,.chip,.qa button,.tile,.srow,.seg button,.stat,.plusbtn{position:relative;overflow:hidden}
+.ripple{position:absolute;border-radius:50%;background:currentColor;opacity:.18;transform:scale(0);pointer-events:none;animation:ripple .5s ease-out forwards}
+@keyframes ripple{to{transform:scale(1);opacity:0}}
+@media (prefers-reduced-motion:no-preference){
+  .rv{opacity:0;transform:translateY(18px)}
+  .rv.in{opacity:1;transform:none;transition:opacity .45s ease,transform .5s cubic-bezier(.2,.8,.2,1)}
+  .onb .body.enter .kw{display:inline-block;animation:kin .55s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i) * .07s + .1s)}
+  @keyframes kin{from{opacity:0;transform:translateY(55%) rotate(5deg)}}
+  .onb .art{animation:bob 4.5s ease-in-out infinite}
+  @keyframes bob{50%{transform:translateY(-6px) rotate(-2deg)}}
+  .onb .body.enter .art svg *{stroke-dasharray:90;stroke-dashoffset:90;animation:draw 1.1s .15s ease forwards}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  .card.flag .sm.fill:active{transform:scale(.94)}
+  .pill{transition:transform .2s}
+  .card:active .pill{transform:scale(1.05)}
+}
 @media (prefers-reduced-motion:no-preference){
   button,.grow,.hcard,.tile,.card.rcard{transition:transform .14s ease,filter .14s ease,background-color .2s ease}
   button:active,.grow:active,.hcard:active,.tile:active,.card.rcard:active{transform:scale(.97)}
@@ -774,7 +801,7 @@ const TABFOR={inventory:'fridge',detail:'fridge',manual:'fridge',recipes:'recipe
 function phone(title,sub,back,inner,act,right){
   const cur=TABFOR[S.screen]||'';
   const tb=[['fridge','Fridge','inventory'],['recipes','Recipes','recipes'],['plus','',''],['history','History','history'],['news','News','news']].map(([k,l,s])=>k==='plus'?`<button class="plusbtn" data-a="sheet" aria-label="Add groceries" aria-haspopup="dialog">${IC.plus}</button>`:`<button data-a="nav" data-v="${s}" ${cur===k?'aria-current="page"':''}>${IC[k]}<span>${l}</span></button>`).join('');
-  return `<div class="phone"><div class="top">${back?`<button class="back" data-a="go" data-v="${back}" aria-label="Back">←</button>`:''}<div style="flex:1;min-width:0"><h2>${title}</h2>${sub?`<div class="sub">${sub}</div>`:''}</div>${right||''}</div>
+  return `<div class="phone"><div class="para" aria-hidden="true">${svg(P.produce)}${svg(P.dairy)}${svg(P.bakery)}${svg(P.eggs)}</div><div class="top">${back?`<button class="back" data-a="go" data-v="${back}" aria-label="Back">←</button>`:''}<div style="flex:1;min-width:0"><h2>${title}</h2>${sub?`<div class="sub">${sub}</div>`:''}</div>${right||''}</div>
   <div class="scr">${inner}</div>${act?`<div class="act">${act}</div>`:''}<nav class="tabbar" aria-label="Main">${tb}</nav>${S.toast?`<div class="toast" role="status"><span>${esc(S.toast.msg)}</span>${S.toast.kind==='info'?'':'<button data-a="undo">Undo</button>'}</div>`:''}${S.sheet?sheetHtml():''}${S.modal?modalHtml():''}${S.cam?camHtml():''}${S.onb!=null?onbHtml():''}</div>`}
 const ONB=[
   ['learn','Welcome to Crispwise','Know what is fresh, use food before it goes off, and waste less money.'],
@@ -784,7 +811,7 @@ const ONB=[
   ['kitchen',"What's already in your kitchen?",'Pick a few staples so recipe ideas are useful from day one. You can change these later.']];
 function onbHtml(){const i=S.onb,[ic,h,p]=ONB[i],last=i===ONB.length-1;const on=new Set(S.staples||[]);
   return `<div class="onb" role="dialog" aria-modal="true" aria-label="Tutorial"><button class="skip" data-a="onbskip">Skip</button>
-  <div class="body" id="onbbody"><div class="art" aria-hidden="true">${svg(P[ic])}</div><h3>${h}</h3><p>${p}</p>
+  <div class="body" id="onbbody"><div class="art" aria-hidden="true">${svg(P[ic])}</div><h3>${h.split(' ').map((w,j)=>`<span class="kw" style="--i:${j}">${w}</span>`).join(' ')}</h3><p>${p}</p>
   ${last?`<div class="chipgrid" style="justify-content:center" role="group" aria-label="Kitchen staples">${STAPLES.map(([k,l])=>`<button class="chip" data-a="staple" data-v="${k}" aria-pressed="${on.has(k)}">${l}</button>`).join('')}</div>`:''}</div>
   <div class="dots" aria-hidden="true">${ONB.map((_,j)=>`<i class="${j===i?'on':''}"></i>`).join('')}</div>
   <div class="row">${i?`<button class="btn ghost" data-a="onbnav" data-v="${i-1}" style="flex:1">Back</button>`:''}<button class="btn" data-a="${last?'onbdone':'onbnav'}" data-v="${i+1}" style="flex:2">${last?'Start using Crispwise':'Next'}</button></div></div>`}
@@ -812,7 +839,7 @@ function inventoryScreen(){
   const q=(S.q||'').trim().toLowerCase();
   const pool=S.view==='bad'?bad:S.view==='soon'?soon:S.view==='fine'?fine:all;
   const f=pool.filter(i=>(S.filter==='All'||i.owner===S.filter)&&(!q||i.name.toLowerCase().includes(q)||catName(i.key).toLowerCase().includes(q)));
-  const stat=(k,n,l,c)=>`<button class="stat ${c}" data-a="view" data-v="${k}" aria-pressed="${S.view===k}"><b>${n}</b><span>${l}</span></button>`;
+  const stat=(k,n,l,c)=>`<button class="stat ${c}" data-a="view" data-v="${k}" aria-pressed="${S.view===k}"><b data-count="${n}" data-cid="stat-${k}">${n}</b><span>${l}</span></button>`;
   const sec=(t,n)=>`<div class="section"><h3>${t}</h3><span class="note">${n}</span></div>`;
   let body='';
   if(S.sort==='az'){body=f.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(itemRow).join('')}
@@ -1021,7 +1048,7 @@ function moneyStats(){let saved=0,lost=0,eaten=0,tossed=0;S.inv.forEach(i=>{if(!
 function historyScreen(){
   const H=S.history,m=moneyStats(),tot=m.saved+m.lost;
   const card=`<div class="money ${m.net<0?'neg':''}" role="group" aria-label="Money saved"><div class="row"><span class="label" style="color:inherit;opacity:.85">Money saved</span>${svg(P.coin,'ii')}</div>
-    <div class="big">${fmtMoney(m.net)}</div>
+    <div class="big" data-count="${m.net.toFixed(2)}" data-cid="money" data-money="1">${fmtMoney(m.net)}</div>
     <div class="mbar" aria-hidden="true"><i style="width:${tot?Math.round(100*m.saved/tot):0}%"></i></div>
     <div class="row"><span>Eaten ${m.eaten} · +${fmtMoney(m.saved)}</span><span>Tossed ${m.tossed} · −${fmtMoney(m.lost).replace('−','')}</span></div>
     <span style="font-size:11.5px;opacity:.8">Goes up when you mark food as used or cooked, down when it's thrown out. Uses receipt prices, or typical prices when there's none.</span></div>`;
@@ -1182,10 +1209,12 @@ function screenHtml(){
 function render(){
   const T=[['app','App prototype'],['magnet','Magnet display'],['log','Test log ('+S.runs.length+')']];
   document.getElementById('tabs').innerHTML=T.map(([k,v])=>`<button class="tab" role="tab" data-a="tab" data-v="${k}" aria-selected="${S.tab===k}">${v}</button>`).join('');
+  const key=[S.tab,S.screen,S.rid,S.hid,S.sort,S.view,S.filter,S.rfilter].join('|');
+  const oldScr=document.querySelector('.scr'),keepY=oldScr&&key===S._k?oldScr.scrollTop:0;
   document.getElementById('view').innerHTML=S.tab==='app'?`<div class="stage" style="grid-template-columns:minmax(0,1fr)">${screenHtml()}</div>`:S.tab==='magnet'?magnetTab():logTab();
   /* animate only what changed: a new screen, a new list order, a sheet/toast/dialog appearing */
-  const key=[S.tab,S.screen,S.rid,S.hid,S.sort,S.view,S.filter,S.rfilter].join('|');
   const q=sel=>document.querySelector(sel);
+  const entered=key!==S._k;if(q('.scr')&&keepY)q('.scr').scrollTop=keepY;
   if(key!==S._k){['.scr','.top','.tabbar'].forEach(c=>{const n=q(c);if(n)n.classList.add('enter')});if(S._k&&S._k.split('|')[1]===S.screen)q('.tabbar')&&q('.tabbar').classList.remove('enter');S._k=key}
   if(S.sheet&&!S._sheetOn&&q('.sheetbg'))q('.sheetbg').classList.add('enter');S._sheetOn=!!S.sheet;
   if(S.toast&&S.toast!==S._toastOn&&q('.toast'))q('.toast').classList.add('enter');S._toastOn=S.toast;
@@ -1200,9 +1229,39 @@ function render(){
   const pf=document.getElementById('photo');if(pf)pf.addEventListener('change',onPhoto);
   const pc=document.getElementById('photocam');if(pc)pc.addEventListener('change',onPhoto);
   const v=document.getElementById('camvid');if(v&&S.stream&&v.srcObject!==S.stream){v.srcObject=S.stream;v.play().catch(()=>{})}
+  fx(entered);
   persist();
 }
 /* ---------- camera: live viewfinder where the browser allows it, the phone's own camera app otherwise ---------- */
+/* ---------- motion: scroll reveal, parallax, collapsing title, count-ups, tap ripples (all off with Reduce Motion) ---------- */
+function fx(entered){
+  if(RM())return;
+  const scr=document.querySelector('.scr'),ph=document.querySelector('.phone');
+  if(scr&&ph){
+    if(entered){
+      const fold=scr.getBoundingClientRect().bottom;
+      const io=new IntersectionObserver(es=>es.forEach(en=>{if(en.isIntersecting){en.target.classList.add('in');io.unobserve(en.target)}}),{root:scr,threshold:.08});
+      [...scr.querySelectorAll(':scope>.card,:scope>.section,:scope>.money,:scope>.match,:scope>a.card')].forEach(el=>{if(el.getBoundingClientRect().top>fold-8){el.classList.add('rv');io.observe(el)}});
+    }
+    const h2=ph.querySelector('.top h2'),sub=ph.querySelector('.top .sub'),para=ph.querySelector('.para'),top=ph.querySelector('.top');
+    const onS=()=>{const y=scr.scrollTop,k=Math.min(y,80)/80;
+      if(h2)h2.style.transform=`scale(${1-k*.22})`;if(sub)sub.style.opacity=String(1-k*.9);
+      if(top)top.classList.toggle('stuck',y>4);
+      if(para)para.style.transform=`translate3d(0,${-y*.28}px,0)`};
+    scr.addEventListener('scroll',onS,{passive:true});onS();
+  }
+  S._cnt=S._cnt||{};
+  document.querySelectorAll('[data-count]').forEach(el=>{
+    const id=el.dataset.cid,to=+el.dataset.count,from=S._cnt[id]!=null?S._cnt[id]:(entered?0:to);S._cnt[id]=to;
+    if(from===to)return;const isM=el.dataset.money,t0=performance.now(),d=700;
+    const step=t=>{const p=Math.min(1,(t-t0)/d),e=1-Math.pow(1-p,3),v=from+(to-from)*e;el.textContent=isM?fmtMoney(v):String(Math.round(v));if(p<1)requestAnimationFrame(step)};
+    requestAnimationFrame(step)});
+}
+document.addEventListener('pointerdown',e=>{
+  if(RM())return;const b=e.target.closest('.btn,.sm,.chip,.qa button,.tile,.srow,.seg button,.stat,.plusbtn');if(!b||b.disabled)return;
+  const r=b.getBoundingClientRect(),d=Math.max(r.width,r.height)*1.4,sp=document.createElement('span');
+  sp.className='ripple';sp.style.cssText=`width:${d}px;height:${d}px;left:${e.clientX-r.left-d/2}px;top:${e.clientY-r.top-d/2}px`;
+  b.appendChild(sp);setTimeout(()=>sp.remove(),520)},{passive:true});
 function stopCam(){if(S.stream){S.stream.getTracks().forEach(t=>t.stop());S.stream=null}S.cam=false}
 async function openCam(){
   S.sheet=false;
