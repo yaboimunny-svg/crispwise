@@ -260,6 +260,13 @@ button,.grow,.hcard,.tile,.srow{touch-action:manipulation}
 .btn,.sm,.chip,.qa button,.tile,.srow,.seg button,.stat,.plusbtn{position:relative;overflow:hidden}
 .ripple{position:absolute;border-radius:50%;background:currentColor;opacity:.18;transform:scale(0);pointer-events:none;animation:ripple .5s ease-out forwards}
 @keyframes ripple{to{transform:scale(1);opacity:0}}
+.scr,.onb .body{touch-action:pan-y}
+@media (prefers-reduced-motion:no-preference){
+  .scr.enter.from-right>*,.onb .body.enter.from-right>*{animation:inR .34s cubic-bezier(.2,.8,.2,1) both!important}
+  .scr.enter.from-left>*,.onb .body.enter.from-left>*{animation:inL .34s cubic-bezier(.2,.8,.2,1) both!important}
+  @keyframes inR{from{opacity:0;transform:translateX(40px)}}
+  @keyframes inL{from{opacity:0;transform:translateX(-40px)}}
+}
 @media (prefers-reduced-motion:no-preference){
   .rv{opacity:0;transform:translateY(18px)}
   .rv.in{opacity:1;transform:none;transition:opacity .45s ease,transform .5s cubic-bezier(.2,.8,.2,1)}
@@ -804,10 +811,10 @@ function phone(title,sub,back,inner,act,right){
   return `<div class="phone"><div class="para" aria-hidden="true">${svg(P.produce)}${svg(P.dairy)}${svg(P.bakery)}${svg(P.eggs)}</div><div class="top">${back?`<button class="back" data-a="go" data-v="${back}" aria-label="Back">←</button>`:''}<div style="flex:1;min-width:0"><h2>${title}</h2>${sub?`<div class="sub">${sub}</div>`:''}</div>${right||''}</div>
   <div class="scr">${inner}</div>${act?`<div class="act">${act}</div>`:''}<nav class="tabbar" aria-label="Main">${tb}</nav>${S.toast?`<div class="toast" role="status"><span>${esc(S.toast.msg)}</span>${S.toast.kind==='info'?'':'<button data-a="undo">Undo</button>'}</div>`:''}${S.sheet?sheetHtml():''}${S.modal?modalHtml():''}${S.cam?camHtml():''}${S.onb!=null?onbHtml():''}</div>`}
 const ONB=[
-  ['learn','Welcome to Crispwise','Know what is fresh, use food before it goes off, and waste less money.'],
+  ['learn','Welcome to Crispwise','Know what is fresh, use food before it goes off, and waste less money. Swipe or tap Next.'],
   ['receipt','Snap your receipt','Tap the + button, then Photos or Camera. We read the items, the store and the date for you.'],
   ['check','Check what we read','Anything we are unsure about is highlighted. One tap confirms or fixes it.'],
-  ['fridge','Use first, cook smart','Your fridge is sorted by what expires soonest. Recipes use those first, and History tracks the money you save.'],
+  ['fridge','Use first, cook smart','Your fridge is sorted by what expires soonest. Recipes use those first, and History tracks the money you save. Swipe left or right to move between tabs.'],
   ['kitchen',"What's already in your kitchen?",'Pick a few staples so recipe ideas are useful from day one. You can change these later.']];
 function onbHtml(){const i=S.onb,[ic,h,p]=ONB[i],last=i===ONB.length-1;const on=new Set(S.staples||[]);
   return `<div class="onb" role="dialog" aria-modal="true" aria-label="Tutorial"><button class="skip" data-a="onbskip">Skip</button>
@@ -1215,12 +1222,13 @@ function render(){
   /* animate only what changed: a new screen, a new list order, a sheet/toast/dialog appearing */
   const q=sel=>document.querySelector(sel);
   const entered=key!==S._k;if(q('.scr')&&keepY)q('.scr').scrollTop=keepY;
+  if(entered&&S._dir&&q('.scr'))q('.scr').classList.add(S._dir==='next'?'from-right':'from-left');
   if(key!==S._k){['.scr','.top','.tabbar'].forEach(c=>{const n=q(c);if(n)n.classList.add('enter')});if(S._k&&S._k.split('|')[1]===S.screen)q('.tabbar')&&q('.tabbar').classList.remove('enter');S._k=key}
   if(S.sheet&&!S._sheetOn&&q('.sheetbg'))q('.sheetbg').classList.add('enter');S._sheetOn=!!S.sheet;
   if(S.toast&&S.toast!==S._toastOn&&q('.toast'))q('.toast').classList.add('enter');S._toastOn=S.toast;
   if(S.modal&&S.modal!==S._modalOn&&q('.modalbg'))q('.modalbg').classList.add('enter');S._modalOn=S.modal;
   const pb=q('.plusbtn');if(pb)pb.classList.toggle('on',!!S.sheet);
-  if(S.onb!=null&&S.onb!==S._onbOn&&q('#onbbody'))q('#onbbody').classList.add('enter');S._onbOn=S.onb;
+  if(S.onb!=null&&S.onb!==S._onbOn&&q('#onbbody')){q('#onbbody').classList.add('enter');if(S._dir)q('#onbbody').classList.add(S._dir==='next'?'from-right':'from-left')}S._onbOn=S.onb;S._dir=null;
   if((S.screen==='news'||S.screen==='learn')&&S.tab==='app')loadNews(false);
   const h=document.getElementById('cvhold');
   if(h){if(S.source!=='photo'||S.photo)h.appendChild(S.canvas);else h.innerHTML='<div class="note">No photo chosen yet.</div>'}
@@ -1262,6 +1270,27 @@ document.addEventListener('pointerdown',e=>{
   const r=b.getBoundingClientRect(),d=Math.max(r.width,r.height)*1.4,sp=document.createElement('span');
   sp.className='ripple';sp.style.cssText=`width:${d}px;height:${d}px;left:${e.clientX-r.left-d/2}px;top:${e.clientY-r.top-d/2}px`;
   b.appendChild(sp);setTimeout(()=>sp.remove(),520)},{passive:true});
+/* ---------- swipe: tabs left/right, tutorial slides, swipe right to go back ---------- */
+const TAB_ORDER=['inventory','recipes','history','news'];
+function swipe(dir){ // dir: 'next' (finger moved left) or 'prev' (finger moved right)
+  if(S.tab!=='app'||S.sheet||S.modal||S.cam||S.screen==='scanning')return false;
+  if(S.onb!=null){const n=S.onb+(dir==='next'?1:-1);if(n<0||n>=ONB.length)return false;S._dir=dir;S.onb=n;render();return true}
+  const cur=S.screen==='learn'?'news':S.screen,i=TAB_ORDER.indexOf(cur);
+  if(i>=0){const n=i+(dir==='next'?1:-1);if(n<0||n>=TAB_ORDER.length)return false;stopCam();S._dir=dir;S.screen=TAB_ORDER[n];render();return true}
+  if(dir==='prev'){const back=document.querySelector('.top .back[data-a="go"]');if(back){S._dir='prev';back.click();return true}}
+  return false}
+(function(){let x0=null,y0=0,t0=0,ok=false;
+  const start=(x,y,target)=>{ok=!!target.closest('.phone')&&!target.closest('.chips,.chipgrid,input,select,textarea,video,.sheetbg,.modalbg,canvas,.mbar');x0=x;y0=y;t0=Date.now()};
+  const end=(x,y,mouse)=>{if(x0==null||!ok){x0=null;return}const dx=x-x0,dy=y-y0,dt=Date.now()-t0;x0=null;
+    if(Math.abs(dx)>60&&Math.abs(dx)>1.7*Math.abs(dy)&&dt<700){if(swipe(dx<0?'next':'prev'))S._swallow=mouse?Date.now():0}};
+  document.addEventListener('touchstart',e=>{const t=e.touches[0];if(e.touches.length===1)start(t.clientX,t.clientY,e.target)},{passive:true});
+  document.addEventListener('touchend',e=>{const t=e.changedTouches[0];end(t.clientX,t.clientY)},{passive:true});
+  /* mouse drag for desktop testing */
+  document.addEventListener('mousedown',e=>{if(e.button===0)start(e.clientX,e.clientY,e.target)});
+  document.addEventListener('mouseup',e=>end(e.clientX,e.clientY,true));
+  /* a swipe that ends on a button should not also press it */
+  document.addEventListener('click',e=>{if(S._swallow&&Date.now()-S._swallow<350){e.stopPropagation();e.preventDefault();S._swallow=0}},true);
+})();
 function stopCam(){if(S.stream){S.stream.getTracks().forEach(t=>t.stop());S.stream=null}S.cam=false}
 async function openCam(){
   S.sheet=false;
