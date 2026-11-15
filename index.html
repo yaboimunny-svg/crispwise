@@ -264,7 +264,11 @@ button,.grow,.hcard,.tile,.srow{touch-action:manipulation}
 .btn,.sm,.chip,.qa button,.tile,.srow,.seg button,.stat,.plusbtn{position:relative;overflow:hidden}
 .ripple{position:absolute;border-radius:50%;background:currentColor;opacity:.18;transform:scale(0);pointer-events:none;animation:ripple .5s ease-out forwards}
 @keyframes ripple{to{transform:scale(1);opacity:0}}
-.scr,.onb .body{touch-action:pan-y}
+.scr,.onb .body,.phone>.top{touch-action:pan-y}
+.peek{position:absolute;left:0;right:0;top:0;display:flex;flex-direction:column;background:var(--bg);z-index:3;pointer-events:none;will-change:transform;box-shadow:0 0 0 1px var(--line)}
+.peek .scr{overflow:hidden}
+.onb .body.peeking{pointer-events:none}
+.phone>.top,.phone>.scr,.phone>.act{will-change:transform}
 @media (prefers-reduced-motion:no-preference){
   .scr.enter.from-right>*,.onb .body.enter.from-right>*{animation:inR .34s cubic-bezier(.2,.8,.2,1) both!important}
   .scr.enter.from-left>*,.onb .body.enter.from-left>*{animation:inL .34s cubic-bezier(.2,.8,.2,1) both!important}
@@ -1130,14 +1134,15 @@ function receiptScreen(){
 
 /* ---------- News: live Government of Canada sources ---------- */
 const FEEDS={
-  recalls:{paths:['feeds/recalls','https://ubiquitous-sopapillas-04e9bc.netlify.app/feeds/recalls','https://recalls-rappels.canada.ca/en/feed/cfia-alerts-recalls'],src:'Government of Canada Recalls and Safety Alerts (CFIA food)',page:'https://recalls-rappels.canada.ca/en/search/site?f%5B0%5D=category%3A144'},
-  news:{paths:['feeds/cfia-news','https://api.io.canada.ca/io-server/gc/news/en/v2?dept=foodinspectionagency&sort=publishedDate&orderBy=desc&pick=8&format=json'],src:'Canadian Food Inspection Agency news releases',page:'https://inspection.canada.ca/en/about-cfia/newsroom'}};
+  recalls:{paths:['feeds-recalls.xml','feeds/recalls','https://ubiquitous-sopapillas-04e9bc.netlify.app/feeds/recalls','https://recalls-rappels.canada.ca/en/feed/cfia-alerts-recalls'],src:'Government of Canada Recalls and Safety Alerts (CFIA food)',page:'https://recalls-rappels.canada.ca/en/search/site?f%5B0%5D=category%3A144'},
+  news:{paths:['https://api.io.canada.ca/io-server/gc/news/en/v2?dept=foodinspectionagency&sort=publishedDate&orderBy=desc&pick=8&format=json','feeds-cfia-news.json','feeds/cfia-news'],src:'Canadian Food Inspection Agency news releases',page:'https://inspection.canada.ca/en/about-cfia/newsroom'}};
 const TRUSTED=[['Recalls and safety alerts','https://recalls-rappels.canada.ca/en','Government of Canada'],['Food recalls, risks and outbreaks','https://www.canada.ca/en/services/health/food-recalls-risks-outbreaks.html','Health Canada'],['Canadian Food Inspection Agency','https://inspection.canada.ca/en','CFIA'],["Canada's food guide",'https://food-guide.canada.ca/en/','Health Canada']];
-async function getText(paths){for(const u of paths){try{const r=await withTimeout(fetch(u,{cache:'no-store'}),9000,'timeout');if(!r.ok)continue;const t=await r.text();if(t&&!/^\s*<!doctype html/i.test(t))return t}catch(e){}}return null}
+async function getText(paths){for(const p of paths){try{const u=/^https?:/.test(p)?p:p+(p.includes('?')?'&':'?')+'t='+Date.now();const r=await withTimeout(fetch(u,{cache:'no-store'}),9000,'timeout');if(!r.ok)continue;const t=await r.text();if(t&&!/^\s*<!doctype html/i.test(t))return t}catch(e){}}return null}
 async function loadNews(force){
   if(S.newsLoading)return;
-  if(!force&&S.news&&Date.now()-S.news.t<30*60e3)return;
-  S.newsLoading=true;render();
+  if(!navigator.onLine){render();return}
+  if(!force&&S.news&&Date.now()-S.news.t<10*60e3)return;
+  S.newsLoading=true;const onNews=()=>S.tab==='app'&&(S.screen==='news'||S.screen==='learn');if(onNews())render();
   const [rx,nx]=await Promise.all([getText(FEEDS.recalls.paths),getText(FEEDS.news.paths)]);
   let recalls=null,news=null;
   try{if(rx){const d=new DOMParser().parseFromString(rx,'text/xml');recalls=[...d.querySelectorAll('item')].slice(0,12).map(it=>({title:(it.querySelector('title')||{}).textContent.trim(),link:(it.querySelector('link')||{}).textContent.trim(),date:(it.querySelector('pubDate')||{}).textContent.trim()}))}}catch(e){}
@@ -1145,7 +1150,7 @@ async function loadNews(force){
   const prev=S.news||{};
   S.news={t:Date.now(),recalls:recalls||prev.recalls||null,news:news||prev.news||null,live:{recalls:!!recalls,news:!!news}};
   try{localStorage.setItem('cw-news',JSON.stringify(S.news))}catch(e){}
-  S.newsLoading=false;render()}
+  S.newsLoading=false;if(onNews())render()}
 const GENERIC=new Set(['BRAND','BRANDS','CERTAIN','RECALLED','RECALL','PRODUCT','PRODUCTS','PRESENCE','UNDECLARED','POSSIBLE','DUE','PIECES','VARIOUS','FOODS','FOOD','WITH','FROM','AND','THE','SOLD']);
 function recallMatches(r){
   const t=String(r.title||'');const brand=((t.match(/^(?:Certain\s+)?(.+?)\s+brands?\b/i)||[])[1]||'').split(/,|\band\b/i)[0].trim().toUpperCase();
@@ -1158,7 +1163,7 @@ function newsScreen(){
   const matches=[];(N&&N.recalls||[]).forEach(r=>recallMatches(r).forEach(i=>matches.push([i,r])));
   const fail=(k)=>`<div class="card"><div class="note">Couldn't load the live ${k==='recalls'?'recall list':'news'} here${N&&N[k]?' (showing the last copy)':''}. <a href="${FEEDS[k].page}" target="_blank" rel="noopener">Open it on the official site</a>.</div></div>`;
   const tips=[['eye','Look','Colour changes, mould, or liquid pooling are signs to stop and inspect.'],['nose','Smell','A sour, sharp or off smell means a closer look before you use it.'],['hand','Touch','Slimy, sticky or very soft food is a warning sign, especially raw meat and fish.'],['snow','Keep it cold','Fridge at 4 °C or colder; raw meat on the bottom shelf.'],['calendar','Dates are estimates','Your own checks come first.']];
-  return phone('News','Recalls and food news from Canada',null,`
+  return phone('News',!navigator.onLine?'Offline · showing saved news':N&&N.t?'Checked '+(Date.now()-N.t<90e3?'just now':Math.round((Date.now()-N.t)/60e3)+' min ago')+(N.recalls&&N.recalls[0]&&N.recalls[0].date?' · latest recall '+ago(N.recalls[0].date).toLowerCase():''):'Recalls and food news from Canada',null,`
     ${matches.length?matches.slice(0,3).map(([i,r])=>`<div class="match" role="alert">${svg(P.alert)}<div><b>Check your fridge: ${esc(i.name)}</b><div style="font-size:13px">It may match this recall: ${esc(r.title)}. <a href="${esc(r.link)}" target="_blank" rel="noopener">Read the notice</a> and compare brand, size and codes.</div></div></div>`).join(''):''}
     <div class="section"><h3>Food recalls</h3><button class="sm" data-a="newsrefresh">${svg(P.refresh,'ii')}${S.newsLoading?'Loading…':'Refresh'}</button></div>
     ${N&&N.recalls?N.recalls.map(r=>item(r,'bad')).join(''):S.newsLoading?'<div class="card"><div class="note">Loading the latest recalls…</div></div>':''}
@@ -1297,6 +1302,7 @@ function redrawSample(){}
 function screenHtml(){
   switch(S.screen){case 'manual':return manualScreen();case 'recipes':return recipesScreen();case 'recipe':return recipeScreen();case 'history':return historyScreen();case 'receipt':return receiptScreen();case 'scan':return scanScreen();case 'scanning':return scanningScreen();case 'review':return reviewScreen();case 'detail':return detailScreen();case 'learn':case 'news':return newsScreen();case 'staples':return staplesScreen();default:return inventoryScreen()}}
 function render(){
+  if(S._dragging){S._pendingRender=true;return}
   const T=[['app','App prototype'],['magnet','Magnet display'],['log','Test log ('+S.runs.length+')']];
   document.getElementById('tabs').innerHTML=T.map(([k,v])=>`<button class="tab" role="tab" data-a="tab" data-v="${k}" aria-selected="${S.tab===k}">${v}</button>`).join('');
   const key=[S.tab,S.screen,S.rid,S.hid,S.sort,S.view,S.filter,S.rfilter].join('|');
@@ -1304,14 +1310,15 @@ function render(){
   document.getElementById('view').innerHTML=S.tab==='app'?`<div class="stage" style="grid-template-columns:minmax(0,1fr)">${screenHtml()}</div>`:S.tab==='magnet'?magnetTab():logTab();
   /* animate only what changed: a new screen, a new list order, a sheet/toast/dialog appearing */
   const q=sel=>document.querySelector(sel);
-  const entered=key!==S._k;if(q('.scr')&&keepY)q('.scr').scrollTop=keepY;
+  const entered=key!==S._k,quiet=S._noEnter;S._noEnter=false;if(q('.scr')&&keepY)q('.scr').scrollTop=keepY;
   if(entered&&S._dir&&q('.scr'))q('.scr').classList.add(S._dir==='next'?'from-right':'from-left');
+  if(key!==S._k&&quiet){S._k=key}
   if(key!==S._k){['.scr','.top','.tabbar'].forEach(c=>{const n=q(c);if(n)n.classList.add('enter')});if(S._k&&S._k.split('|')[1]===S.screen)q('.tabbar')&&q('.tabbar').classList.remove('enter');S._k=key}
   if(S.sheet&&!S._sheetOn&&q('.sheetbg'))q('.sheetbg').classList.add('enter');S._sheetOn=!!S.sheet;
   if(S.toast&&S.toast!==S._toastOn&&q('.toast'))q('.toast').classList.add('enter');S._toastOn=S.toast;
   if(S.modal&&S.modal!==S._modalOn&&q('.modalbg'))q('.modalbg').classList.add('enter');S._modalOn=S.modal;
   const pb=q('.plusbtn');if(pb)pb.classList.toggle('on',!!S.sheet);
-  if(S.onb!=null&&S.onb!==S._onbOn&&q('#onbbody')){q('#onbbody').classList.add('enter');if(S._dir)q('#onbbody').classList.add(S._dir==='next'?'from-right':'from-left')}S._onbOn=S.onb;S._dir=null;
+  if(S.onb!=null&&S.onb!==S._onbOn&&q('#onbbody')&&!quiet){q('#onbbody').classList.add('enter');if(S._dir)q('#onbbody').classList.add(S._dir==='next'?'from-right':'from-left')}S._onbOn=S.onb;S._dir=null;
   if((S.screen==='news'||S.screen==='learn')&&S.tab==='app')loadNews(false);
   const h=document.getElementById('cvhold');
   if(h){if(S.source!=='photo'||S.photo)h.appendChild(S.canvas);else h.innerHTML='<div class="note">No photo chosen yet.</div>'}
@@ -1355,24 +1362,58 @@ document.addEventListener('pointerdown',e=>{
   sp.className='ripple';sp.style.cssText=`width:${d}px;height:${d}px;left:${e.clientX-r.left-d/2}px;top:${e.clientY-r.top-d/2}px`;
   b.appendChild(sp);setTimeout(()=>sp.remove(),520)},{passive:true});
 /* ---------- swipe: tabs left/right, tutorial slides, swipe right to go back ---------- */
+/* ---------- swipe: the page follows your finger, the next page peeks in, release to slide or spring back ---------- */
 const TAB_ORDER=['inventory','recipes','history','news'];
-function swipe(dir){ // dir: 'next' (finger moved left) or 'prev' (finger moved right)
-  if(S.tab!=='app'||S.sheet||S.modal||S.cam||S.screen==='scanning')return false;
-  if(S.onb!=null){const n=S.onb+(dir==='next'?1:-1);if(n<0||n>=ONB.length)return false;S._dir=dir;S.onb=n;render();return true}
+function neighbour(dir){
+  if(S.tab!=='app'||S.sheet||S.modal||S.cam||S.screen==='scanning')return null;
+  if(S.onb!=null){const n=S.onb+(dir==='next'?1:-1);return n>=0&&n<ONB.length?{onb:n}:null}
   const cur=S.screen==='learn'?'news':S.screen,i=TAB_ORDER.indexOf(cur);
-  if(i>=0){const n=i+(dir==='next'?1:-1);if(n<0||n>=TAB_ORDER.length)return false;stopCam();S._dir=dir;S.screen=TAB_ORDER[n];render();return true}
-  if(dir==='prev'){const back=document.querySelector('.top .back[data-a="go"]');if(back){S._dir='prev';back.click();return true}}
-  return false}
-(function(){let x0=null,y0=0,t0=0,ok=false;
-  const start=(x,y,target)=>{ok=!!target.closest('.phone')&&!target.closest('.chips,.chipgrid,input,select,textarea,video,.sheetbg,.modalbg,canvas,.mbar');x0=x;y0=y;t0=Date.now()};
-  const end=(x,y,mouse)=>{if(x0==null||!ok){x0=null;return}const dx=x-x0,dy=y-y0,dt=Date.now()-t0;x0=null;
-    if(Math.abs(dx)>60&&Math.abs(dx)>1.7*Math.abs(dy)&&dt<700){if(swipe(dx<0?'next':'prev'))S._swallow=mouse?Date.now():0}};
-  document.addEventListener('touchstart',e=>{const t=e.touches[0];if(e.touches.length===1)start(t.clientX,t.clientY,e.target)},{passive:true});
-  document.addEventListener('touchend',e=>{const t=e.changedTouches[0];end(t.clientX,t.clientY)},{passive:true});
-  /* mouse drag for desktop testing */
-  document.addEventListener('mousedown',e=>{if(e.button===0)start(e.clientX,e.clientY,e.target)});
-  document.addEventListener('mouseup',e=>end(e.clientX,e.clientY,true));
-  /* a swipe that ends on a button should not also press it */
+  if(i>=0){const n=i+(dir==='next'?1:-1);return n>=0&&n<TAB_ORDER.length?{screen:TAB_ORDER[n]}:null}
+  if(dir==='prev'){const btn=document.querySelector('.top .back[data-a="go"]');if(btn)return{screen:btn.dataset.v,back:btn}}
+  return null}
+function peekFor(nb){
+  const tmp=document.createElement('div');let pk;
+  if(nb.onb!=null){const save=S.onb;S.onb=nb.onb;tmp.innerHTML=onbHtml();S.onb=save;pk=tmp.querySelector('.body');pk.removeAttribute('id');
+    const cur=document.getElementById('onbbody');Object.assign(pk.style,{position:'absolute',left:cur.offsetLeft+'px',top:cur.offsetTop+'px',width:cur.offsetWidth+'px',height:cur.offsetHeight+'px'});
+    cur.parentNode.appendChild(pk)}
+  else{const save=S.screen,sd=S.detail;S.screen=nb.screen;try{tmp.innerHTML=screenHtml()}finally{S.screen=save;S.detail=sd}
+    const ph=document.querySelector('.phone'),tb=ph.querySelector('.tabbar');pk=document.createElement('div');pk.className='peek';pk.style.bottom=(tb?tb.offsetHeight:0)+'px';
+    const t=tmp.querySelector('.top'),sc=tmp.querySelector('.scr');if(t)pk.appendChild(t);if(sc)pk.appendChild(sc);ph.appendChild(pk)}
+  pk.classList.add('peeking');return pk}
+function commitNav(nb){
+  S._noEnter=true;
+  if(nb.onb!=null){S.onb=nb.onb;render();return}
+  if(nb.back){S._noEnter=true;nb.back.click();return}
+  stopCam();S.sheet=false;S.screen=nb.screen;S.ocrErr=null;render()}
+(function(){let st=null;
+  const blocked=t=>!t.closest('.phone')||t.closest('.chips,.chipgrid,input,select,textarea,video,.sheetbg,.modalbg,canvas,.mbar,.cam,.toast');
+  const begin=(x,y,t)=>{if(blocked(t))return;st={x0:x,y0:y,mode:null,dx:0,lx:x,lt:performance.now(),v:0,dir:null,pk:null,nb:null}};
+  const els=()=>S.onb!=null?[document.getElementById('onbbody')]:[...document.querySelectorAll('.phone>.top,.phone>.scr,.phone>.act')];
+  const W=()=>{const p=document.querySelector('.phone');return p?p.getBoundingClientRect().width:360};
+  const setDir=dir=>{if(st.dir===dir)return;st.dir=dir;if(st.pk){st.pk.remove();st.pk=null}st.nb=neighbour(dir);if(st.nb&&!RM())st.pk=peekFor(st.nb)};
+  const paint=(d,anim)=>{const w=W(),tr=anim?'transform .3s cubic-bezier(.2,.8,.2,1)':'none';
+    els().forEach(e=>{if(e){e.style.transition=tr;e.style.transform=`translate3d(${d}px,0,0)`}});
+    if(st.pk){st.pk.style.transition=tr;st.pk.style.transform=`translate3d(${d+(st.dir==='next'?w:-w)}px,0,0)`}};
+  const move=(x,y)=>{if(!st)return;const dx=x-st.x0,dy=y-st.y0;
+    if(!st.mode){if(Math.abs(dx)<8&&Math.abs(dy)<8)return;st.mode=Math.abs(dx)>Math.abs(dy)*1.15?'h':'v';if(st.mode==='v'){st=null;return}}
+    const now=performance.now();st.v=(x-st.lx)/Math.max(1,now-st.lt);st.lx=x;st.lt=now;
+    S._dragging=true;setDir(dx<0?'next':'prev');st.dx=st.nb?dx:dx*.22;if(!RM())paint(st.dx,false)};
+  const flush=()=>{S._dragging=false;if(S._pendingRender){S._pendingRender=false;render()}};
+  const end=mouse=>{if(!st)return;const s0=st;st=null;if(s0.mode!=='h'){S._dragging=false;return}
+    const w=W(),fling=Math.abs(s0.v)>.45&&Math.sign(s0.v)===Math.sign(s0.dx)&&Math.abs(s0.dx)>30;
+    const go=s0.nb&&(Math.abs(s0.dx)>w*.33||fling);if(mouse)S._swallow=Date.now();
+    const restore=()=>{els().forEach(e=>{if(e){e.style.transition='';e.style.transform=''}});if(s0.pk)s0.pk.remove()};
+    if(RM()){restore();S._dragging=false;S._pendingRender=false;if(go)commitNav(s0.nb);else render();return}
+    st=s0;
+    if(go){paint(s0.dir==='next'?-w:w,true);st=null;setTimeout(()=>{if(s0.pk)s0.pk.remove();S._dragging=false;S._pendingRender=false;commitNav(s0.nb)},300)}
+    else{paint(0,true);st=null;setTimeout(()=>{restore();flush()},310)}};
+  document.addEventListener('touchstart',e=>{if(e.touches.length===1){const t=e.touches[0];begin(t.clientX,t.clientY,e.target)}else st=null},{passive:true});
+  document.addEventListener('touchmove',e=>{const t=e.touches[0];if(t)move(t.clientX,t.clientY)},{passive:true});
+  document.addEventListener('touchend',()=>end(false),{passive:true});
+  document.addEventListener('touchcancel',()=>{if(st&&st.mode==='h'){st.dx=0}end(false)},{passive:true});
+  document.addEventListener('mousedown',e=>{if(e.button===0)begin(e.clientX,e.clientY,e.target)});
+  document.addEventListener('mousemove',e=>{if(st&&e.buttons===1)move(e.clientX,e.clientY)});
+  document.addEventListener('mouseup',()=>end(true));
   document.addEventListener('click',e=>{if(S._swallow&&Date.now()-S._swallow<350){e.stopPropagation();e.preventDefault();S._swallow=0}},true);
 })();
 function stopCam(){if(S.stream){S.stream.getTracks().forEach(t=>t.stop());S.stream=null}S.cam=false}
@@ -1641,7 +1682,9 @@ document.addEventListener('input',e=>{
 window.__proto={recipeMatch,RECIPES,prettyName,mergeParsed,S,drawReceipt,parseReceipt,prepReceipt,receiptDate,matchFood,TODAY,iso};
 restore();readJoin();if(!S.onboarded&&!S.joinData)S.onb=0;render();
 if('serviceWorker' in navigator&&/github\.io$|netlify\.app$|^localhost/.test(location.hostname)){navigator.serviceWorker.register('sw.js').catch(()=>{})}
-notifyCheck(false);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')notifyCheck(false)});
+notifyCheck(false);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){notifyCheck(false);loadNews(false)}});
+/* fetch fresh recalls and news as soon as the phone is back online (e.g. joins Wi-Fi), and once at start-up */
+window.addEventListener('online',()=>loadNews(true));window.addEventListener('offline',()=>{if(S.screen==='news')render()});setTimeout(()=>loadNews(false),1500);
 </script>
 
 </body></html>
