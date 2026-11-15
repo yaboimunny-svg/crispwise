@@ -214,6 +214,16 @@ canvas.rc{width:100%;height:auto;max-height:290px;object-fit:contain;border-radi
 .hero .srcbtns .btn.ghost{background:transparent;color:var(--green-fg);border-color:var(--green-fg)}
 details summary{cursor:pointer;font-size:13px;color:var(--green);font-weight:500}
 details.mhelp[open]{display:flex;flex-direction:column;gap:6px}
+.msetup summary{font:600 15px var(--body);color:var(--fg)}
+.hbtns{display:flex;gap:6px;flex:none}
+.magframe{position:relative;background:#216F54;border-radius:22px;padding:16px 17px;width:100%;max-width:420px;margin:2px auto 0;box-shadow:0 10px 24px rgb(28 17 12 / .18),inset 0 1px 0 rgb(255 255 255 / .12)}
+.magframe canvas{display:block;width:100%;height:auto;border-radius:2px;box-shadow:0 0 0 2px rgb(0 0 0 / .25)}
+.magbtn{position:absolute;top:-4px;left:34%;width:16px;height:5px;border-radius:3px 3px 0 0;background:#1C1C1C}
+.msteps{margin:4px 0 0;padding-left:20px;display:flex;flex-direction:column;gap:5px;font-size:14px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14px;margin:4px 0}.kv span:nth-child(odd){font-weight:600}
+.magrow{display:flex;flex-direction:row;align-items:center;gap:12px;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.magrow.stale{border:1.5px solid var(--green)}
+.magrow .pill{background:var(--green);color:var(--green-fg)}
 .btn:disabled{opacity:.5}
 details.tests{background:var(--surface);border-radius:14px;padding:10px 12px;box-shadow:var(--shadow)}
 details.tests[open]{display:flex;flex-direction:column;gap:8px}
@@ -779,6 +789,7 @@ const P={
   refresh:'<path d="M20 11a8 8 0 1 0-2.3 5.7M20 5v6h-6"/>',
   coin:'<circle cx="12" cy="12" r="8.5"/><path d="M14.5 9.2c-.5-.9-1.5-1.4-2.6-1.4-1.5 0-2.6.8-2.6 2 0 2.8 5.5 1.5 5.5 4.3 0 1.2-1.2 2.1-2.8 2.1-1.2 0-2.3-.6-2.8-1.6M12 6.3v1.5M12 16.2v1.5"/>',
   book:'<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 0 6.5 23H20"/>',
+  magnet:'<path d="M5 3.5h4.5v8a2.5 2.5 0 0 0 5 0v-8H19v8a7 7 0 0 1-14 0z"/><path d="M5 8h4.5M14.5 8H19"/>',
   userplus:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.5-3.5 3.3-6 6.5-6s6 2.5 6.5 6M19 8v6M16 11h6"/>',
   copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5.5A1.5 1.5 0 0 0 14.5 4h-9A1.5 1.5 0 0 0 4 5.5v9A1.5 1.5 0 0 0 5.5 16H8"/>',
   share:'<path d="M12 3v12M7.5 7.5 12 3l4.5 4.5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/>',
@@ -818,7 +829,7 @@ const GROUP={cream:'dairy',fruit:'produce',veg:'produce',seafood:'fish',pantry:'
 const grp=k=>GROUP[k]||(FOOD[k]?'produce':'other');
 const badge=(k,st,cls)=>`<div class="badge g-${grp(k)} ${st==='bad'?'bad':''} ${cls||''}" aria-hidden="true">${IC[grp(k)]}</div>`;
 const ico=k=>svg(P[grp(k)],'ii');
-const TABFOR={inventory:'fridge',detail:'fridge',manual:'fridge',recipes:'recipes',recipe:'recipes',history:'history',receipt:'history',learn:'news',news:'news',staples:'recipes'};
+const TABFOR={magnet:'fridge',inventory:'fridge',detail:'fridge',manual:'fridge',recipes:'recipes',recipe:'recipes',history:'history',receipt:'history',learn:'news',news:'news',staples:'recipes'};
 
 /* ---------- phone shell ---------- */
 function phone(title,sub,back,inner,act,right){
@@ -901,11 +912,11 @@ function inventoryScreen(){
   const list=!all.length?`<div class="card empty">${badge('other','')}<div class="name">Your fridge is empty</div><div class="note">Tap + to scan a grocery receipt and add everything at once.</div><button class="btn" data-a="sheet" style="max-width:220px">${svg(P.plus,'ii')}Add groceries</button></div>`
     :!f.length?`<div class="card empty"><div class="note">Nothing matches.</div><button class="sm" data-a="clearf">Clear filters</button></div>`:body;
   return phone('My Fridge',all.length+' item'+(all.length===1?'':'s'),null,`
-    ${todayCard()}
+    ${magnetBanner()}${todayCard()}
     <div class="stats" role="group" aria-label="Filter by status">${stat('bad',bad.length,'Inspect','bad')}${stat('soon',soon.length,'Use soon','warn')}${stat('fine',fine.length,'Likely fine','')}</div>
     <div class="search">${SEARCH_IC}<input type="search" id="fq" placeholder="Search your fridge" value="${esc(S.q||'')}" aria-label="Search your fridge"></div>
     <div class="row"><span class="label">Sort</span><div class="seg" role="group" aria-label="Sort by" style="flex:1">${[['exp','Expiring soon'],['az','A–Z'],['cat','Category']].map(([k,l])=>`<button data-a="sort" data-v="${k}" aria-pressed="${(S.sort||'exp')===k}">${l}</button>`).join('')}</div></div>
-    <div class="row"><div class="chips" role="group" aria-label="Whose food">${owners().length>1?owners().map(o=>`<button class="chip" data-a="filter" data-v="${esc(o)}" aria-pressed="${S.filter===o}">${esc(o)}</button>`).join(''):`<span class="chip" aria-pressed="true">Me</span>`}</div><button class="sm invite" data-a="invite" aria-label="Invite people to your fridge">${svg(P.userplus,'ii')}Invite</button></div>
+    <div class="row"><div class="chips" role="group" aria-label="Whose food">${owners().length>1?owners().map(o=>`<button class="chip" data-a="filter" data-v="${esc(o)}" aria-pressed="${S.filter===o}">${esc(o)}</button>`).join(''):`<span class="chip" aria-pressed="true">Me</span>`}</div><span class="hbtns"><button class="sm invite" data-a="openmag" aria-label="Fridge magnet">${svg(P.magnet,'ii')}Magnet</button><button class="sm invite" data-a="invite" aria-label="Invite people to your fridge">${svg(P.userplus,'ii')}Invite</button></span></div>
     ${list}
     <div class="note">Dates are estimates from typical shelf life, not safety guarantees.</div>`,null)}
 
@@ -1121,11 +1132,7 @@ function historyScreen(){
     return `<div class="card hcard" data-a="hopen" data-v="${h.id}" role="button" tabindex="0">${h.thumb?`<img class="thumb" src="${h.thumb}" alt="">`:`<div class="thumb">${IC[h.store==='Barcode scan'?'barcode':'receipt']}</div>`}
     <div><div class="name">${esc(h.store)}</div><div class="meta">${fmt(h.purchase)}${diffDays(h.scanned,h.purchase)?' · scanned '+fmt(h.scanned):''}</div><div class="meta">${n} item${n===1?'':'s'} · ${left} still in fridge</div></div>
     <div class="meta">${h.total?'$'+h.total.toFixed(2):''}</div></div>`};
-  const nm=S.inv.filter(i=>!i.used).length;
-  const magnet=`<div class="section"><h3>Fridge magnet</h3></div><div class="card"><div class="row"><div><div class="name" style="font-size:15px">Crispwise magnet</div><div class="note">The e-paper screen on your fridge that shows what to use first.${S.magnetSent?' Last sent '+fmt(new Date(S.magnetSent))+'.':''}</div></div>${svg(P.fridge,'ii')}</div>
-    <div class="note">Press the button on top of the magnet and wait for "Ready to sync", then tap Send. Your phone needs to be on the same Wi-Fi.</div>
-    <button class="btn" data-a="magnet"${nm?'':' disabled'}>${svg(P.share,'ii')}Send ${nm} item${nm===1?'':'s'} to magnet</button>
-    <details class="mhelp"><summary class="note">Not connecting?</summary><label class="label" for="magnethost">Magnet address</label><input type="text" id="magnethost" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="crispwise.local" value="${esc(S.magnetHost||'')}"><div class="note">Type the address shown on the magnet's screen (like 192.168.1.42) if your phone can't find crispwise.local. Android phones usually need this.</div></details></div>`;
+  const magnet=`<div class="section"><h3>Fridge magnet</h3></div><button class="card magrow" data-a="openmag"><span class="badge g-produce" aria-hidden="true">${svg(P.magnet)}</span><span style="flex:1;min-width:0"><span class="name" style="font-size:15px;display:block">Crispwise magnet</span><span class="note">${magnetStatus()}</span></span><span aria-hidden="true">›</span></button>`;
   const tools=`<div class="section"><h3>Your data</h3></div><div class="card"><div class="note">Your fridge, history and savings are stored on this phone only. Back up before clearing Safari data or switching phones.</div>
     <div class="row wrapx"><button class="sm fill" data-a="backup">${svg(P.share,'ii')}Back up</button><label class="sm" style="cursor:pointer">${svg(P.refresh,'ii')}Restore<input type="file" id="restorefile" accept="application/json,.json" class="visually-hidden"></label><button class="sm" data-a="remindall">${svg(P.calendar,'ii')}Calendar reminders</button>${'Notification' in window&&Notification.permission!=='granted'?'<button class="sm" data-a="asknotify">Turn on alerts</button>':''}</div></div>`;
   return phone('History','Receipts and savings',null,card+(H.length?`<div class="section"><h3>Receipts</h3><span class="note">${H.length}</span></div>`+H.map(row).join(''):`<div class="card empty">${badge('other','')}<div class="name">No receipts yet</div><div class="note">Every receipt you scan is kept here with its items.</div><button class="btn" data-a="sheet" style="max-width:220px">${svg(P.plus,'ii')}Scan a receipt</button></div>`)+magnet+tools,null)}
@@ -1203,6 +1210,51 @@ function magnetPayload(){const items=S.inv.filter(i=>!i.used).map(i=>({i,r:rem(i
   .map(({i,r})=>[String(i.name||catName(i.key)).slice(0,40),catName(i.key),iso(addDays(TODAY,r))]);return{v:1,now:Date.now(),items}}
 function magnetUrl(){const host=(S.magnetHost||'').trim().replace(/^https?:\/\//,'').replace(/\/.*$/,'')||'crispwise.local';
   return 'http://'+host+'/sync#'+b64u.enc(JSON.stringify(magnetPayload()))}
+function magnetRows(){return S.inv.filter(i=>!i.used).map(i=>({name:String(i.name||catName(i.key)),days:rem(i)})).sort((a,b)=>a.days-b.days)}
+const magnetSig=()=>JSON.stringify(magnetPayload().items);
+const agoTxt=t=>{const m=Math.round((Date.now()-t)/60000);return m<1?'just now':m<60?m+' min ago':m<1440?Math.round(m/60)+' h ago':fmt(new Date(t))};
+const magnetStale=()=>!!S.magnetSent&&magnetSig()!==S.magnetSig;
+function magnetStatus(){return !S.magnetSent?'Not set up yet':magnetStale()?'Out of date · last sent '+agoTxt(S.magnetSent):'Up to date · sent '+agoTxt(S.magnetSent)}
+function magnetBanner(){if(!magnetStale())return '';return `<button class="card magrow stale" data-a="openmag"><span class="badge" aria-hidden="true">${svg(P.magnet)}</span><span style="flex:1;min-width:0"><span class="name" style="font-size:14.5px;display:block">Your magnet is out of date</span><span class="note">Your fridge changed since you last sent it.</span></span><span class="pill">Update</span></button>`}
+/* same words-in-title check the magnet firmware uses for its recall alert */
+function magnetRecallHit(rows){const T=((S.news&&S.news.recalls)||[]).slice(0,6).map(r=>String(r.title||'').toLowerCase());if(!T.length)return '';
+  const SKIP=new Set(['fresh','organic','large','small','brand','pack','family','original','classic']);
+  for(const r of rows)for(const w of r.name.toLowerCase().split(/[^a-z]+/)){if(w.length<4||SKIP.has(w))continue;if(T.some(t=>t.includes(w)))return r.name}return ''}
+const magLabel=d=>d<0?'Inspect':d===0?'Today':d===1?'1 day':d+' days';
+function magnetText(){const r=magnetRows();return r.length?r.slice(0,4).map(x=>x.name+', '+magLabel(x.days)).join('; '):'Nothing here yet'}
+/* draws the 296 x 128 e-paper screen the way drawDashboard() in the firmware does */
+function drawMagnet(c){const x=c.getContext('2d'),k=c.width/296;x.setTransform(k,0,0,k,0,0);
+  const paper='#E4E1D7',ink='#232325',F=b=>(b?'700 ':'400 ')+'16.5px "Helvetica Neue",Helvetica,Arial,sans-serif';
+  x.fillStyle=paper;x.fillRect(0,0,296,128);x.fillStyle=ink;x.textBaseline='alphabetic';x.textAlign='left';
+  x.font=F(1);x.fillText('Use first',6,16);
+  const t=new Date(),D=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  x.font=F(0);x.textAlign='right';x.fillText(`${D[t.getDay()]} ${M[t.getMonth()]} ${pad2(t.getDate())}`,262,16);x.textAlign='left';
+  x.lineWidth=1;x.strokeRect(268.5,6.5,19,9);x.fillRect(288,9,2,4);x.fillRect(270,8,13,6);x.fillRect(0,22,296,1);
+  const rows=magnetRows();
+  if(!rows.length){x.font=F(0);['Nothing here yet.','Press the top button, then in','the app: Send to magnet.'].forEach((l,i)=>x.fillText(l,6,50+i*22))}
+  rows.slice(0,4).forEach((r,i)=>{const y=24+i*21,lab=magLabel(r.days);x.font=F(1);const lw=x.measureText(lab).width+10;
+    if(r.days<=1){x.beginPath();x.roundRect?x.roundRect(296-lw-4,y+2,lw,18,4):x.rect(296-lw-4,y+2,lw,18);x.fill();x.fillStyle=paper}
+    x.fillText(lab,296-lw+1,y+16);x.fillStyle=ink;x.font=F(0);let n=r.name;const max=296-lw-18;
+    if(x.measureText(n).width>max){while(n.length>1&&x.measureText(n+'...').width>max)n=n.slice(0,-1);n+='...'}x.fillText(n,6,y+16)});
+  x.fillRect(0,110,296,1);x.font='10px ui-monospace,Menlo,monospace';x.textBaseline='top';
+  const hit=magnetRecallHit(rows);let foot=rows.length>4?'+'+(rows.length-4)+' more in the Crispwise app':'Press the top button to sync';
+  if(hit){x.fillRect(0,111,296,17);x.fillStyle=paper;foot='RECALL ALERT - check your '+hit}x.fillText(foot.slice(0,48),6,115);x.fillStyle=ink}
+function magnetScreen(){const n=S.inv.filter(i=>!i.used).length,first=!S.magnetSent,stale=magnetStale();
+  return phone('Fridge magnet',magnetStatus(),S.magBack||'inventory',`
+    <div class="magframe"><i class="magbtn" aria-hidden="true"></i><canvas id="magprev" width="888" height="384" role="img" aria-label="${esc('Magnet screen preview: '+magnetText())}"></canvas></div>
+    <div class="note" style="text-align:center">${stale?'This is what it will show once you send. Your fridge changed since last time.':'What your magnet shows. It counts the days down on its own every morning.'}</div>
+    <details class="card mhelp msetup"${first?' open':''}><summary>Set up your magnet</summary><ol class="msteps">
+      <li>Charge it with a USB-C cable until the charge light changes colour.</li>
+      <li>Press the button on top. The screen asks you to join the Wi-Fi network <b>Crispwise-Setup</b>.</li>
+      <li>On this phone, open Settings › Wi-Fi, join Crispwise-Setup and pick your home Wi-Fi. You only do this once.</li>
+      <li>Come back here and tap Send.</li></ol></details>
+    <div class="card"><div class="name" style="font-size:15px">Each time you shop</div><ol class="msteps">
+      <li>Press the button on top of the magnet.</li><li>Wait for “Ready to sync” on its screen, about 5 seconds.</li><li>Tap Send. Your phone must be on the same Wi-Fi.</li></ol></div>
+    <div class="card"><div class="name" style="font-size:15px">The button</div><div class="kv"><span>Press</span><span>Wake up and get ready to sync</span><span>Hold 8 s</span><span>Forget Wi-Fi so you can set it up again</span></div>
+      <div class="note">It refreshes at 6 a.m., checks Canadian food recalls, and sleeps the rest of the time. If a recall matches your food, the bottom line turns into an alert.</div></div>
+    <details class="card mhelp"><summary>Not connecting?</summary><label class="label" for="magnethost">Magnet address</label><input type="text" id="magnethost" inputmode="url" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="crispwise.local" value="${esc(S.magnetHost||'')}">
+      <div class="note">Type the address shown on the magnet's “Ready to sync” screen (like 192.168.1.42) if your phone can't find crispwise.local. Android phones usually need this. Make sure your phone isn't on mobile data or a guest network.</div></details>`,
+    `<button class="btn" data-a="magnet"${n?'':' disabled'}>${svg(P.share,'ii')}${n?'Send '+n+' item'+(n===1?'':'s')+' to magnet':'Add food first'}</button>`)}
 function backup(){const data={app:'crispwise',v:1,saved:new Date().toISOString(),inv:S.inv,history:S.history,staples:S.staples,members:S.members,myName:S.myName,seq:S.seq};
   downloadFile('crispwise-backup-'+iso(TODAY)+'.json',JSON.stringify(data),'application/json');toast('Backup made. Keep the file somewhere safe (Files, iCloud Drive).',[],'info')}
 function restoreFrom(file){const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);if(d.app!=='crispwise'||!Array.isArray(d.inv))throw new Error('not a backup');
@@ -1245,13 +1297,8 @@ function modalHtml(){
 
 /* ---------- magnet mock-up ---------- */
 function magnetTab(){
-  const list=sorted();const it=list[S.mag%Math.max(list.length,1)];
-  let txt='All clear.\nNothing to use up.';
-  if(it){const st=status(it);txt=`${S.mag%list.length+1}/${list.length}  ${it.name.slice(0,18)}\n${st.label.toUpperCase()}\n${st.sub}`}
-  return `<div class="stage"><div><div class="mag" aria-label="Cardboard fridge magnet mock-up"><div class="label" style="color:#1d1608">Magnet display · cardboard mock-up</div>
-    <div class="lcd" aria-live="polite">${esc(txt)}</div>
-    <div class="btns"><button data-a="mag" data-v="on">ON</button><button data-a="mag" data-v="menu">MENU</button><button data-a="mag" data-v="ok">OK / USED</button><button data-a="mag" data-v="scroll">SCROLL</button></div></div></div>
-    <div class="side"><div class="panel"><h3>What this mock-up is for</h3><p>It copies Ivan's Sept 28 sketch: ON, Menu, OK/Enter, Scroll. It shows the same items as the app, soonest first. Build the real version from cardboard and paper for the demo.</p><ul><li>SCROLL moves to the next item.</li><li>OK / USED marks the shown item as used.</li><li>It has no sensors. It only mirrors the app.</li></ul></div></div></div>`}
+  return `<div class="stage"><div><div class="magframe" style="max-width:520px"><i class="magbtn" aria-hidden="true"></i><canvas id="magprev" width="888" height="384" role="img" aria-label="${esc('Magnet screen preview: '+magnetText())}"></canvas></div></div>
+    <div class="side"><div class="panel"><h3>The fridge magnet</h3><p>A 2.9-inch e-paper screen with an ESP32-C3. It shows the four foods to use first, wakes at 6 a.m. to count the days down and check recalls, and sleeps the rest of the time.</p><ul><li>In the app: Fridge › Magnet › Send.</li><li>This preview uses the same layout as the firmware.</li><li>It has no sensors. It only mirrors the app.</li></ul></div></div></div>`}
 
 /* ---------- test log ---------- */
 function stats(){
@@ -1301,6 +1348,7 @@ const NOTES={
  manual:['Manual add for food without a receipt (markets, gifts, leftovers). The type sets the shelf-life estimate.'],
  recipes:['Recipes are ranked by how much they use food close to its date (2 days or less counts most).','"Use it up" only shows recipes that use something expiring. Built-in set of 30 recipes, no internet needed.'],
  recipe:['"I cooked this" marks the ticked fridge items as used, with Undo.','Raw meat and fish show a check-and-cook-through reminder.'],
+ magnet:['Shows exactly what the e-paper magnet will display, drawn from the fridge list.','Send opens crispwise.local on the home Wi-Fi with the list in the link. The fridge screen shows a reminder when the magnet is out of date.'],
  history:['Every saved scan is kept with the store, date, total and a photo of the receipt.','Fridge, history and recipes are saved in this browser only.'],
  receipt:['Each item shows its current status: still in the fridge, used or thrown out.']
 };
@@ -1312,7 +1360,7 @@ S.canvas=document.createElement('canvas');S.canvas.className='rc';S.canvas.setAt
 function scenDate(){return S.scenario==='late'?addDays(TODAY,-3):S.scenario==='future'?addDays(TODAY,365):S.scenario==='old'?addDays(TODAY,-1100):TODAY}
 function redrawSample(){}
 function screenHtml(){
-  switch(S.screen){case 'manual':return manualScreen();case 'recipes':return recipesScreen();case 'recipe':return recipeScreen();case 'history':return historyScreen();case 'receipt':return receiptScreen();case 'scan':return scanScreen();case 'scanning':return scanningScreen();case 'review':return reviewScreen();case 'detail':return detailScreen();case 'learn':case 'news':return newsScreen();case 'staples':return staplesScreen();default:return inventoryScreen()}}
+  switch(S.screen){case 'manual':return manualScreen();case 'recipes':return recipesScreen();case 'recipe':return recipeScreen();case 'history':return historyScreen();case 'magnet':return magnetScreen();case 'receipt':return receiptScreen();case 'scan':return scanScreen();case 'scanning':return scanningScreen();case 'review':return reviewScreen();case 'detail':return detailScreen();case 'learn':case 'news':return newsScreen();case 'staples':return staplesScreen();default:return inventoryScreen()}}
 function render(){
   if(S._dragging){S._pendingRender=true;return}
   const T=[['app','App prototype'],['magnet','Magnet display'],['log','Test log ('+S.runs.length+')']];
@@ -1336,6 +1384,7 @@ function render(){
   if(h){if(S.source!=='photo'||S.photo)h.appendChild(S.canvas);else h.innerHTML='<div class="note">No photo chosen yet.</div>'}
   const ph=document.getElementById('prepholder');if(ph&&S.prep){const c=document.createElement('canvas');c.className='rc';c.width=S.prep.width;c.height=S.prep.height;c.getContext('2d').drawImage(S.prep,0,0);c.style.marginTop='6px';c.style.maxHeight='260px';ph.innerHTML='<div class="note" style="margin-top:6px">Image the OCR saw:</div>';ph.appendChild(c)}
   engineLine();
+  const mp=document.getElementById('magprev');if(mp)drawMagnet(mp);
   const pf=document.getElementById('photo');if(pf)pf.addEventListener('change',onPhoto);
   const pc=document.getElementById('photocam');if(pc)pc.addEventListener('change',onPhoto);
   const rf=document.getElementById('restorefile');if(rf)rf.addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];if(f)restoreFrom(f)});
@@ -1567,9 +1616,9 @@ function makeThumb(){try{if(!S.img)return null;const w=S.img.naturalWidth||S.img
   const k=Math.min(1,320/b.w);const c=document.createElement('canvas');c.width=Math.round(b.w*k);c.height=Math.round(Math.min(b.h,b.w*4)*k);c.getContext('2d').drawImage(S.img,b.x,b.y,b.w,c.height/k,0,0,c.width,c.height);return c.toDataURL('image/jpeg',0.68)}catch(e){return null}}
 /* ---------- saved on this device (per browser) ---------- */
 const STORE_KEY='crispwise-data-v1';
-function persist(){try{localStorage.setItem(STORE_KEY,JSON.stringify({inv:S.inv,history:S.history,seq:S.seq,staples:S.staples,onboarded:S.onboarded,members:S.members,myName:S.myName,todayHidden:S.todayHidden,magnetHost:S.magnetHost||'',magnetSent:S.magnetSent||null}))}catch(e){}}
+function persist(){try{localStorage.setItem(STORE_KEY,JSON.stringify({inv:S.inv,history:S.history,seq:S.seq,staples:S.staples,onboarded:S.onboarded,members:S.members,myName:S.myName,todayHidden:S.todayHidden,magnetHost:S.magnetHost||'',magnetSent:S.magnetSent||null,magnetSig:S.magnetSig||null}))}catch(e){}}
 function restore(){try{const d=JSON.parse(localStorage.getItem(STORE_KEY)||'null');if(!d)return;const rv=x=>x?new Date(x):x;
-  S.inv=(d.inv||[]).map(i=>Object.assign(i,{purchase:rv(i.purchase)}));S.history=(d.history||[]).map(h=>Object.assign(h,{scanned:rv(h.scanned),purchase:rv(h.purchase)}));S.seq=d.seq||0;S.staples=d.staples||[];S.onboarded=!!d.onboarded;S.members=d.members||[];S.myName=d.myName||'';S.todayHidden=d.todayHidden||null;S.magnetHost=d.magnetHost||'';S.magnetSent=d.magnetSent||null}catch(e){}
+  S.inv=(d.inv||[]).map(i=>Object.assign(i,{purchase:rv(i.purchase)}));S.history=(d.history||[]).map(h=>Object.assign(h,{scanned:rv(h.scanned),purchase:rv(h.purchase)}));S.seq=d.seq||0;S.staples=d.staples||[];S.onboarded=!!d.onboarded;S.members=d.members||[];S.myName=d.myName||'';S.todayHidden=d.todayHidden||null;S.magnetHost=d.magnetHost||'';S.magnetSent=d.magnetSent||null;S.magnetSig=d.magnetSig||null}catch(e){}
   try{const n=JSON.parse(localStorage.getItem('cw-news')||'null');if(n)S.news=n}catch(e){}}
 function toast(msg,ids,kind){clearTimeout(S.toastT);S.toast={msg,ids,kind};S.toastT=setTimeout(()=>{S.toast=null;S._toastOn=null;const t=document.querySelector('.toast');if(t)t.remove()},5000)}
 function resolve(id){const r=S.review.find(x=>x.id===id);const now=performance.now();r.resolved=true;r.editing=false;r.ms=now-S.run.last;S.run.times.push(r.ms);S.run.last=now}
@@ -1625,7 +1674,8 @@ document.addEventListener('click',e=>{
   else if(a==='asknotify'){askNotify();return}
   else if(a==='todayhide'){S.todayHidden=iso(TODAY)}
   else if(a==='backup'){backup();return}
-  else if(a==='magnet'){const u=magnetUrl();S.magnetSent=Date.now();persist();const w=window.open(u,'_blank');if(!w)location.href=u;return}
+  else if(a==='magnet'){const u=magnetUrl();S.magnetSent=Date.now();S.magnetSig=magnetSig();persist();const w=window.open(u,'_blank');render();if(!w)location.href=u;return}
+  else if(a==='openmag'){if(S.screen!=='magnet')S.magBack=S.screen;S.screen='magnet'}
   else if(a==='invite'){S.modal='invite';S.copied=false}
   else if(a==='modalclose'){if(e.target!==el)return;S.modal=null}
   else if(a==='sharelink'||a==='copylink'){const inp=document.getElementById('myname');if(inp)S.myName=inp.value.trim();const link=inviteLink(),who=S.myName||'me';
