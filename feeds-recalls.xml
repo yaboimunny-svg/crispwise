@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:og="http://ogp.me/ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:schema="http://schema.org/" xmlns:sioc="http://rdfs.org/sioc/ns#" xmlns:sioct="http://rdfs.org/sioc/types#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" version="2.0" xml:base="https://recalls-rappels.canada.ca/en">
+  <channel>
+    <title>Health and safety recalls and alerts</title>
+    <link>https://recalls-rappels.canada.ca/en</link>
+    <description>Canadian Food Inspection Agency</description>
+    <language>en</language>
+    
+    <item>
+  <title>Soup Time brand Baba's Borscht Soup and Wardy's Bow Valley Beef Barley recalled due to undeclared wheat</title>
+  <link>https://recalls-rappels.canada.ca/en/alert-recall/soup-time-brand-baba-s-borscht-soup-and-wardy-s-bow-valley-beef-barley-recalled-due</link>
+  <description>The affected products are being recalled from the marketplace because they contain wheat which is not declared on the label.
+</description>
+  <pubDate>2026-11-14T12:00:00</pubDate>
+    <dc:creator>CFIA</dc:creator>
+    <guid isPermaLink="false">82958</guid>
+    </item>
+<item>
+  <title>Producers brand Brown Rice recalled due to presence of insects</title>
+  <link>https://recalls-rappels.canada.ca/en/alert-recall/producers-brand-brown-rice-recalled-due-presence-insects</link>
+  <description>Producers brand Brown Rice recalled due to presence of insects.
+</description>
+  <pubDate>2026-11-13T12:00:00</pubDate>
+    <dc:creator>CFIA</dc:creator>
+    <guid isPermaLink="false">82943</guid>
+    </item>
+<item>
+  <title>Certain Plantropy brand Jack’d Up Bites Crispy Protein Bites recalled due to undeclared milk</title>
+  <link>https://recalls-rappels.canada.ca/en/alert-recall/certain-plantropy-brand-jack-bites-crispy-protein-bites-recalled-due-undeclared-milk</link>
+  <description>The affected products&amp;nbsp;are being recalled from the marketplace because they contain&amp;nbsp;milk which is not declared on the label.
+</description>
+  <pubDate>2026-11-13T12:00:00</pubDate>
+    <dc:creator>CFIA</dc:creator>
+    <guid isPermaLink="false">82929</guid>
+    </item>
+
+  </channel>
+</rss>
