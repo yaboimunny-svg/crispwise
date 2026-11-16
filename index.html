@@ -1144,9 +1144,10 @@ function historyScreen(){
     <div><div class="name">${esc(h.store)}</div><div class="meta">${fmt(h.purchase)}${diffDays(h.scanned,h.purchase)?' · scanned '+fmt(h.scanned):''}</div><div class="meta">${n} item${n===1?'':'s'} · ${left} still in fridge</div></div>
     <div class="meta">${h.total?'$'+h.total.toFixed(2):''}</div></div>`};
   const magnet=`<div class="section"><h3>Fridge magnet</h3></div><button class="card magrow" data-a="openmag"><span class="badge g-produce" aria-hidden="true">${svg(P.magnet)}</span><span style="flex:1;min-width:0"><span class="name" style="font-size:15px;display:block">Crispwise magnet</span><span class="note">${magnetStatus()}</span></span><span aria-hidden="true">›</span></button>`;
+  const appearance=`<div class="section"><h3>Appearance</h3></div><div class="card"><div class="seg" role="group" aria-label="Appearance">${[['system','Match phone'],['light','Light'],['dark','Dark']].map(([k,l])=>`<button data-a="theme" data-v="${k}" aria-pressed="${(S.theme||'system')===k}">${l}</button>`).join('')}</div></div>`;
   const tools=`<div class="section"><h3>Your data</h3></div><div class="card"><div class="note">Your fridge, history and savings are stored on this phone only. Back up before clearing Safari data or switching phones.</div>
     <div class="row wrapx"><button class="sm fill" data-a="backup">${svg(P.share,'ii')}Back up</button><label class="sm" style="cursor:pointer">${svg(P.refresh,'ii')}Restore<input type="file" id="restorefile" accept="application/json,.json" class="visually-hidden"></label><button class="sm" data-a="remindall">${svg(P.calendar,'ii')}Calendar reminders</button>${'Notification' in window&&Notification.permission!=='granted'?'<button class="sm" data-a="asknotify">Turn on alerts</button>':''}</div></div>`;
-  return phone('History','Receipts and savings',null,card+(H.length?`<div class="section"><h3>Receipts</h3><span class="note">${H.length}</span></div>`+H.map(row).join(''):`<div class="card empty">${badge('other','')}<div class="name">No receipts yet</div><div class="note">Every receipt you scan is kept here with its items.</div><button class="btn" data-a="sheet" style="max-width:220px">${svg(P.plus,'ii')}Scan a receipt</button></div>`)+magnet+tools,null)}
+  return phone('History','Receipts and savings',null,card+(H.length?`<div class="section"><h3>Receipts</h3><span class="note">${H.length}</span></div>`+H.map(row).join(''):`<div class="card empty">${badge('other','')}<div class="name">No receipts yet</div><div class="note">Every receipt you scan is kept here with its items.</div><button class="btn" data-a="sheet" style="max-width:220px">${svg(P.plus,'ii')}Scan a receipt</button></div>`)+magnet+appearance+tools,null)}
 function receiptScreen(){
   const h=S.history.find(x=>x.id===S.hid);if(!h)return historyScreen();
   const st=x=>{const it=S.inv.find(i=>i.id===x.id);if(!it)return['Removed',''];if(it.used)return[it.outcome==='toss'||it.outcome==='discard'?'Thrown out':'Used',''];const s=status(it);return[s.label,s.cls]};
@@ -1231,7 +1232,9 @@ function magnetBanner(){if(!magnetStale())return '';return `<button class="card 
 /* same words-in-title check the magnet firmware uses for its recall alert */
 function magnetRecallHit(rows){const T=((S.news&&S.news.recalls)||[]).slice(0,6).map(r=>String(r.title||'').toLowerCase());if(!T.length)return '';
   const SKIP=new Set(['fresh','organic','large','small','brand','pack','family','original','classic']);
-  for(const r of rows)for(const w of r.name.toLowerCase().split(/[^a-z]+/)){if(w.length<4||SKIP.has(w))continue;if(T.some(t=>t.includes(w)))return r.name}return ''}
+  // one shared word ("beef") is too loose; two of the food's words must appear in the same recall
+  for(const r of rows){const ws=[...new Set(r.name.toLowerCase().split(/[^a-z]+/).filter(w=>w.length>=4&&!SKIP.has(w)))];
+    if(ws.length&&T.some(t=>ws.filter(w=>t.includes(w)).length>=Math.min(2,ws.length)&&ws.length>1))return r.name}return ''}
 const magLabel=d=>d<0?'Inspect':d===0?'Today':d===1?'1 day':d+' days';
 function magnetText(){const r=magnetRows();return r.length?r.slice(0,4).map(x=>x.name+', '+magLabel(x.days)).join('; '):'Nothing here yet'}
 /* draws the 296 x 128 e-paper screen the way drawDashboard() in the firmware does */
@@ -1776,9 +1779,12 @@ function makeThumb(){try{if(!S.img)return null;const w=S.img.naturalWidth||S.img
   const k=Math.min(1,320/b.w);const c=document.createElement('canvas');c.width=Math.round(b.w*k);c.height=Math.round(Math.min(b.h,b.w*4)*k);c.getContext('2d').drawImage(S.img,b.x,b.y,b.w,c.height/k,0,0,c.width,c.height);return c.toDataURL('image/jpeg',0.68)}catch(e){return null}}
 /* ---------- saved on this device (per browser) ---------- */
 const STORE_KEY='crispwise-data-v1';
-function persist(){try{localStorage.setItem(STORE_KEY,JSON.stringify({inv:S.inv,history:S.history,seq:S.seq,staples:S.staples,onboarded:S.onboarded,members:S.members,myName:S.myName,todayHidden:S.todayHidden,magnetHost:S.magnetHost||'',magnetSent:S.magnetSent||null,magnetSig:S.magnetSig||null}))}catch(e){}}
+function persist(){try{localStorage.setItem(STORE_KEY,JSON.stringify({inv:S.inv,history:S.history,seq:S.seq,staples:S.staples,onboarded:S.onboarded,members:S.members,myName:S.myName,todayHidden:S.todayHidden,magnetHost:S.magnetHost||'',magnetSent:S.magnetSent||null,magnetSig:S.magnetSig||null,theme:S.theme||'system'}))}catch(e){}}
+function applyTheme(){const t=S.theme||'system',r=document.documentElement;if(t==='system')r.removeAttribute('data-theme');else r.setAttribute('data-theme',t);
+  const dark=t==='dark'||(t==='system'&&matchMedia('(prefers-color-scheme: dark)').matches);
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m=>{m.content=dark?'#24170F':'#FCF9E8';m.removeAttribute('media')})}
 function restore(){try{const d=JSON.parse(localStorage.getItem(STORE_KEY)||'null');if(!d)return;const rv=x=>x?new Date(x):x;
-  S.inv=(d.inv||[]).map(i=>Object.assign(i,{purchase:rv(i.purchase)}));S.history=(d.history||[]).map(h=>Object.assign(h,{scanned:rv(h.scanned),purchase:rv(h.purchase)}));S.seq=d.seq||0;S.staples=d.staples||[];S.onboarded=!!d.onboarded;S.members=d.members||[];S.myName=d.myName||'';S.todayHidden=d.todayHidden||null;S.magnetHost=d.magnetHost||'';S.magnetSent=d.magnetSent||null;S.magnetSig=d.magnetSig||null}catch(e){}
+  S.inv=(d.inv||[]).map(i=>Object.assign(i,{purchase:rv(i.purchase)}));S.history=(d.history||[]).map(h=>Object.assign(h,{scanned:rv(h.scanned),purchase:rv(h.purchase)}));S.seq=d.seq||0;S.staples=d.staples||[];S.onboarded=!!d.onboarded;S.members=d.members||[];S.myName=d.myName||'';S.todayHidden=d.todayHidden||null;S.magnetHost=d.magnetHost||'';S.magnetSent=d.magnetSent||null;S.magnetSig=d.magnetSig||null;S.theme=d.theme||'system'}catch(e){}
   try{const n=JSON.parse(localStorage.getItem('cw-news')||'null');if(n)S.news=n}catch(e){}}
 function toast(msg,ids,kind){clearTimeout(S.toastT);S.toast={msg,ids,kind};S.toastT=setTimeout(()=>{S.toast=null;S._toastOn=null;const t=document.querySelector('.toast');if(t)t.remove()},5000)}
 function resolve(id){const r=S.review.find(x=>x.id===id);const now=performance.now();r.resolved=true;r.editing=false;r.ms=now-S.run.last;S.run.times.push(r.ms);S.run.last=now}
@@ -1835,6 +1841,7 @@ document.addEventListener('click',e=>{
   else if(a==='todayhide'){S.todayHidden=iso(TODAY)}
   else if(a==='backup'){backup();return}
   else if(a==='magnet'){const u=magnetUrl();S.magnetSent=Date.now();S.magnetSig=magnetSig();persist();const w=window.open(u,'_blank');render();if(!w)location.href=u;return}
+  else if(a==='theme'){S.theme=v;applyTheme();persist()}
   else if(a==='openmag'){if(S.screen!=='magnet')S.magBack=S.screen;S.screen='magnet'}
   else if(a==='invite'){S.modal='invite';S.copied=false}
   else if(a==='modalclose'){if(e.target!==el)return;S.modal=null}
@@ -1904,7 +1911,7 @@ document.addEventListener('input',e=>{
   if(el.dataset&&el.dataset.note!==undefined){S.runs[+el.dataset.note].notes=el.value;const o=document.getElementById('logout');if(o)o.value=logText()}
 });
 window.__proto={magnetPayload,magnetUrl,recipeMatch,RECIPES,prettyName,mergeParsed,S,drawReceipt,parseReceipt,prepReceipt,receiptDate,matchFood,TODAY,iso};
-restore();readJoin();if(!S.onboarded&&!S.joinData)S.onb=0;render();
+restore();applyTheme();try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme)}catch(e){}readJoin();if(!S.onboarded&&!S.joinData)S.onb=0;render();
 if('serviceWorker' in navigator&&/github\.io$|netlify\.app$|^localhost/.test(location.hostname)){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 notifyCheck(false);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){notifyCheck(false);loadNews(false)}});
 /* fetch fresh recalls and news as soon as the phone is back online (e.g. joins Wi-Fi), and once at start-up */
