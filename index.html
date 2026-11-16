@@ -506,13 +506,17 @@ const NOISE=['SUBTOTAL','CHANGE','DEBIT','CREDIT','BALANCE','APPROVED','THANK','
 const PRICE=/(\$?\s?\d{1,3}\s?[.,'’`]\s?\d{2})\s*-?\s*[A-Z0]{0,2}\W{0,4}$/;
 const PRICE_GAP=/(?:\$|\b)(\d{1,2})\s(\d{2})\s?[A-Z0]{0,2}\W{0,4}$/;
 /* where the item list ends */
+/* things people buy at the grocery store that never go in the fridge */
+const NONFOOD=/\b(PAPER\s?TOWELS?|TOWELS?|TISSUES?|KLEENEX|BOUNTY|CHARMIN|ROYALE|CASHMERE|TOILET|BATH\s?TISSUE|NAPKINS?|DETERGENT|TIDE|GAIN|DOWNY|BOUNCE|FABRIC|BLEACH|CLOROX|LYSOL|CLEANER|CLEANING|WINDEX|WIPES?|SPONGES?|DISH\s?SOAP|DAWN|CASCADE|FINISH\s?PODS?|PODS|SOAP|BODY\s?WASH|SHAMPOO|CONDITIONER|TOOTHPASTE|COLGATE|CREST|TOOTHBRUSH|FLOSS|MOUTHWASH|DEODORANT|RAZORS?|LOTION|SUNSCREEN|DIAPERS?|PAMPERS|HUGGIES|BATTER(Y|IES)|DURACELL|ENERGIZER|FOIL|PLASTIC\s?WRAP|CLING|ZIPLOC|GARBAGE|TRASH|BIN\s?BAGS?|GLAD|CANDLES?|BULBS?|CHARGER|CABLE|HDMI|USB|GIFT\s?CARD|MAGAZINE|GREETING|SOCKS|SHIRT|PANTS|HANGERS?|ADVIL|TYLENOL|ADVIL|BAND.?AIDS?|DOG\s?FOOD|CAT\s?FOOD|LITTER|PEDIGREE|PURINA|MEOW|FLOWERS?|BOUQUET|PLANTS?|BAG\s?FEE|SHOPPING\s?BAGS?|REUSABLE\s?BAGS?|LIGHTER|MATCHES|PROPANE|CHARCOAL|MOTOR\s?OIL|WASHER\s?FLUID|LOTTO|LOTTERY)\b/i;
+/* the same words when the reader runs them together ("TOTALNMBER OFITEMS SOD") */
+const SKIP_GLUED=/^\W*(SUB)?TOTAL[A-Z]|NU?M?BER\s*OF\s*ITEMS|ITEMS\s*SO\w{0,2}D|CHANGE\s*DUE|AMOUNT\s*DUE|(VISA|MASTERCARD|DEBIT)\s*TEND/i;
 const END=/SUB\s?-?\s?TOTAL|\*{2,}\s*TOTAL|^\W*TOTAL\W*\$?\s*\d|BALANCE\s+DUE|\bTOTAL\s+\$\s?\d/i;
 /* discounts, coupons and markdowns that belong to the item above them */
 const DISC=/\bTPD\b|INSTANT\s+SAV|\bCOUPON|%\s*OFF|\bYOU\s+SAVED|\bSAVED\b|\bROLLBACK|\bREDUCED|MARK\s?DOWN|CLEARANCE|\bCLR\b|\bDISC(OUNT)?\b|^\W*-\s?\$?\d{1,3}[.,]\d{2}\W*$|\d[.,]\d{2}\s?-\s*[A-Z]?\W*$/i;
 const DISC_WORD=/\bTPD\b|INSTANT\s+SAV|\bCOUPON|%\s*OFF|\bYOU\s+SAVED|\bSAVED\b|\bSAVINGS?\b|\bROLLBACK|\bREDUCED|MARK\s?DOWN|CLEARANCE|\bCLR\b|\bDISC(OUNT)?\b/i;
 const MARKDOWN=/CLEARANCE|\bCLR\b|REDUCED|MARK\s?DOWN|\bMGR\s?SPEC/i;
 /* weight / multi-buy lines: "0.265 kg @ $4.94 /kg  $1.31", "2 @ 0.99" */
-const QTY=/^\W*\d+\s*@\s*\$?\d|\d\s*(kg|lb|ks)\b.*@|@\s*\$?\d+[.,]\d\d\s*\/\s*(kg|lb|ks)|\/\s*(k[gqas]|lb)\b/i;
+const QTY=/^\W*\d+\s*@\s*\$?\d|\d\s*(kg|lb|ks)\b.*@|@\s*\$?\d+[.,]\d\d\s*\/\s*(kg|lb|ks)|\/\s*(k[gqas9]|lb|1b)\b|^\W*\d[.,]\d{2,3}\s*[xk]?\s*[gq9]?\s*[@x]?\s*\$?\d+[.,]\d\d\s*\/\s*k/i;
 /* store abbreviations and brands the plain dictionary cannot know; checked before the dictionary */
 /* Store abbreviations, brands and product words, checked in order before the plain dictionary (more specific first). */
 const RULES=[
@@ -558,11 +562,12 @@ function classify(label){
   return matchFood(t)}
 const money=s=>{const m=String(s).replace(/\s/g,'').match(/(\d{1,3})[.,'’`](\d{2})/);return m?+(m[1]+'.'+m[2]):null};
 function receiptDate(text){
-  let m=text.match(/\b(20\d\d)[-\/.](\d{1,2})[-\/.](\d{1,2})\b/);
+  // PaddleOCR often runs the time straight on (2026/11/1415:22:48), so the day may be followed by more digits
+  let m=text.match(/\b(20\d\d)[-\/.](\d{1,2})[-\/.](\d{2}|\d(?!\d))/);
   if(m)return valid(+m[1],+m[2],+m[3]);
   m=text.match(/\b([A-Za-z]{3})[a-z]*\.?\s+(\d{1,2}),?\s+(20\d\d)\b/);
   if(m){const mo=MON.findIndex(x=>x.toLowerCase()===m[1].toLowerCase());if(mo>=0)return valid(+m[3],mo+1,+m[2])}
-  m=text.match(/\b(\d{1,2})[-\/.](\d{1,2})[-\/.](20\d\d|\d\d)\b/);
+  m=text.match(/\b(\d{1,2})[-\/.](\d{1,2})[-\/.](20\d\d|\d\d\b)/);
   if(m){const y=m[3].length===2?2000+ +m[3]:+m[3];return valid(y,+m[1],+m[2])}
   return null}
 function valid(y,mo,d){const x=new Date(y,mo-1,d);return x.getFullYear()===y&&x.getMonth()===mo-1&&x.getDate()===d?x:null}
@@ -601,7 +606,7 @@ async function enrichUPC(items){
   return items.filter(it=>{
     if(!it.upc)return true;
     if(it.info){
-      if(it.info.nonFood&&it.upcVerified&&it.key==='other')return false;
+      if(it.info.nonFood&&(it.key==='other'||it.conf<0.6)){(S.nonFood=S.nonFood||[]).push(it.info.name||it.label);return false}
       const m=classify((it.info.name+' '+it.info.cats).replace(/\b(\w{3,})S\b/gi,'$1'));
       if(m){if(it.key===m.key)it.conf=Math.min(1,it.conf+0.12);else{it.key=m.key;it.guessKey=m.key;it.conf=0.9}it.label=it.info.name||it.label;if(it.info.name)it.nice=it.info.name;it.raw+='  [found in '+it.info.src+']'}
       else if(it.key==='other'){it.label=it.info.name||it.label;if(it.info.name)it.nice=it.info.name;it.conf=0.6}
@@ -609,7 +614,7 @@ async function enrichUPC(items){
     if(it.info===false)return !(it.upcOnly&&it.upcVerified);
     return true})}
 function parseReceipt(lines){
-  let date=null,dateConf=100,dateAlt=false,ended=false,pending=null;const items=[];
+  let date=null,dateConf=100,dateAlt=false,ended=false,pending=null;const items=[],nonFood=[];
   const add=(text,conf,priceTxt,cls)=>{
     const code=findCode(text),upc=code&&code.upc||null;
     if(code&&code.plu&&!cls){const [k,nmP]=PLU[code.plu];cls={key:k,score:0.97,plu:code.plu,name:(code.organic?'Organic ':'')+nmP}}
@@ -620,11 +625,13 @@ function parseReceipt(lines){
       /* an unknown line still counts as an item if it looks like words, not OCR noise */
       const words=label.split(' ').filter(w=>/^[A-Za-z']{3,}$/.test(w));
       if(!(words.length&&ocr>=0.45)&&!upc)return}
+    if(NONFOOD.test(label)&&(!m||m.score<0.9)){nonFood.push(label);return}
     const key=m?m.key:'other',match=m?m.score:0.3;
     const c=0.55*match+0.45*ocr;
     items.push({nice:m&&m.name?m.name:null,raw:text+(m&&m.plu?'  [PLU '+m.plu+(code.organic?', organic':'')+']':''),label:m&&m.name?m.name:(label||'Item '+(upc||'')),key,guessKey:key,conf:c,ocr,match,flagged:c<THRESH,upc,upcVerified:!!(code&&code.verified),organic:!!(code&&code.organic),upcOnly:!m,price:money(priceTxt),discount:0,markdown:false})};
   lines.forEach(({text,conf})=>{
-    const t=text.trim();if(!t)return;
+    // a name run into its code ("GRND0000050") gets its space back
+    const t=text.trim().replace(/([A-Za-z]{2,})(\d{5,})/g,'$1 $2');if(!t)return;
     {const d=receiptDate(t);if(d){if(!date){date=d;dateConf=conf}else if(diffDays(d,date)!==0)dateAlt=true}}
     if(ended)return;
     if(END.test(t)&&items.length){ended=true;return}
@@ -641,7 +648,7 @@ function parseReceipt(lines){
       const pm=t.match(PRICE);
       if(pending&&pm){add(pending.text+' '+pm[1],Math.min(pending.conf,conf),pm[1]);pending=null}
       return}
-    if(/\bYOU\b/i.test(t)||SKIP.test(t)){pending=null;return}
+    if(/\bYOU\b/i.test(t)||SKIP.test(t)||SKIP_GLUED.test(t)){pending=null;return}
     const words=t.toUpperCase().replace(/[^A-Z ]/g,' ').split(/\s+/).filter(w=>w.length>=5);
     if(words.some(w=>NOISE.some(n=>lev(w,n)<=(n.length>=7?2:1)))){pending=null;return}
     let pm=t.match(PRICE);if(!pm){const g=t.match(PRICE_GAP);if(g&&/[A-Za-z]{3}/.test(t))pm=[g[0],g[1]+'.'+g[2]]}
@@ -662,7 +669,7 @@ function parseReceipt(lines){
     const pct=it.discountPct||(it.price&&it.discount?it.discount/(it.price):0);
     it.discountPct=pct;
     if(it.markdown||pct>=0.3){it.clearance=true;it.flagged=true}});
-  return{date,items,dateConf,dateAlt}}
+  return{date,items,dateConf,dateAlt,nonFood}}
 /* Several OCR passes over differently prepared images: keep what they agree on, fill gaps from the others. */
 function sharesWord(a,b){const w=x=>new Set(x.toUpperCase().match(/[A-Z]{4,}/g)||[]);const A=w(a);for(const t of w(b))if(A.has(t))return true;return false}
 function mergeParsed(list){
@@ -767,15 +774,19 @@ function ensureEngine(){
   S.ocr={state:'loading',msg:'Starting the receipt reader…'};engineLine();
   enginePromise=(async()=>{
     try{
+      await withTimeout(ppLoad(p=>{S.ocr={state:'loading',msg:'Downloading the receipt reader (one time) '+Math.round(p*100)+'%'};engineLine();setBar(p,S.ocr.msg)}),120000,'Receipt reader download timed out.');
+      S.engine='paddle';S.ocr={state:'ready',msg:'Receipt reader ready (PaddleOCR). Runs on this device.'};engineLine();return
+    }catch(e){console.warn('PaddleOCR unavailable, using Tesseract',e)}
+    await ensureTesseract();engineLine()})();
+  return enginePromise}
+async function ensureTesseract(){
+    try{S.engine='tesseract';
       if(!window.Tesseract)await withTimeout(loadScript(TESS_SRC),25000,'OCR library load timed out.');
       const wurl=await withTimeout(makeWorkerBlob(),40000,'Language data download timed out.');
       S.worker=await withTimeout(Tesseract.createWorker('eng',1,{workerPath:wurl,workerBlobURL:false,langPath:'tessdata',gzip:false,cacheMethod:'none',logger:m=>{if(m.status)setBar(m.progress||0,m.status+' '+Math.round((m.progress||0)*100)+'%')}}),70000,'OCR engine start timed out.');
       try{await S.worker.setParameters({tessedit_pageseg_mode:'6'})}catch(e){}
       S.ocr={state:'ready',msg:'Receipt reader ready. Runs on this device.'};
-    }catch(e){S.ocr={state:'failed',msg:'OCR engine could not start: '+(e&&e.message?e.message:e)};enginePromise=null}
-    engineLine();
-  })();
-  return enginePromise}
+    }catch(e){S.ocr={state:'failed',msg:'OCR engine could not start: '+(e&&e.message?e.message:e)};enginePromise=null}}
 
 /* ---------- icons ---------- */
 const svg=(d,cls)=>`<svg viewBox="0 0 24 24" aria-hidden="true"${cls?` class="${cls}"`:''}>${d}</svg>`;
@@ -964,7 +975,7 @@ function reviewScreen(){
   const unk=live.filter(r=>r.key==='other'&&!r.resolved&&!r.added).length;
   const dateTxt=S.ocrDate?`Receipt date ${S.dateOK?'(you confirmed)':'read'}: ${fmt(S.ocrDate)}`:(S.dateNote||'No date found on the receipt. Using today.');
   return phone('Check items',live.length+' found','scan',`<div class="note">${open?open+' to check. Tap once per item.':live.length?'All checked. Ready to save.':'No food items found. Add them below or go back.'}</div>
-    <div class="note">${esc(dateTxt)}${S.store?' · '+esc(S.store):''}</div>
+    <div class="note">${esc(dateTxt)}${S.store?' · '+esc(S.store):''}</div>${S.nonFood&&S.nonFood.length?`<div class="note">Left out ${S.nonFood.length} non-food item${S.nonFood.length===1?'':'s'}: ${esc(S.nonFood.slice(0,4).join(', ').toLowerCase())}${S.nonFood.length>4?'…':''}</div>`:''}
     ${unk>2?`<button class="sm" data-a="dropunk">Remove ${unk} unrecognised lines at once</button>`:''}
     ${flagged}${clear?`<div class="label">Read clearly</div>${clear}`:''}
     <details><summary>What the OCR read</summary><div class="ocrtxt">${esc(S.ocrText)}</div><div id="prepholder"></div></details>
@@ -1155,16 +1166,17 @@ async function getText(paths){for(const p of paths){try{const u=/^https?:/.test(
 async function loadNews(force){
   if(S.newsLoading)return;
   if(!navigator.onLine){render();return}
-  if(!force&&S.news&&Date.now()-S.news.t<10*60e3)return;
-  S.newsLoading=true;const onNews=()=>S.tab==='app'&&(S.screen==='news'||S.screen==='learn');if(onNews())render();
+  // only skip when the last check actually got both feeds; after a failure, try again right away
+  if(!force&&S.news&&S.news.live&&S.news.live.recalls&&S.news.live.news&&Date.now()-S.news.t<10*60e3)return;
+  S.newsLoading=true;const onNews=()=>S.tab==='app'&&(S.screen==='news'||S.screen==='learn');if(onNews())render();try{
   const [rx,nx]=await Promise.all([getText(FEEDS.recalls.paths),getText(FEEDS.news.paths)]);
   let recalls=null,news=null;
-  try{if(rx){const d=new DOMParser().parseFromString(rx,'text/xml');recalls=[...d.querySelectorAll('item')].slice(0,12).map(it=>({title:(it.querySelector('title')||{}).textContent.trim(),link:(it.querySelector('link')||{}).textContent.trim(),date:(it.querySelector('pubDate')||{}).textContent.trim()}))}}catch(e){}
+  try{if(rx){const d=new DOMParser().parseFromString(rx,'text/xml');recalls=[...d.querySelectorAll('item')].slice(0,12).map(it=>({title:((it.querySelector('title')||{}).textContent||'').trim(),link:((it.querySelector('link')||{}).textContent||'').trim(),date:((it.querySelector('pubDate')||{}).textContent||'').trim()}))}}catch(e){}
   try{if(nx){const j=JSON.parse(nx);news=((j.feed&&j.feed.entry)||[]).slice(0,8).map(e=>({title:String(e.title||'').trim(),link:e.link,date:e.publishedDate,teaser:String(e.teaser||'').slice(0,160)}))}}catch(e){}
   const prev=S.news||{};
   S.news={t:Date.now(),recalls:recalls||prev.recalls||null,news:news||prev.news||null,live:{recalls:!!recalls,news:!!news}};
   try{localStorage.setItem('cw-news',JSON.stringify(S.news))}catch(e){}
-  S.newsLoading=false;if(onNews())render()}
+  }finally{S.newsLoading=false}if(onNews())render()}
 const GENERIC=new Set(['BRAND','BRANDS','CERTAIN','RECALLED','RECALL','PRODUCT','PRODUCTS','PRESENCE','UNDECLARED','POSSIBLE','DUE','PIECES','VARIOUS','FOODS','FOOD','WITH','FROM','AND','THE','SOLD']);
 function recallMatches(r){
   const t=String(r.title||'');const brand=((t.match(/^(?:Certain\s+)?(.+?)\s+brands?\b/i)||[])[1]||'').split(/,|\band\b/i)[0].trim().toUpperCase();
@@ -1505,12 +1517,159 @@ function onPhoto(e){
   img.onload=()=>usePhoto(img);
   img.onerror=()=>{S.photo=false;S.img=null;render()};img.src=u}
 
+/* ---------- PaddleOCR (PP-OCRv4) on this device, through ONNX Runtime Web ----------
+   Text detection (DB) finds every line of print, even on a tilted or crumpled receipt; the recognizer
+   then reads each line. Nothing leaves the phone: the models (about 16 MB) download once and are cached. */
+const ORT_VER='1.20.1',ORT_BASE='https://cdn.jsdelivr.net/npm/onnxruntime-web@'+ORT_VER+'/dist/';
+const PP={det:null,rec:null,keys:null,loading:null};
+async function fetchBuf(url,onProg){
+  const r=await fetch(url);if(!r.ok)throw new Error('Could not download '+url+' ('+r.status+')');
+  const total=+r.headers.get('content-length')||0;if(!r.body||!total||!onProg)return new Uint8Array(await r.arrayBuffer());
+  const rd=r.body.getReader(),parts=[];let got=0;
+  for(;;){const {done,value}=await rd.read();if(done)break;parts.push(value);got+=value.length;onProg(got/total)}
+  const out=new Uint8Array(got);let o=0;for(const p of parts){out.set(p,o);o+=p.length}return out}
+function ppLoad(onProg){
+  if(PP.loading)return PP.loading;
+  PP.loading=(async()=>{
+    if(!window.ort)await loadScript(ORT_BASE+'ort.wasm.min.js');
+    ort.env.wasm.wasmPaths=ORT_BASE;ort.env.wasm.numThreads=self.crossOriginIsolated?Math.min(4,navigator.hardwareConcurrency||2):1;
+    const prog=(a,b)=>p=>onProg&&onProg(a+(b-a)*p);
+    const U=Object.assign({det:'ocr/det.onnx',rec:['ocr/rec-1.onnx','ocr/rec-2.onnx'],keys:'ocr/keys.json'},window.PP_SRC||{});
+    const [det,rec,keys]=await Promise.all([fetchBuf(U.det,prog(0,.3)),(Array.isArray(U.rec)?Promise.all(U.rec.map((u,i,a)=>fetchBuf(u,prog(.3+.6*i/a.length,.3+.6*(i+1)/a.length)))).then(ps=>{const o=new Uint8Array(ps.reduce((n,p)=>n+p.length,0));let k=0;for(const p of ps){o.set(p,k);k+=p.length}return o}):fetchBuf(U.rec,prog(.3,.9))),fetch(U.keys).then(r=>/\.json$/.test(U.keys)?r.json():r.text().then(t=>t.split(/\r?\n/).filter((l,i,a)=>i<a.length-1||l)))]);
+    const opt={executionProviders:['wasm'],graphOptimizationLevel:'all'};
+    PP.det=await ort.InferenceSession.create(det,opt);onProg&&onProg(.95);
+    PP.rec=await ort.InferenceSession.create(rec,opt);
+    PP.keys=['blank',...keys,' '];onProg&&onProg(1);
+  })().catch(e=>{PP.loading=null;throw e});
+  return PP.loading}
+
+/* 1. detection: probability map of "this pixel is text" -> oriented boxes */
+async function ppDetect(src){
+  const W0=src.naturalWidth||src.width,H0=src.naturalHeight||src.height;
+  // short side to 960 (sharper small print), long side capped at 2560 so a long receipt still fits on a phone
+  let s=960/Math.min(W0,H0);if(Math.max(W0,H0)*s>2560)s=2560/Math.max(W0,H0);
+  const W=Math.max(32,Math.round(W0*s/32)*32),H=Math.max(32,Math.round(H0*s/32)*32);
+  const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d',{willReadFrequently:true});
+  x.drawImage(src,0,0,W,H);const px=x.getImageData(0,0,W,H).data,N=W*H,inp=new Float32Array(3*N);
+  // Paddle feeds B,G,R with ImageNet mean/std
+  const M=[.406,.456,.485],SD=[.225,.224,.229];
+  for(let i=0;i<N;i++){const r=px[i*4]/255,g=px[i*4+1]/255,b=px[i*4+2]/255;inp[i]=(b-M[0])/SD[0];inp[N+i]=(g-M[1])/SD[1];inp[2*N+i]=(r-M[2])/SD[2]}
+  const out=await PP.det.run({[PP.det.inputNames[0]]:new ort.Tensor('float32',inp,[1,3,H,W])});
+  const prob=out[PP.det.outputNames[0]].data;
+  // threshold + 2x2 dilation
+  const bm=new Uint8Array(N);
+  for(let y=0;y<H;y++)for(let xx=0;xx<W;xx++){const i=y*W+xx;if(prob[i]>.3){bm[i]=1;if(xx+1<W)bm[i+1]=1;if(y+1<H)bm[i+W]=1;if(xx+1<W&&y+1<H)bm[i+W+1]=1}}
+  // connected components (8-way) -> oriented box from the pixel cloud (principal axis)
+  const lab=new Int32Array(N),stack=new Int32Array(N),boxes=[];let L=0;
+  for(let i=0;i<N;i++){if(!bm[i]||lab[i])continue;L++;let sp=0;stack[sp++]=i;lab[i]=L;
+    let n=0,sx=0,sy=0,sxx=0,syy=0,sxy=0,ps=0;const pts=[];
+    while(sp){const p=stack[--sp],py=(p/W)|0,pxx=p-py*W;n++;sx+=pxx;sy+=py;sxx+=pxx*pxx;syy+=py*py;sxy+=pxx*py;ps+=prob[p];pts.push(p);
+      for(let dy=-1;dy<=1;dy++){const yy=py+dy;if(yy<0||yy>=H)continue;for(let dx=-1;dx<=1;dx++){const x2=pxx+dx;if(x2<0||x2>=W)continue;const q=yy*W+x2;if(bm[q]&&!lab[q]){lab[q]=L;stack[sp++]=q}}}}
+    if(n<12||ps/n<.55)continue;
+    const mx=sx/n,my=sy/n,cxx=sxx/n-mx*mx,cyy=syy/n-my*my,cxy=sxy/n-mx*my;
+    let th=.5*Math.atan2(2*cxy,cxx-cyy);const co=Math.cos(th),si=Math.sin(th);
+    let u0=1e9,u1=-1e9,v0=1e9,v1=-1e9;
+    for(const p of pts){const py=(p/W)|0,pxx=p-py*W,dx=pxx-mx,dy=py-my,u=dx*co+dy*si,v=-dx*si+dy*co;if(u<u0)u0=u;if(u>u1)u1=u;if(v<v0)v0=v;if(v>v1)v1=v}
+    let w=u1-u0+1,h=v1-v0+1;if(Math.min(w,h)<3)continue;
+    const cu=(u0+u1)/2,cv=(v0+v1)/2,cx=mx+cu*co-cv*si,cy=my+cu*si+cv*co;      // box centre
+    if(h>w*1.5){th+=Math.PI/2;[w,h]=[h,w]}                                     // keep the long side along the angle
+    const d=w*h*1.6/(2*(w+h));w+=2*d;h+=2*d;if(Math.min(w,h)<5)continue;          // DB "unclip"
+    const fx=W0/W,fy=H0/H;
+    boxes.push({cx:cx*fx,cy:cy*fy,w:w*fx,h:h*fy,th,score:ps/n})}
+  return boxes}
+
+/* 2. recognition: cut each box out straight, read it, greedy CTC decode */
+function ppCrop(src,b){
+  let th=b.th;if(th>Math.PI/2)th-=Math.PI;if(th<-Math.PI/2)th+=Math.PI;   // text reads left to right
+  const h=48,w=Math.max(8,Math.min(1600,Math.round(b.w/b.h*48)));
+  const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});
+  const k=h/b.h;x.setTransform(k,0,0,k,w/2,h/2);x.rotate(-th);x.translate(-b.cx,-b.cy);x.drawImage(src,0,0);
+  return c}
+async function ppRecognize(src,boxes,onProg){
+  const crops=boxes.map(b=>ppCrop(src,b)),order=crops.map((c,i)=>i).sort((a,b)=>crops[a].width-crops[b].width),res=new Array(boxes.length);
+  for(let s=0;s<order.length;s+=6){
+    const ids=order.slice(s,s+6),Wb=Math.max(...ids.map(i=>crops[i].width)),n=ids.length,inp=new Float32Array(n*3*48*Wb);
+    ids.forEach((id,k)=>{const c=crops[id],d=c.getContext('2d').getImageData(0,0,c.width,48).data,plane=48*Wb,base=k*3*plane;
+      for(let y=0;y<48;y++)for(let xx=0;xx<c.width;xx++){const p=(y*c.width+xx)*4,o=y*Wb+xx;
+        inp[base+o]=(d[p+2]/255-.5)/.5;inp[base+plane+o]=(d[p+1]/255-.5)/.5;inp[base+2*plane+o]=(d[p]/255-.5)/.5}});
+    const out=await PP.rec.run({[PP.rec.inputNames[0]]:new ort.Tensor('float32',inp,[n,3,48,Wb])});
+    const t=out[PP.rec.outputNames[0]],[,T,C]=t.dims,P=t.data;
+    ids.forEach((id,k)=>{let txt='',last=0,cs=0,cn=0;
+      for(let j=0;j<T;j++){let bi=0,bv=-1;const o=(k*T+j)*C;for(let q=0;q<C;q++){const v=P[o+q];if(v>bv){bv=v;bi=q}}
+        if(bi!==0&&bi!==last){txt+=PP.keys[bi]||'';cs+=bv;cn++}last=bi}
+      res[id]={text:txt,conf:cn?100*cs/cn:0}});
+    onProg&&onProg(Math.min(1,(s+6)/order.length));await new Promise(r=>setTimeout(r,0))}
+  return res}
+
+/* 3. put the pieces back into receipt lines, allowing for a tilted photo:
+   rotate every centre by the median text angle, then join pieces whose centres share a row */
+function ppLines(boxes,texts){
+  const items=boxes.map((b,i)=>({...b,...texts[i]})).filter(it=>it.text.trim()&&it.conf>35);
+  if(!items.length)return[];
+  const norm=t=>{if(t>Math.PI/2)t-=Math.PI;if(t<-Math.PI/2)t+=Math.PI;return t};
+  const angs=items.filter(it=>it.w>it.h*3).map(it=>norm(it.th)).sort((a,b)=>a-b);
+  const a=angs.length?angs[angs.length>>1]:0,co=Math.cos(-a),si=Math.sin(-a);
+  items.forEach(it=>{it.ry=it.cx*si+it.cy*co;it.rx=it.cx*co-it.cy*si;
+    it.slope=it.w>it.h*3?Math.tan(Math.max(-.35,Math.min(.35,norm(it.th)-a))):0;it.l=it.rx-it.w/2;it.r=it.rx+it.w/2;it.prev=-1;it.next=-1});
+  // prices that stand alone at the right edge are paired separately, in order (step 2)
+  const xs=items.map(it=>it.r).sort((p,q)=>p-q),right=xs[Math.floor(xs.length*.9)]||0,pageW=(xs[xs.length-1]-Math.min(...items.map(it=>it.l)))||1;
+  // tax flags printed after a price ("16.99  H") belong to that price, not to the next line
+  for(let i=items.length-1;i>=0;i--){const f=items[i];if(!/^[A-Z*]{1,2}$/.test(f.text.trim()))continue;
+    const p=items.find(q=>q!==f&&/\d[.,]?\d{2}$/.test(q.text.trim())&&q.r<=f.l+f.h&&f.l-q.r<f.h*3&&Math.abs(q.ry-f.ry)<Math.min(q.h,f.h)*.7);
+    if(p){p.text=p.text.trim()+' '+f.text.trim();p.r=f.r;items.splice(i,1)}}
+  // a price in the right-hand column whose decimal point was too small to see ("$1298D") gets it back
+  items.forEach(it=>{const m=it.text.trim().match(/^[$S]\s?(\d{1,3})(\d{2})\s?([A-Z*]{0,2})$/);if(m&&it.r>right-pageW*.12)it.text='$'+m[1]+'.'+m[2]+(m[3]?' '+m[3]:'')});
+  const isPrice=it=>/^[$S]?-?\d{1,4}[.,]\d{2}\s?[A-Z*]{0,2}$/.test(it.text.trim())&&it.r>right-pageW*.12;
+  const body=items.filter(it=>!isPrice(it)),prices=items.filter(isPrice);
+  // 1. join the other pieces left to right along each one's own slant
+  const links=[];
+  body.forEach((p,i)=>body.forEach((q,j)=>{if(i===j||q.l<p.rx)return;const gap=q.l-p.r;if(gap>Math.max(p.h,q.h)*25)return;
+    const pred=p.ry+p.slope*(q.rx-p.rx),err=Math.abs(q.ry-pred)/Math.min(p.h,q.h);if(err<.6)links.push({i,j,cost:err*3+Math.max(0,gap)/(p.h*10)})}));
+  links.sort((x,y)=>x.cost-y.cost);
+  for(const k of links){const p=body[k.i],q=body[k.j];if(p.next<0&&q.prev<0){p.next=k.j;q.prev=k.i}}
+  const rows=[];
+  body.forEach((it,i)=>{if(it.prev>=0)return;const parts=[];let c=i,g=0;while(c>=0&&g++<50){parts.push(body[c]);c=body[c].next}
+    const last=parts[parts.length-1];rows.push({parts,y:parts[0].ry,h:Math.max(...parts.map(p=>p.h)),end:last,price:null})});
+  rows.sort((x,y)=>x.y-y.y);
+  // 2. pair the price column with rows in reading order (a crumpled receipt bends, but never swaps lines);
+  //    each price costs how far it sits from where that row's baseline would reach it
+  prices.sort((p,q)=>p.ry-q.ry);
+  const R=rows.length,Pn=prices.length,SKIP_ROW=.45,SKIP_PRICE=2.2,INF=1e9;
+  // rows with hardly any letters (a lone "2", a line of stars) rarely own a price
+  const at=(r,p)=>{const e=r.end,pred=e.ry+e.slope*(p.rx-e.rx),letters=(r.parts.map(q=>q.text).join('').match(/[A-Za-z]/g)||[]).length;return Math.abs(p.ry-pred)/Math.min(r.h,p.h)+(letters<3?1.2:0)};
+  const D=[...Array(R+1)].map(()=>new Float64Array(Pn+1).fill(INF)),B=[...Array(R+1)].map(()=>new Int8Array(Pn+1));D[0][0]=0;
+  for(let r=0;r<=R;r++)for(let p=0;p<=Pn;p++){const d=D[r][p];if(d>=INF)continue;
+    if(r<R&&d+SKIP_ROW<D[r+1][p]){D[r+1][p]=d+SKIP_ROW;B[r+1][p]=1}
+    if(p<Pn&&d+SKIP_PRICE<D[r][p+1]){D[r][p+1]=d+SKIP_PRICE;B[r][p+1]=2}
+    if(r<R&&p<Pn){const c=at(rows[r],prices[p]);if(c<2.2&&d+c<D[r+1][p+1]){D[r+1][p+1]=d+c;B[r+1][p+1]=3}}}
+  for(let r=R,p=Pn;r>0||p>0;){const b=B[r][p];if(b===3){rows[r-1].price=prices[p-1];r--;p--}else if(b===1)r--;else{rows.push({parts:[],y:prices[p-1].ry,h:prices[p-1].h,price:prices[p-1]});p--}}
+  rows.sort((x,y)=>x.y-y.y);
+  return rows.map(r=>{const parts=r.price?[...r.parts,r.price]:r.parts;
+    return{text:parts.map(p=>p.text.trim()).join('  '),conf:parts.reduce((s,p)=>s+p.conf,0)/parts.length}})}
+
+async function ppRead(src,onProg){
+  const boxes=await ppDetect(src);onProg&&onProg(.25);
+  const texts=await ppRecognize(src,boxes,p=>onProg&&onProg(.25+.75*p));
+  return ppLines(boxes,texts)}
+
 /* ---------- scan flow ---------- */
 /* Photos are read three times, each from a differently prepared image, and the results are merged
    (benchmarked on real Costco, Walmart and Domino's receipts: 1 pass 74-78%, 3 passes 96% of items right). */
 const PASSES=[{label:'sharpened',opts:{C:8,width:1300}},{label:'shadows removed',opts:{mode:'flat',gain:3,width:1800}},{label:'high contrast',opts:{mode:'flat',gain:3,width:1300,lo:100,hi:215}}];
 const fmtLines=lines=>lines.map(l=>l.text.trim()+'   ['+Math.round(l.conf)+'%]').join('\n');
-async function recognizePasses(isPhoto){
+async function recognizePasses(isPhoto,forceTess){
+  if(S.engine==='paddle'&&!forceTess){
+    const lines=await withTimeout(ppRead(isPhoto?S.img:S.canvas,p=>setBar(.05+.9*p,p<.25?'Finding the lines of text…':'Reading line by line…')),180000,'Reading the receipt took too long. Try a smaller or sharper photo.');
+    const text='--- PaddleOCR ---\n'+fmtLines(lines),parsed=parseReceipt(lines);
+    const sub=findTotal(lines.map(l=>l.text).join('\n')),sum=parsed.items.reduce((a,i)=>a+(i.price||0)-(i.discount||0),0);
+    if(!sub||Math.abs(sum-sub)<=Math.max(.06,sub*.01))return{parsed,text};
+    // the items don't add up: also try the older reader and keep whichever comes closer to the receipt's own total
+    try{setBar(.9,'Double-checking against the receipt total…');
+      const keep=S.ocr;if(!S.worker){await ensureTesseract()}S.ocr=keep;if(!S.worker)throw 0;
+      const alt=await recognizePasses(isPhoto,true),altSum=alt.parsed.items.reduce((a,i)=>a+(i.price||0)-(i.discount||0),0);
+      S.engine='paddle';
+      if(Math.abs(altSum-sub)<Math.abs(sum-sub))return{parsed:alt.parsed,text:text+'\n'+alt.text}}catch(e){S.engine='paddle'}
+    return{parsed,text}}
   const run=async cv=>{const res=await withTimeout(S.worker.recognize(cv),240000,'Reading the receipt took too long. Try a smaller or sharper photo.');return linesFrom(res.data)};
   try{await S.worker.setParameters({tessedit_pageseg_mode:'6'})}catch(e){}
   if(!isPhoto){const lines=await run(S.canvas);return{parsed:parseReceipt(lines),text:fmtLines(lines)}}
@@ -1572,7 +1731,7 @@ async function barcodeGo(){
     S.review=[item];S.ocrDate=null;S.dateNote='Barcode scan: counted as bought today.';S.ocrText='UPC '+code+(info?' -> '+info.name:' (product not found)');S.prep=null;S.screen='review'}
   render()}
 async function startScan(forceSim){
-  S.ocrErr=null;S.prep=null;S.dateNote='';
+  S.ocrErr=null;S.prep=null;S.dateNote='';S.nonFood=[];
   S.run={source:'photo',start:0,last:0,times:[],late:false,prompted:false,hrOpened:0,hrChecklist:0,tester:S.tester,backdated:false,engine:'tesseract',ocrMs:0};
   if(!S.photo){S.run=null;S.ocrErr='Choose a receipt photo first.';render();return}
   S.screen='scanning';render();
@@ -1581,6 +1740,7 @@ async function startScan(forceSim){
     setBar(.05,'Starting OCR engine…');
     await ensureEngine();
     if(S.ocr.state!=='ready'){S.screen='scan';S.run=null;S.ocrErr=S.ocr.msg;render();return}
+    S.run.engine=S.engine||'tesseract';
     try{
       const r=await recognizePasses(true);pre=r.parsed;S.ocrText=r.text}
     catch(e){S.screen='scan';S.run=null;S.ocr={state:'failed',msg:'OCR failed: '+(e&&e.message||e)};S.ocrErr=S.ocr.msg;render();return}
@@ -1589,7 +1749,7 @@ async function startScan(forceSim){
     await new Promise(r=>setTimeout(r,900))}
   S.run.ocrMs=performance.now()-t0;
   S.store=detectStore(S.ocrText);S.total=findTotal(S.ocrText);S.thumb=makeThumb();
-  const parsed=pre||parseReceipt(lines);
+  const parsed=pre||parseReceipt(lines);S.nonFood=[...(parsed.nonFood||[])];
   if(parsed.items.some(i=>i.upc)){setBar(1,'Looking up product codes\u2026');try{parsed.items=await enrichUPC(parsed.items)}catch(e){}}
   let date=parsed.date;S.dateIssue=null;S.dateOK=false;S.lastDateAlt=parsed.dateAlt;
   if(date){const n=diffDays(TODAY,date);
