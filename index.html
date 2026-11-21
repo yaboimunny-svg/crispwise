@@ -529,7 +529,8 @@ const QTY=/^\W*\d+\s*@\s*\$?\d|\d\s*(kg|lb|ks)\b.*@|@\s*\$?\d+[.,]\d\d\s*\/\s*(k
 /* Store abbreviations, brands and product words, checked in order before the plain dictionary (more specific first). */
 const RULES=[
  [/SOUR\s*CR|WHIP|HALF\s*&?\s*HALF|COFFEE\s*CR|(?<!ICE\s)\bCREAM\b(?!\s*CH)|\bCRM\b(?!\s*CH)|\b(10|18|35)\s?%\s*(CR|M\.?F)/i,'cream'],
- [/PEANUT\s*BUT|\bPB\b|NUTELLA|\bJAM\b|HONEY|SYRUP|DRESSING|KETCHUP|MUSTARD|\bMAYO|TOMATO\s*(SAUCE|PASTE)|PASTA\s*SAUCE|CORN\s*FLAKES|CEREAL|CHEERIOS|OATMEAL|\bOATS\b|\bRICE\b|PASTA|SPAGHETTI|PENNE|MACARONI|NOODLE|RAMEN|FLOUR|\bOIL\b|VINEGAR|CANNED|\bSOUP\b|\bSPICE|SEASONING|COFFEE|KRAFT\s*DINNER|\bKD\b/i,'pantry'],
+ [/RICE\s*CA?KE?S?|\bRICE\s*CAK|POPCORN|PRETZEL/i,'snack'],
+ [/BROTH|\bBRTH\b|\bSTOCK\b|BOUILLON|PRESERV|PRESERU|JELLY|MARMALADE|CONFIT|PEANUT\s*BUT|\bPB\b|NUTELLA|\bJAM\b|HONEY|SYRUP|DRESSING|KETCHUP|MUSTARD|\bMAYO|TOMATO\s*(SAUCE|PASTE)|PASTA\s*SAUCE|CORN\s*FLAKES|CEREAL|CHEERIOS|OATMEAL|\bOATS\b|\bRICE\b|PASTA|SPAGHETTI|PENNE|MACARONI|NOODLE|RAMEN|FLOUR|\bOIL\b|VINEGAR|CANNED|\bSOUP\b|\bSPICE|SEASONING|COFFEE|KRAFT\s*DINNER|\bKD\b/i,'pantry'],
  [/ICE\s*CR|FROZEN|\bFRZ\b|POPSICLE|FRIES\b/i,'frozen'],
  [/CREAM\s*CH|PHILADELPHIA|BABYBEL|CHEESE\s*STR|STRINGS?\s*CHEESE|COTTAGE|RICOTTA|HALLOUMI|PANEER|BLACK\s*DIAMOND|CRACKER\s*BARREL|SINGLES|SHRED|GRATED/i,'cheese'],
  [/PEANUT\s*BUT/i,'pantry'],
@@ -656,7 +657,12 @@ function parseReceipt(lines){
       if(MARKDOWN.test(t))last.markdown=true;
       return}
     if(MARKDOWN.test(t)&&last){last.markdown=true}
+    if(!PRICE.test(t)&&(/\b(GROSS|TARE|NET\s*W)/i.test(t)||/^\W*-?\d+[.,]\d{2,3}\s*(kg|k9|lb|ks)\b/i.test(t)))return;
     if(QTY.test(t)){
+      // "2 @ $7.89" under a line already priced at $15.78: that line is 2 of the same thing
+      const q=t.match(/^\W*(\d{1,2})\s*@\s*\$?\s*(\d+)[.,](\d\d)\b(?!\s*\/)/),last=items[items.length-1];
+      if(!pending&&q&&last&&last.price&&+q[1]>1&&+q[1]<=12){const unit=+(q[2]+'.'+q[3]);
+        if(Math.abs(unit*+q[1]-last.price)<0.02){last.price=unit;last.qty=+q[1];for(let k=1;k<+q[1];k++)items.push({...last,copy:k})}return}
       const pm=t.match(PRICE);
       if(pending&&pm){add(pending.text+' '+pm[1],Math.min(pending.conf,conf),pm[1]);pending=null}
       return}
@@ -731,7 +737,7 @@ function status(it){const r=rem(it);
 const flagCls=c=>c<.6?'bad':'warn';
 const sorted=()=>S.inv.filter(i=>!i.used).sort((a,b)=>rem(a)-rem(b));
 /* Product names: the receipt's own wording, with store abbreviations spelled out. The food type is shown underneath. */
-const ABBR={DEMP:"Dempster's",WWH:'Whole Wheat',WW:'Whole Wheat',GRN:'Green',PEP:'Pepper',GRD:'Ground',BF:'Beef',CHD:'Cheddar',SMK:'Smokies',OJ:'Orange Juice',PINEAP:'Pineapple',JU:'Juice',JCE:'Juice',HOMO:'Homo',MED:'Méditerranée',LG:'Large',ORG:'Organic',BNNA:'Bananas',BNN:'Bananas',CHKN:'Chicken',BRST:'Breast',BNLS:'Boneless',SKNLS:'Skinless',MLK:'Milk',YGRT:'Yogurt',YGT:'Yogurt',GRK:'Greek',SPNCH:'Spinach',BBY:'Baby',SLMN:'Salmon',FLT:'Fillet',BRD:'Bread',WHL:'Whole',WHT:'Wheat',TOM:'Tomatoes',GV:'Great Value',KS:'Kirkland Signature',LIBERTE:'Liberté',BRIOCHE:'Brioche',BUN:'Buns',BUNS:'Buns',HMBRG:'Hamburger',HMB:'Hamburger',BGR:'Burger',STRWB:'Strawberries',FRZ:'Frozen',CKD:'Cooked',SLCD:'Sliced',SHRD:'Shredded',MOZZ:'Mozzarella',PARM:'Parmesan',CRM:'Cream',BTR:'Butter',VICKIES:"Vickie's",WELCHS:"Welch's",WELCH:"Welch's",FILET:'Fillet',SLICE:'Slices',TKY:'Turkey',TRKY:'Turkey',SSG:'Sausage',POT:'Potatoes',ONI:'Onions',CUC:'Cucumber',LTTC:'Lettuce',BROC:'Broccoli',MSHRM:'Mushrooms',AVO:'Avocado',APL:'Apples',GRP:'Grapes'};
+const ABBR={PC:'PC',PO:'PC',BRWN:'Brown',BRUN:'Brown',CAK:'Cakes',CAKS:'Cakes',CRACKR:'Crackers',CRKR:'Crackers',NT2U:'Nuts to You',PISTA:'Pistachio',IMAG:'Imagine',BRTH:'Broth',CHK:'Chicken',LS:'Low Sodium',SDL:'Seedless',PURP:'Purple',PRESERV:'Preserves',PRESERU:'Preserves',PRSRV:'Preserves',VEG:'Vegetable',NN:'No Name',BLK:'Black',DEMP:"Dempster's",WWH:'Whole Wheat',WW:'Whole Wheat',GRN:'Green',PEP:'Pepper',GRD:'Ground',BF:'Beef',CHD:'Cheddar',SMK:'Smokies',OJ:'Orange Juice',PINEAP:'Pineapple',JU:'Juice',JCE:'Juice',HOMO:'Homo',MED:'Méditerranée',LG:'Large',ORG:'Organic',BNNA:'Bananas',BNN:'Bananas',CHKN:'Chicken',BRST:'Breast',BNLS:'Boneless',SKNLS:'Skinless',MLK:'Milk',YGRT:'Yogurt',YGT:'Yogurt',GRK:'Greek',SPNCH:'Spinach',BBY:'Baby',SLMN:'Salmon',FLT:'Fillet',BRD:'Bread',WHL:'Whole',WHT:'Wheat',TOM:'Tomatoes',GV:'Great Value',KS:'Kirkland Signature',LIBERTE:'Liberté',BRIOCHE:'Brioche',BUN:'Buns',BUNS:'Buns',HMBRG:'Hamburger',HMB:'Hamburger',BGR:'Burger',STRWB:'Strawberries',FRZ:'Frozen',CKD:'Cooked',SLCD:'Sliced',SHRD:'Shredded',MOZZ:'Mozzarella',PARM:'Parmesan',CRM:'Cream',BTR:'Butter',VICKIES:"Vickie's",WELCHS:"Welch's",WELCH:"Welch's",FILET:'Fillet',SLICE:'Slices',TKY:'Turkey',TRKY:'Turkey',SSG:'Sausage',POT:'Potatoes',ONI:'Onions',CUC:'Cucumber',LTTC:'Lettuce',BROC:'Broccoli',MSHRM:'Mushrooms',AVO:'Avocado',APL:'Apples',GRP:'Grapes'};
 const WORDS='GROUND LEAN MEDIUM EXTRA FRESH FROZEN ORGANIC WHOLE WHEAT WHITE BROWN LARGE SMALL BABY GREEN RED YELLOW SWEET SLICED SLICES SMOKED SMOKIES BONELESS SKINLESS BREAST THIGHS FILLET STEAK LOAF BUNS BURGER HOT DOG DOGS CHEDDAR MARBLE CREAM SOUR JUICE ORANGE APPLE PINEAPPLE GRAPE LEMON LIME MILK HOMO SKIM BUTTER YOGURT GREEK VANILLA PLAIN STRAWBERRY STRAWBERRIES BLUEBERRY BLUEBERRIES BANANA BANANAS TOMATO TOMATOES POTATO POTATOES ONION ONIONS PEPPER PEPPERS LETTUCE ROMAINE SPINACH CARROT CARROTS CUCUMBER BROCCOLI MUSHROOM MUSHROOMS CABBAGE GRAPES PEAR PEARS APPLES AVOCADO AVOCADOS BREAD BAGELS TORTILLA TORTILLAS WRAPS PITA RICE PASTA SUGAR FLOUR SALT CHIPS COOKIES CRACKERS SNACKS CHICKEN BEEF PORK LAMB TURKEY SAUSAGE SAUSAGES BACON HAM SALMON TUNA SHRIMP EGGS CHEESE PIZZA WATER SODA POP TEA ICED COFFEE PACK BRIOCHE HAMBURGER MOZZARELLA PARMESAN FETA DELI WINGS DRUMSTICKS ROAST MINCED CHUNKS FRUIT SNACK CEREAL OATS GRANOLA HONEY JAM PEANUT CHOCOLATE FREE RUN RANGE NATURAL CLASSIC ORIGINAL DIET ZERO LIGHT FAMILY SIZE FAIRLIFE NATREL LACTANTIA NEILSON BEATRICE DEMPSTERS WONDER CHRISTIES OASIS TROPICANA SIMPLY NESTEA LIBERTE ACTIVIA OIKOS IOGO DANONE ASTRO KRAFT SCHNEIDERS BURNBRAE GRAY RIDGE KIRKLAND SIGNATURE GREAT VALUE COMPLIMENTS SELECTION SAPUTO ARMSTRONG OLYMPIC SILK ALMOND OAT LAYS DORITOS PRINGLES OREO RITZ GOLDFISH HEINZ CAMPBELLS KELLOGGS CHEERIOS QUAKER DOLE CHIQUITA SUNKIST ZESPRI PRESIDENTS CHOICE KARTAGO VERKA PURFILTRE MAPLE LEAF CRACKER BARREL PHILADELPHIA BABYBEL TROPICANA MINUTE MAID COKE PEPSI SPRITE GATORADE'.split(' ');
 let VOCAB=null;
 function vocab(){if(VOCAB)return VOCAB;VOCAB=new Set(WORDS);FOOD_KEYS.forEach(k=>FOOD[k].kw.forEach(w=>VOCAB.add(w)));Object.keys(ABBR).forEach(k=>VOCAB.add(k));Object.values(ABBR).forEach(v=>v.toUpperCase().replace(/[^A-ZÉ' ]/g,'').split(' ').forEach(w=>w&&VOCAB.add(w)));return VOCAB}
@@ -740,10 +746,19 @@ const tc=w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase();
 const NOUN={cream:['Cream',/CREAM/],milk:['Milk',/MILK|HOMO|SKIM|CREAM|BEVERAGE/],eggs:['Eggs',/EGG/],bread:['Bread',/BREAD|BUN|LOAF|BAGEL|BRIOCHE|WRAP|PITA|TORTILLA|TOAST/],yogurt:['Yogurt',/YOG|GREEK/],cheese:['Cheese',/CHEESE|CHEDDAR|MARBLE|MOZZ|PARM|FETA|BRIE|GOUDA/],
   juice:['Juice',/JUICE|\bOJ\b/],beef:['Beef',/BEEF|STEAK/],lamb:['Lamb',/LAMB/],chicken:['Chicken',/CHICKEN|WING|DRUMSTICK/],thighs:['Chicken Thighs',/THIGH/],pork:['Pork',/PORK|BACON|HAM/],sausage:['Sausage',/SAUSAGE|SMOKIE|WIENER|HOT DOG/],
   salmon:['Salmon',/SALMON/],shrimp:['Shrimp',/SHRIMP/],tomato:['Tomatoes',/TOMATO/],pepper:['Peppers',/PEPPER/],banana:['Bananas',/BANANA/],butter:['Butter',/BUTTER/],turkey:['Turkey',/TURKEY/],pizza:['Pizza',/PIZZA/]};
+const NAME_PHRASES=[[/\bPB\s+PC\s+PISTA\w*/i,'PISTACHIO BUTTER'],[/\bBRTH\s+CHK\b|\bBROTH\s+CHICKEN\b/i,'CHICKEN BROTH'],[/\bBRTH\s+BF\b|\bBROTH\s+BEEF\b/i,'BEEF BROTH'],[/\bBRTH\s+VEG\b/i,'VEGETABLE BROTH'],[/\bSN\s+CRACKR\b/i,'CRACKERS']];
+/* produce printed noun first ("GRAPE RED SDL") reads better as "Red Seedless Grapes" */
+const PRODUCE_NOUN={GRAPE:'Grapes',GRAPES:'Grapes',APPLE:'Apples',APPLES:'Apples',PEPPER:'Peppers',PEPPERS:'Peppers',ONION:'Onions',ONIONS:'Onions',POTATO:'Potatoes',POTATOES:'Potatoes',PEAR:'Pears',PEARS:'Pears'};
+const PRODUCE_ADJ=new Set(['RED','GREEN','YELLOW','ORANGE','WHITE','BLACK','SWEET','SEEDLESS','GALA','FUJI','AMBROSIA','HONEYCRISP','MCINTOSH','BOSC','BARTLETT','RUSSET','BABY','MINI','ORGANIC']);
 function prettyName(r){
   if(r.nice)return r.nice;
   const low=r.ocr!=null&&r.ocr<0.68;
-  let t=String(r.label||'').replace(/\b\d{5,}\b/g,' ').replace(/([A-Za-z])\.(?=[A-Za-z0-9])/g,'$1 ').replace(/%(?=[A-Za-z])/g,'% ').replace(/[^A-Za-zÀ-ÿ0-9%.'\/ -]/g,' ');
+  let t=String(r.label||'');
+  // word pairs a till abbreviates back to front
+  for(const [re,to] of NAME_PHRASES)t=t.replace(re,to);
+  // tax and price codes printed after the name ("MRJ", "HRJ", "GST") are not part of it
+  {const w=t.trim().split(/\s+/);while(w.length>1&&/^[B-DF-HJ-NP-TV-Z]{1,4}$/.test(w[w.length-1])&&!ABBR[w[w.length-1]])w.pop();t=w.join(' ')}
+  t=t.replace(/\b\d{5,}\b/g,' ').replace(/([A-Za-z])\.(?=[A-Za-z0-9])/g,'$1 ').replace(/%(?=[A-Za-z])/g,'% ').replace(/[^A-Za-zÀ-ÿ0-9%.'\/ -]/g,' ');
   const V=vocab(),out=[];
   t.split(/\s+/).filter(Boolean).forEach((w,i,arr)=>{
     const up=w.toUpperCase().replace(/[.']/g,'');
@@ -756,6 +771,8 @@ function prettyName(r){
       if(best&&bd<=(up.length>=7?2:1)){out.push(tc(ABBR[best]||best));return}}
     if(low||up.length<=2)return;
     out.push(tc(w))});
+  {const u=out.map(x=>x.toUpperCase());const nounAt=u.findIndex(x=>PRODUCE_NOUN[x]);
+    if(nounAt>=0&&u[nounAt+1]&&PRODUCE_ADJ.has(u[nounAt+1])){let e=nounAt+1;while(e<u.length&&PRODUCE_ADJ.has(u[e]))e++;const noun=PRODUCE_NOUN[u[nounAt]];out.splice(nounAt,e-nounAt,...out.slice(nounAt+1,e),noun)}}
   let n=out.join(' ').replace(/\s+/g,' ').trim();
   const nn=NOUN[r.key];
   if(nn&&!nn[1].test(n.toUpperCase())&&n.split(' ').length<=3)n=(n+' '+nn[0]).trim();
