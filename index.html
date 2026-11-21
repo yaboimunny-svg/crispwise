@@ -507,7 +507,7 @@ const PRICE=/(\$?\s?\d{1,3}\s?[.,'’`]\s?\d{2})\s*-?\s*[A-Z0]{0,2}\W{0,4}$/;
 const PRICE_GAP=/(?:\$|\b)(\d{1,2})\s(\d{2})\s?[A-Z0]{0,2}\W{0,4}$/;
 /* where the item list ends */
 /* things people buy at the grocery store that never go in the fridge */
-const NONFOOD=/\b(PAPER\s?TOWELS?|TOWELS?|TISSUES?|KLEENEX|BOUNTY|CHARMIN|ROYALE|CASHMERE|TOILET|BATH\s?TISSUE|NAPKINS?|DETERGENT|TIDE|GAIN|DOWNY|BOUNCE|FABRIC|BLEACH|CLOROX|LYSOL|CLEANER|CLEANING|WINDEX|WIPES?|SPONGES?|DISH\s?SOAP|DAWN|CASCADE|FINISH\s?PODS?|PODS|SOAP|BODY\s?WASH|SHAMPOO|CONDITIONER|TOOTHPASTE|COLGATE|CREST|TOOTHBRUSH|FLOSS|MOUTHWASH|DEODORANT|RAZORS?|LOTION|SUNSCREEN|DIAPERS?|PAMPERS|HUGGIES|BATTER(Y|IES)|DURACELL|ENERGIZER|FOIL|PLASTIC\s?WRAP|CLING|ZIPLOC|GARBAGE|TRASH|BIN\s?BAGS?|GLAD|CANDLES?|BULBS?|CHARGER|CABLE|HDMI|USB|GIFT\s?CARD|MAGAZINE|GREETING|SOCKS|SHIRT|PANTS|HANGERS?|ADVIL|TYLENOL|ADVIL|BAND.?AIDS?|DOG\s?FOOD|CAT\s?FOOD|LITTER|PEDIGREE|PURINA|MEOW|FLOWERS?|BOUQUET|PLANTS?|BAG\s?FEE|SHOPPING\s?BAGS?|REUSABLE\s?BAGS?|LIGHTER|MATCHES|PROPANE|CHARCOAL|MOTOR\s?OIL|WASHER\s?FLUID|LOTTO|LOTTERY)\b/i;
+const NONFOOD=/\b(PAPER\s?TOWELS?|TOWELS?|TISSUES?|KLEENEX|BOUNTY|CHARMIN|ROYALE|CASHMERE|TOILET|BATH\s?TISSUE|NAPKINS?|DETERGENT|TIDE|GAIN|DOWNY|BOUNCE|FABRIC|BLEACH|CLOROX|LYSOL|CLEANER|CLEANING|WINDEX|WIPES?|SPONGES?|DISH\s?SOAP|DAWN|CASCADE|FINISH\s?PODS?|PODS|SOAP|BODY\s?WASH|SHAMPOO|CONDITIONER|TOOTHPASTE|COLGATE|CREST|TOOTHBRUSH|FLOSS|MOUTHWASH|DEODORANT|RAZORS?|LOTION|SUNSCREEN|DIAPERS?|\bDIPR\b|\bPMPR\b|PAMPERS|HUGGIES|BABY\s?WIPES|BATTER(Y|IES)|DURACELL|ENERGIZER|FOIL|PLASTIC\s?WRAP|CLING|ZIPLOC|GARBAGE|TRASH|BIN\s?BAGS?|GLAD|CANDLES?|BULBS?|CHARGER|CABLE|HDMI|USB|GIFT\s?CARD|MAGAZINE|GREETING|SOCKS|SHIRT|PANTS|HANGERS?|ADVIL|TYLENOL|ADVIL|BAND.?AIDS?|DOG\s?FOOD|CAT\s?FOOD|LITTER|PEDIGREE|PURINA|MEOW|FLOWERS?|BOUQUET|PLANTS?|BAG\s?FEE|SHOPPING\s?BAGS?|REUSABLE\s?BAGS?|LIGHTER|MATCHES|PROPANE|CHARCOAL|MOTOR\s?OIL|WASHER\s?FLUID|LOTTO|LOTTERY)\b/i;
 /* Trained food / non-food model (naive Bayes on ~114,000 labelled receipt lines, lxe/receipt-line-items-taxonomy, MIT).
    It catches the long tail a word list can't: hoodies, doorbells, lawn fertiliser, phone cases. Loaded once, cached offline. */
 let FOODNB=null;
@@ -529,8 +529,11 @@ const QTY=/^\W*\d+\s*@\s*\$?\d|\d\s*(kg|lb|ks)\b.*@|@\s*\$?\d+[.,]\d\d\s*\/\s*(k
 /* Store abbreviations, brands and product words, checked in order before the plain dictionary (more specific first). */
 const RULES=[
  [/SOUR\s*CR|WHIP|HALF\s*&?\s*HALF|COFFEE\s*CR|(?<!ICE\s)\bCREAM\b(?!\s*CH)|\bCRM\b(?!\s*CH)|\b(10|18|35)\s?%\s*(CR|M\.?F)/i,'cream'],
- [/RICE\s*CA?KE?S?|\bRICE\s*CAK|POPCORN|PRETZEL/i,'snack'],
- [/BROTH|\bBRTH\b|\bSTOCK\b|BOUILLON|PRESERV|PRESERU|JELLY|MARMALADE|CONFIT|PEANUT\s*BUT|\bPB\b|NUTELLA|\bJAM\b|HONEY|SYRUP|DRESSING|KETCHUP|MUSTARD|\bMAYO|TOMATO\s*(SAUCE|PASTE)|PASTA\s*SAUCE|CORN\s*FLAKES|CEREAL|CHEERIOS|OATMEAL|\bOATS\b|\bRICE\b|PASTA|SPAGHETTI|PENNE|MACARONI|NOODLE|RAMEN|FLOUR|\bOIL\b|VINEGAR|CANNED|\bSOUP\b|\bSPICE|SEASONING|COFFEE|KRAFT\s*DINNER|\bKD\b/i,'pantry'],
+ [/RICE\s*CA?KE?S?|\bRICE\s*CAK|POPCORN|PRETZEL|FIBE?R\s*1|FIBER\s*ONE|GRANOLA\s*BAR/i,'snack'],
+ [/BOCCONCINI|BOURSIN|SPLENDID|PARMESAN|PARMIGIANO|\bPC\b.*\bPAR\b|MOZZ|BRIE|FETA|GOUDA/i,'cheese'],
+ [/FLD\s*GRNS|FIELD\s*GREENS|SPRING\s*MIX|MESCLUN|SALAD\s*(KIT|MIX)|GRNS\s*SLD|\bSLD\b/i,'lettuce'],
+ [/\bCHI?\b.*\b(DRUM|CRUM)|DRUMSTICK/i,'chicken'],
+[/TAGLIATELLE|FETTUCC|LINGUINE|RIGATONI|FUSILLI|\bVIN\b|VINAIGRETTE|BROTH|\bBRTH\b|\bSTOCK\b|BOUILLON|PRESERV|PRESERU|JELLY|MARMALADE|CONFIT|PEANUT\s*BUT|\bPB\b|NUTELLA|\bJAM\b|HONEY|SYRUP|DRESSING|KETCHUP|MUSTARD|\bMAYO|TOMATO\s*(SAUCE|PASTE)|PASTA\s*SAUCE|CORN\s*FLAKES|CEREAL|CHEERIOS|OATMEAL|\bOATS\b|\bRICE\b|PASTA|SPAGHETTI|PENNE|MACARONI|NOODLE|RAMEN|FLOUR|\bOIL\b|VINEGAR|CANNED|\bSOUP\b|\bSPICE|SEASONING|COFFEE|KRAFT\s*DINNER|\bKD\b/i,'pantry'],
  [/ICE\s*CR|FROZEN|\bFRZ\b|POPSICLE|FRIES\b/i,'frozen'],
  [/CREAM\s*CH|PHILADELPHIA|BABYBEL|CHEESE\s*STR|STRINGS?\s*CHEESE|COTTAGE|RICOTTA|HALLOUMI|PANEER|BLACK\s*DIAMOND|CRACKER\s*BARREL|SINGLES|SHRED|GRATED/i,'cheese'],
  [/PEANUT\s*BUT/i,'pantry'],
@@ -644,7 +647,7 @@ function parseReceipt(lines){
     items.push({nice:m&&m.name?m.name:null,raw:text+(m&&m.plu?'  [PLU '+m.plu+(code.organic?', organic':'')+']':''),label:m&&m.name?m.name:(label||'Item '+(upc||'')),key,guessKey:key,conf:c,ocr,match,flagged:c<THRESH,upc,upcVerified:!!(code&&code.verified),organic:!!(code&&code.organic),upcOnly:!m,price:money(priceTxt),discount:0,markdown:false})};
   lines.forEach(({text,conf})=>{
     // a name run into its code ("GRND0000050") gets its space back
-    const t=text.trim().replace(/([A-Za-z]{2,})(\d{5,})/g,'$1 $2');if(!t)return;
+    const t=text.trim().replace(/([A-Za-z]{2,})(\d{5,})/g,'$1 $2').replace(/(\d{5,})([A-Za-z]{2})/g,'$1 $2').replace(/([A-Za-z]{3})(G?[MHI]RJ|MAJ)\b/g,'$1 $2').replace(/(?<=[A-Za-z])0(?=[A-Za-z])|\b0(?=[A-Za-z]{3})/g,'O').replace(/[A-Za-z]{6,}/g,splitGlued);if(!t)return;
     {const d=receiptDate(t);if(d){if(!date){date=d;dateConf=conf}else if(diffDays(d,date)!==0)dateAlt=true}}
     if(ended)return;
     if(END.test(t)&&items.length){ended=true;return}
@@ -737,7 +740,7 @@ function status(it){const r=rem(it);
 const flagCls=c=>c<.6?'bad':'warn';
 const sorted=()=>S.inv.filter(i=>!i.used).sort((a,b)=>rem(a)-rem(b));
 /* Product names: the receipt's own wording, with store abbreviations spelled out. The food type is shown underneath. */
-const ABBR={PC:'PC',PO:'PC',BRWN:'Brown',BRUN:'Brown',CAK:'Cakes',CAKS:'Cakes',CRACKR:'Crackers',CRKR:'Crackers',NT2U:'Nuts to You',PISTA:'Pistachio',IMAG:'Imagine',BRTH:'Broth',CHK:'Chicken',LS:'Low Sodium',SDL:'Seedless',PURP:'Purple',PRESERV:'Preserves',PRESERU:'Preserves',PRSRV:'Preserves',VEG:'Vegetable',NN:'No Name',BLK:'Black',DEMP:"Dempster's",WWH:'Whole Wheat',WW:'Whole Wheat',GRN:'Green',PEP:'Pepper',GRD:'Ground',BF:'Beef',CHD:'Cheddar',SMK:'Smokies',OJ:'Orange Juice',PINEAP:'Pineapple',JU:'Juice',JCE:'Juice',HOMO:'Homo',MED:'Méditerranée',LG:'Large',ORG:'Organic',BNNA:'Bananas',BNN:'Bananas',CHKN:'Chicken',BRST:'Breast',BNLS:'Boneless',SKNLS:'Skinless',MLK:'Milk',YGRT:'Yogurt',YGT:'Yogurt',GRK:'Greek',SPNCH:'Spinach',BBY:'Baby',SLMN:'Salmon',FLT:'Fillet',BRD:'Bread',WHL:'Whole',WHT:'Wheat',TOM:'Tomatoes',GV:'Great Value',KS:'Kirkland Signature',LIBERTE:'Liberté',BRIOCHE:'Brioche',BUN:'Buns',BUNS:'Buns',HMBRG:'Hamburger',HMB:'Hamburger',BGR:'Burger',STRWB:'Strawberries',FRZ:'Frozen',CKD:'Cooked',SLCD:'Sliced',SHRD:'Shredded',MOZZ:'Mozzarella',PARM:'Parmesan',CRM:'Cream',BTR:'Butter',VICKIES:"Vickie's",WELCHS:"Welch's",WELCH:"Welch's",FILET:'Fillet',SLICE:'Slices',TKY:'Turkey',TRKY:'Turkey',SSG:'Sausage',POT:'Potatoes',ONI:'Onions',CUC:'Cucumber',LTTC:'Lettuce',BROC:'Broccoli',MSHRM:'Mushrooms',AVO:'Avocado',APL:'Apples',GRP:'Grapes'};
+const ABBR={NEST:'Nests',NESTS:'Nests',FREE:'Free',OATS:'Oats',FIBER:'Fiber',FIBRE:'Fibre',FLL:'Field',FLD:'Field',GRNS:'Greens',SLD:'Salad',CHI:'Chicken',CRUM:'Drumsticks',DRUM:'Drumsticks',STL:'Stella',PAR:'Parmesan',KFT:'Kraft',SIG:'Signature',RASP:'Raspberry',VIN:'Vinaigrette',DAIR:'Dairyland',CHO:'Chocolate',TAGLIATELLE:'Tagliatelle',BOCCONCINI:'Bocconcini',PC:'PC',PO:'PC',BRWN:'Brown',BRUN:'Brown',CAK:'Cakes',CAKS:'Cakes',CRACKR:'Crackers',CRKR:'Crackers',NT2U:'Nuts to You',PISTA:'Pistachio',IMAG:'Imagine',BRTH:'Broth',CHK:'Chicken',LS:'Low Sodium',SDL:'Seedless',PURP:'Purple',PRESERV:'Preserves',PRESERU:'Preserves',PRSRV:'Preserves',VEG:'Vegetable',NN:'No Name',BLK:'Black',DEMP:"Dempster's",WWH:'Whole Wheat',WW:'Whole Wheat',GRN:'Green',PEP:'Pepper',GRD:'Ground',BF:'Beef',CHD:'Cheddar',SMK:'Smokies',OJ:'Orange Juice',PINEAP:'Pineapple',JU:'Juice',JCE:'Juice',HOMO:'Homo',MED:'Méditerranée',LG:'Large',ORG:'Organic',BNNA:'Bananas',BNN:'Bananas',CHKN:'Chicken',BRST:'Breast',BNLS:'Boneless',SKNLS:'Skinless',MLK:'Milk',YGRT:'Yogurt',YGT:'Yogurt',GRK:'Greek',SPNCH:'Spinach',BBY:'Baby',SLMN:'Salmon',FLT:'Fillet',BRD:'Bread',WHL:'Whole',WHT:'Wheat',TOM:'Tomatoes',GV:'Great Value',KS:'Kirkland Signature',LIBERTE:'Liberté',BRIOCHE:'Brioche',BUN:'Buns',BUNS:'Buns',HMBRG:'Hamburger',HMB:'Hamburger',BGR:'Burger',STRWB:'Strawberries',FRZ:'Frozen',CKD:'Cooked',SLCD:'Sliced',SHRD:'Shredded',MOZZ:'Mozzarella',PARM:'Parmesan',CRM:'Cream',BTR:'Butter',VICKIES:"Vickie's",WELCHS:"Welch's",WELCH:"Welch's",FILET:'Fillet',SLICE:'Slices',TKY:'Turkey',TRKY:'Turkey',SSG:'Sausage',POT:'Potatoes',ONI:'Onions',CUC:'Cucumber',LTTC:'Lettuce',BROC:'Broccoli',MSHRM:'Mushrooms',AVO:'Avocado',APL:'Apples',GRP:'Grapes'};
 const WORDS='GROUND LEAN MEDIUM EXTRA FRESH FROZEN ORGANIC WHOLE WHEAT WHITE BROWN LARGE SMALL BABY GREEN RED YELLOW SWEET SLICED SLICES SMOKED SMOKIES BONELESS SKINLESS BREAST THIGHS FILLET STEAK LOAF BUNS BURGER HOT DOG DOGS CHEDDAR MARBLE CREAM SOUR JUICE ORANGE APPLE PINEAPPLE GRAPE LEMON LIME MILK HOMO SKIM BUTTER YOGURT GREEK VANILLA PLAIN STRAWBERRY STRAWBERRIES BLUEBERRY BLUEBERRIES BANANA BANANAS TOMATO TOMATOES POTATO POTATOES ONION ONIONS PEPPER PEPPERS LETTUCE ROMAINE SPINACH CARROT CARROTS CUCUMBER BROCCOLI MUSHROOM MUSHROOMS CABBAGE GRAPES PEAR PEARS APPLES AVOCADO AVOCADOS BREAD BAGELS TORTILLA TORTILLAS WRAPS PITA RICE PASTA SUGAR FLOUR SALT CHIPS COOKIES CRACKERS SNACKS CHICKEN BEEF PORK LAMB TURKEY SAUSAGE SAUSAGES BACON HAM SALMON TUNA SHRIMP EGGS CHEESE PIZZA WATER SODA POP TEA ICED COFFEE PACK BRIOCHE HAMBURGER MOZZARELLA PARMESAN FETA DELI WINGS DRUMSTICKS ROAST MINCED CHUNKS FRUIT SNACK CEREAL OATS GRANOLA HONEY JAM PEANUT CHOCOLATE FREE RUN RANGE NATURAL CLASSIC ORIGINAL DIET ZERO LIGHT FAMILY SIZE FAIRLIFE NATREL LACTANTIA NEILSON BEATRICE DEMPSTERS WONDER CHRISTIES OASIS TROPICANA SIMPLY NESTEA LIBERTE ACTIVIA OIKOS IOGO DANONE ASTRO KRAFT SCHNEIDERS BURNBRAE GRAY RIDGE KIRKLAND SIGNATURE GREAT VALUE COMPLIMENTS SELECTION SAPUTO ARMSTRONG OLYMPIC SILK ALMOND OAT LAYS DORITOS PRINGLES OREO RITZ GOLDFISH HEINZ CAMPBELLS KELLOGGS CHEERIOS QUAKER DOLE CHIQUITA SUNKIST ZESPRI PRESIDENTS CHOICE KARTAGO VERKA PURFILTRE MAPLE LEAF CRACKER BARREL PHILADELPHIA BABYBEL TROPICANA MINUTE MAID COKE PEPSI SPRITE GATORADE'.split(' ');
 let VOCAB=null;
 function vocab(){if(VOCAB)return VOCAB;VOCAB=new Set(WORDS);FOOD_KEYS.forEach(k=>FOOD[k].kw.forEach(w=>VOCAB.add(w)));Object.keys(ABBR).forEach(k=>VOCAB.add(k));Object.values(ABBR).forEach(v=>v.toUpperCase().replace(/[^A-ZÉ' ]/g,'').split(' ').forEach(w=>w&&VOCAB.add(w)));return VOCAB}
@@ -750,6 +753,11 @@ const NAME_PHRASES=[[/\bPB\s+PC\s+PISTA\w*/i,'PISTACHIO BUTTER'],[/\bBRTH\s+CHK\
 /* produce printed noun first ("GRAPE RED SDL") reads better as "Red Seedless Grapes" */
 const PRODUCE_NOUN={GRAPE:'Grapes',GRAPES:'Grapes',APPLE:'Apples',APPLES:'Apples',PEPPER:'Peppers',PEPPERS:'Peppers',ONION:'Onions',ONIONS:'Onions',POTATO:'Potatoes',POTATOES:'Potatoes',PEAR:'Pears',PEARS:'Pears'};
 const PRODUCE_ADJ=new Set(['RED','GREEN','YELLOW','ORANGE','WHITE','BLACK','SWEET','SEEDLESS','GALA','FUJI','AMBROSIA','HONEYCRISP','MCINTOSH','BOSC','BARTLETT','RUSSET','BABY','MINI','ORGANIC']);
+/* words the reader ran together ("TAGLIATELLENEST", "OATSCHO"): split only when every piece is a word or abbreviation the app knows */
+function splitGlued(w){const V=vocab(),U=w.toUpperCase();if(V.has(U)||U.length>24)return w;
+  const n=U.length,best=new Array(n+1).fill(null);best[0]=[];
+  for(let i=0;i<n;i++){if(!best[i])continue;for(let j=i+2;j<=n;j++){const p=U.slice(i,j);if((V.has(p)||ABBR[p])&&(!best[j]||best[j].length>best[i].length+1))best[j]=[...best[i],p]}}
+  return best[n]&&best[n].length<=4&&best[n].every(p=>p.length>=3||ABBR[p])?best[n].join(' '):w}
 function prettyName(r){
   if(r.nice)return r.nice;
   const low=r.ocr!=null&&r.ocr<0.68;
@@ -757,7 +765,7 @@ function prettyName(r){
   // word pairs a till abbreviates back to front
   for(const [re,to] of NAME_PHRASES)t=t.replace(re,to);
   // tax and price codes printed after the name ("MRJ", "HRJ", "GST") are not part of it
-  {const w=t.trim().split(/\s+/);while(w.length>1&&/^[B-DF-HJ-NP-TV-Z]{1,4}$/.test(w[w.length-1])&&!ABBR[w[w.length-1]])w.pop();t=w.join(' ')}
+  {const w=t.trim().split(/\s+/);while(w.length>1&&(/^[B-DF-HJ-NP-TV-Z]{1,4}$/.test(w[w.length-1])||/^([A-Z]{0,3}R[JQO0]|MA[JI])$/.test(w[w.length-1]))&&!ABBR[w[w.length-1]])w.pop();t=w.join(' ')}
   t=t.replace(/\b\d{5,}\b/g,' ').replace(/([A-Za-z])\.(?=[A-Za-z0-9])/g,'$1 ').replace(/%(?=[A-Za-z])/g,'% ').replace(/[^A-Za-zÀ-ÿ0-9%.'\/ -]/g,' ');
   const V=vocab(),out=[];
   t.split(/\s+/).filter(Boolean).forEach((w,i,arr)=>{
@@ -1534,15 +1542,34 @@ function camShot(){
   stopCam();const img=new Image();img.onload=()=>usePhoto(img);img.src=c.toDataURL('image/jpeg',0.95)}
 /* show the photo with the detected receipt outlined, like a document scanner */
 function usePhoto(img){
-  S.img=img;S.photo=true;S.sheet=false;S.source='photo';if(S.screen!=='scan'){S.screen='scan'}S.ocrErr=null;ensureEngine();
+  S.img=img;S.photo=true;S.sheet=false;S.source='photo';S.cropBox=null;if(S.screen!=='scan'){S.screen='scan'}S.ocrErr=null;
+  let quick=null;try{quick=prepReceipt(img,{boxOnly:true})}catch(e){}
+  drawPhotoBox(img,quick,false);render();
+  // the reader's own text finder knows where the print is, even on a dark seat or with glare: outline that instead
+  ensureEngine().then(async()=>{if(S.engine!=='paddle'||S.img!==img)return;
+    try{const b=await textBox(img);if(S.img!==img||!b)return;S.cropBox=b;drawPhotoBox(img,b,true);if(S.screen==='scan')render()}catch(e){}})}
+function drawPhotoBox(img,b,sure){
   const sc=Math.min(1,1000/Math.max(img.naturalWidth||img.width,img.naturalHeight||img.height));
   const W=Math.round((img.naturalWidth||img.width)*sc),H=Math.round((img.naturalHeight||img.height)*sc);
   S.canvas.width=W;S.canvas.height=H;const g=S.canvas.getContext('2d');g.drawImage(img,0,0,W,H);
-  try{const b=prepReceipt(img,{boxOnly:true});const x=b.x*sc,y=b.y*sc,w=b.w*sc,h=b.h*sc;
-    g.fillStyle='rgba(0,0,0,.45)';g.fillRect(0,0,W,y);g.fillRect(0,y+h,W,H-y-h);g.fillRect(0,y,x,h);g.fillRect(x+w,y,W-x-w,h);
-    g.strokeStyle='#3ccf6e';g.lineWidth=Math.max(3,W/180);g.strokeRect(x,y,w,h);
-    g.fillStyle='#3ccf6e';const r=Math.max(6,W/90);[[x,y],[x+w,y],[x,y+h],[x+w,y+h]].forEach(([a,c])=>{g.beginPath();g.arc(a,c,r,0,7);g.fill()})}catch(e){}
-  render()}
+  if(!b)return;const x=b.x*sc,y=b.y*sc,w=b.w*sc,h=b.h*sc;
+  g.fillStyle='rgba(0,0,0,.45)';g.fillRect(0,0,W,y);g.fillRect(0,y+h,W,H-y-h);g.fillRect(0,y,x,h);g.fillRect(x+w,y,W-x-w,h);
+  g.strokeStyle='#3ccf6e';g.lineWidth=Math.max(3,W/180);if(!sure)g.setLineDash([W/60,W/90]);g.strokeRect(x,y,w,h);g.setLineDash([]);
+  if(sure){g.fillStyle='#3ccf6e';const r=Math.max(6,W/90);[[x,y],[x+w,y],[x,y+h],[x+w,y+h]].forEach(([a,c])=>{g.beginPath();g.arc(a,c,r,0,7);g.fill()})}}
+/* where the printed text is: lines of text found by the reader, keeping the column they share (a car's badge or a sign beside the receipt is left out) */
+async function textBox(img){
+  const W0=img.naturalWidth||img.width,H0=img.naturalHeight||img.height,k=Math.min(1,1280/Math.max(W0,H0));
+  const c=document.createElement('canvas');c.width=Math.round(W0*k);c.height=Math.round(H0*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+  const bx=(await ppDetect(c)).filter(b=>b.w>b.h*1.5&&b.score>.6).map(b=>{const co=Math.abs(Math.cos(b.th)),si=Math.abs(Math.sin(b.th)),hw=(b.w*co+b.h*si)/2,hh=(b.w*si+b.h*co)/2;return{l:b.cx-hw,r:b.cx+hw,t:b.cy-hh,b:b.cy+hh,cx:b.cx,w:b.w}});
+  if(bx.length<4)return null;
+  const q=(a,p)=>{const s=[...a].sort((x,y)=>x-y);return s[Math.min(s.length-1,Math.max(0,Math.round(p*(s.length-1))))]};
+  const midL=q(bx.map(b=>b.l),.5),midR=q(bx.map(b=>b.r),.5),span=Math.max(midR-midL,q(bx.map(b=>b.w),.9));
+  const keep=bx.filter(b=>b.r>midL-span*.6&&b.l<midR+span*.6);
+  if(keep.length<4)return null;
+  let l=Math.min(...keep.map(b=>b.l)),r=Math.max(...keep.map(b=>b.r)),t=Math.min(...keep.map(b=>b.t)),bt=Math.max(...keep.map(b=>b.b));
+  const m=Math.max(r-l,bt-t)*.03;l=Math.max(0,l-m);t=Math.max(0,t-m);r=Math.min(c.width,r+m);bt=Math.min(c.height,bt+m);
+  return{x:l/k,y:t/k,w:(r-l)/k,h:(bt-t)/k}}
+function cropTo(img,b){const c=document.createElement('canvas');c.width=Math.round(b.w);c.height=Math.round(b.h);c.getContext('2d').drawImage(img,b.x,b.y,b.w,b.h,0,0,c.width,c.height);return c}
 function onPhoto(e){
   const f=e.target.files&&e.target.files[0];if(!f)return;
   const img=new Image();const u=URL.createObjectURL(f);
@@ -1668,7 +1695,7 @@ function ppLines(boxes,texts){
   prices.sort((p,q)=>p.ry-q.ry);
   const R=rows.length,Pn=prices.length,SKIP_ROW=.45,SKIP_PRICE=2.2,INF=1e9;
   // rows with hardly any letters (a lone "2", a line of stars) rarely own a price
-  const at=(r,p)=>{const e=r.end,pred=e.ry+e.slope*(p.rx-e.rx),letters=(r.parts.map(q=>q.text).join('').match(/[A-Za-z]/g)||[]).length;return Math.abs(p.ry-pred)/Math.min(r.h,p.h)+(letters<3?1.2:0)};
+  const at=(r,p)=>{const e=r.end,pred=e.ry+e.slope*(p.rx-e.rx),letters=(r.parts.map(q=>q.text).join('').match(/[A-Za-z]/g)||[]).length,head=/^\W*\d{1,3}\s*-\s*[A-Z][A-Z &]+$/i.test(r.parts.map(q=>q.text).join(' ').trim());return Math.abs(p.ry-pred)/Math.min(r.h,p.h)+(letters<3?1.2:0)+(head?3:0)};
   const D=[...Array(R+1)].map(()=>new Float64Array(Pn+1).fill(INF)),B=[...Array(R+1)].map(()=>new Int8Array(Pn+1));D[0][0]=0;
   for(let r=0;r<=R;r++)for(let p=0;p<=Pn;p++){const d=D[r][p];if(d>=INF)continue;
     if(r<R&&d+SKIP_ROW<D[r+1][p]){D[r+1][p]=d+SKIP_ROW;B[r+1][p]=1}
@@ -1813,7 +1840,7 @@ function findSubtotal(t){const L=String(t||'').split('\n');
   for(const l of L){if(/SUB\s?-?TOTAL/i.test(l)){const m=l.match(/(\d{1,5})[.,](\d{2})(?!\d)/);if(m)return +(m[1]+'.'+m[2])}}
   for(const l of L){if(/\bTOTAL\b/i.test(l)&&!/TAX|SAV|NUMBER|ITEMS|PURCHASE|BOXES|QTY/i.test(l)){const m=l.match(/(\d{1,5})[.,](\d{2})(?!\d)/);if(m)return +(m[1]+'.'+m[2])}}
   return null}
-function makeThumb(){try{if(!S.img)return null;const w=S.img.naturalWidth||S.img.width,h=S.img.naturalHeight||S.img.height;let b={x:0,y:0,w,h};try{b=prepReceipt(S.img,{boxOnly:true})}catch(e){}
+function makeThumb(){try{if(!S.img)return null;const w=S.img.naturalWidth||S.img.width,h=S.img.naturalHeight||S.img.height;let b={x:0,y:0,w,h};try{b=S.cropBox||prepReceipt(S.img,{boxOnly:true})}catch(e){}
   const k=Math.min(1,320/b.w);const c=document.createElement('canvas');c.width=Math.round(b.w*k);c.height=Math.round(Math.min(b.h,b.w*4)*k);c.getContext('2d').drawImage(S.img,b.x,b.y,b.w,c.height/k,0,0,c.width,c.height);return c.toDataURL('image/jpeg',0.68)}catch(e){return null}}
 /* ---------- saved on this device (per browser) ---------- */
 const STORE_KEY='crispwise-data-v1';
