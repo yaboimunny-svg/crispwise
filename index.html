@@ -508,6 +508,14 @@ const PRICE_GAP=/(?:\$|\b)(\d{1,2})\s(\d{2})\s?[A-Z0]{0,2}\W{0,4}$/;
 /* where the item list ends */
 /* things people buy at the grocery store that never go in the fridge */
 const NONFOOD=/\b(PAPER\s?TOWELS?|TOWELS?|TISSUES?|KLEENEX|BOUNTY|CHARMIN|ROYALE|CASHMERE|TOILET|BATH\s?TISSUE|NAPKINS?|DETERGENT|TIDE|GAIN|DOWNY|BOUNCE|FABRIC|BLEACH|CLOROX|LYSOL|CLEANER|CLEANING|WINDEX|WIPES?|SPONGES?|DISH\s?SOAP|DAWN|CASCADE|FINISH\s?PODS?|PODS|SOAP|BODY\s?WASH|SHAMPOO|CONDITIONER|TOOTHPASTE|COLGATE|CREST|TOOTHBRUSH|FLOSS|MOUTHWASH|DEODORANT|RAZORS?|LOTION|SUNSCREEN|DIAPERS?|PAMPERS|HUGGIES|BATTER(Y|IES)|DURACELL|ENERGIZER|FOIL|PLASTIC\s?WRAP|CLING|ZIPLOC|GARBAGE|TRASH|BIN\s?BAGS?|GLAD|CANDLES?|BULBS?|CHARGER|CABLE|HDMI|USB|GIFT\s?CARD|MAGAZINE|GREETING|SOCKS|SHIRT|PANTS|HANGERS?|ADVIL|TYLENOL|ADVIL|BAND.?AIDS?|DOG\s?FOOD|CAT\s?FOOD|LITTER|PEDIGREE|PURINA|MEOW|FLOWERS?|BOUQUET|PLANTS?|BAG\s?FEE|SHOPPING\s?BAGS?|REUSABLE\s?BAGS?|LIGHTER|MATCHES|PROPANE|CHARCOAL|MOTOR\s?OIL|WASHER\s?FLUID|LOTTO|LOTTERY)\b/i;
+/* Trained food / non-food model (naive Bayes on ~114,000 labelled receipt lines, lxe/receipt-line-items-taxonomy, MIT).
+   It catches the long tail a word list can't: hoodies, doorbells, lawn fertiliser, phone cases. Loaded once, cached offline. */
+let FOODNB=null;
+function loadFoodModel(){if(FOODNB||loadFoodModel.p)return loadFoodModel.p;
+  loadFoodModel.p=fetch('ocr/food-nb.json').then(r=>r.ok?r.json():null).then(m=>{if(m&&m.w)FOODNB=m}).catch(()=>{});return loadFoodModel.p}
+function nbFeatures(label){const f=[];for(const t of String(label).toLowerCase().replace(/[^a-z0-9&% ]+/g,' ').split(/\s+/)){if(t.length<2||/^\d+$/.test(t))continue;
+  f.push('w:'+t);if(t.length>4)f.push('p:'+t.slice(0,4));if(/\d/.test(t))f.push('u:'+t.replace(/\d+/g,'#'))}return f}
+function foodProb(label,wordsOnly){if(!FOODNB)return null;let s=FOODNB.prior;for(const k of nbFeatures(label)){if(wordsOnly&&k[0]==='u')continue;const w=FOODNB.w[k];if(w!=null)s+=w}return 1/(1+Math.exp(-s/FOODNB.scale))}
 /* the same words when the reader runs them together ("TOTALNMBER OFITEMS SOD") */
 const SKIP_GLUED=/^\W*(SUB)?TOTAL[A-Z]|NU?M?BER\s*OF\s*ITEMS|ITEMS\s*SO\w{0,2}D|CHANGE\s*DUE|AMOUNT\s*DUE|(VISA|MASTERCARD|DEBIT)\s*TEND/i;
 const END=/SUB\s?-?\s?TOTAL|\*{2,}\s*TOTAL|^\W*TOTAL\W*\$?\s*\d|BALANCE\s+DUE|\bTOTAL\s+\$\s?\d/i;
@@ -568,7 +576,8 @@ function receiptDate(text){
   m=text.match(/\b([A-Za-z]{3})[a-z]*\.?\s+(\d{1,2}),?\s+(20\d\d)\b/);
   if(m){const mo=MON.findIndex(x=>x.toLowerCase()===m[1].toLowerCase());if(mo>=0)return valid(+m[3],mo+1,+m[2])}
   m=text.match(/\b(\d{1,2})[-\/.](\d{1,2})[-\/.](20\d\d|\d\d\b)/);
-  if(m){const y=m[3].length===2?2000+ +m[3]:+m[3];return valid(y,+m[1],+m[2])}
+  // month first (11/14/2026) unless that can't be a date, then day first (15/01/2026), which many Canadian tills print
+  if(m){const y=m[3].length===2?2000+ +m[3]:+m[3];return valid(y,+m[1],+m[2])||valid(y,+m[2],+m[1])}
   return null}
 function valid(y,mo,d){const x=new Date(y,mo-1,d);return x.getFullYear()===y&&x.getMonth()===mo-1&&x.getDate()===d?x:null}
 const title=s=>s.toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());
@@ -626,6 +635,9 @@ function parseReceipt(lines){
       const words=label.split(' ').filter(w=>/^[A-Za-z']{3,}$/.test(w));
       if(!(words.length&&ocr>=0.45)&&!upc)return}
     if(NONFOOD.test(label)&&(!m||m.score<0.9)){nonFood.push(label);return}
+    // not a food we know for sure, and the trained model says it probably isn't food either
+    // the model can overrule a loose name match too, but only when it is close to certain ("EG LAWN FERT" is not eggs)
+    {const p=foodProb(label),pw=foodProb(label,true);if(p!=null&&((!m||m.score<0.9)&&p<0.35||(!m||m.score<0.98)&&pw<0.03)){nonFood.push(label);return}}
     const key=m?m.key:'other',match=m?m.score:0.3;
     const c=0.55*match+0.45*ocr;
     items.push({nice:m&&m.name?m.name:null,raw:text+(m&&m.plu?'  [PLU '+m.plu+(code.organic?', organic':'')+']':''),label:m&&m.name?m.name:(label||'Item '+(upc||'')),key,guessKey:key,conf:c,ocr,match,flagged:c<THRESH,upc,upcVerified:!!(code&&code.verified),organic:!!(code&&code.organic),upcOnly:!m,price:money(priceTxt),discount:0,markdown:false})};
@@ -1664,7 +1676,7 @@ async function recognizePasses(isPhoto,forceTess){
   if(S.engine==='paddle'&&!forceTess){
     const lines=await withTimeout(ppRead(isPhoto?S.img:S.canvas,p=>setBar(.05+.9*p,p<.25?'Finding the lines of text…':'Reading line by line…')),180000,'Reading the receipt took too long. Try a smaller or sharper photo.');
     const text='--- PaddleOCR ---\n'+fmtLines(lines),parsed=parseReceipt(lines);
-    const sub=findTotal(lines.map(l=>l.text).join('\n')),sum=parsed.items.reduce((a,i)=>a+(i.price||0)-(i.discount||0),0);
+    const sub=findSubtotal(lines.map(l=>l.text).join('\n')),sum=parsed.items.reduce((a,i)=>a+(i.price||0)-(i.discount||0),0);
     if(!sub||Math.abs(sum-sub)<=Math.max(.06,sub*.01))return{parsed,text};
     // the items don't add up: also try the older reader and keep whichever comes closer to the receipt's own total
     try{setBar(.9,'Double-checking against the receipt total…');
@@ -1744,6 +1756,7 @@ async function startScan(forceSim){
     await ensureEngine();
     if(S.ocr.state!=='ready'){S.screen='scan';S.run=null;S.ocrErr=S.ocr.msg;render();return}
     S.run.engine=S.engine||'tesseract';
+    await withTimeout(loadFoodModel(),8000,'').catch(()=>{});
     try{
       const r=await recognizePasses(true);pre=r.parsed;S.ocrText=r.text}
     catch(e){S.screen='scan';S.run=null;S.ocr={state:'failed',msg:'OCR failed: '+(e&&e.message||e)};S.ocrErr=S.ocr.msg;render();return}
@@ -1773,8 +1786,16 @@ const PRODUCE=new Set(['fruit','veg','banana','apple','pear','orange','tangerine
 function flagPerishables(){S.review.forEach(r=>{if(PRODUCE.has(r.key)||/\bORG(ANIC)?\b/i.test(r.raw)){r.flagged=true;r.dateFlag=true}})}
 const STORES=[[/COSTCO|C0STCO|WHOLESALE/i,'Costco'],[/WAL\s?MART/i,'Walmart'],[/DOMINO/i,"Domino's"],[/LOBLAW/i,'Loblaws'],[/NO\s?FRILLS/i,'No Frills'],[/\bMETRO\b/i,'Metro'],[/SOBEYS/i,'Sobeys'],[/FOOD\s?BASICS/i,'Food Basics'],[/FRESHCO/i,'FreshCo'],[/T\s?&\s?T/i,'T&T'],[/SHOPPERS/i,'Shoppers'],[/ZEHRS/i,'Zehrs'],[/FORTINOS/i,'Fortinos'],[/GIANT\s?TIGER/i,'Giant Tiger'],[/FARM\s?BOY/i,'Farm Boy'],[/REAL\s?CANADIAN/i,'Real Canadian Superstore'],[/LONGO/i,"Longo's"],[/WHOLE\s?FOODS/i,'Whole Foods'],[/SAFEWAY/i,'Safeway'],[/ADONIS/i,'Adonis']];
 function detectStore(t){for(const [re,n] of STORES)if(re.test(t||''))return n;return null}
-function findTotal(t){const L=String(t||'').split('\n');const get=re=>{for(const l of L){if(re.test(l)&&!/TAX|SAV|NUMBER|ITEMS|PURCHASE|BOXES/i.test(l)){const m=l.match(/(\d{1,4})[.,](\d{2})(?!\d)/);if(m)return +(m[1]+'.'+m[2])}}return null};
-  return get(/\bTOTAL\b/i)&&!/SUB/i.test('')?(get(/(^|[^B])\bTOTAL\b/i)||get(/SUB\s?TOTAL/i)):get(/SUB\s?TOTAL/i)}
+/* grand total: the largest amount on a TOTAL line that isn't a count, a saving or a before-tax figure */
+function findTotal(t){const L=String(t||'').split('\n');let best=null;
+  for(const l of L){if(!/TOTAL/i.test(l)||/SUB\s?-?TOTAL|QTY|QUANTITY|NUMBER|ITEMS?\b|SAV|DISC|EXCL|BEFORE|ROUND|TAX\s*TOTAL|POINTS?|PURCHASE|BOXES/i.test(l))continue;
+    const ms=[...l.matchAll(/(\d{1,5})[.,](\d{2})(?!\d)/g)];if(!ms.length)continue;const v=+(ms[ms.length-1][1]+'.'+ms[ms.length-1][2]);if(best==null||v>best)best=v}
+  return best!=null?best:findSubtotal(t)}
+/* what the items should add up to: SUBTOTAL when the till prints one, otherwise the total */
+function findSubtotal(t){const L=String(t||'').split('\n');
+  for(const l of L){if(/SUB\s?-?TOTAL/i.test(l)){const m=l.match(/(\d{1,5})[.,](\d{2})(?!\d)/);if(m)return +(m[1]+'.'+m[2])}}
+  for(const l of L){if(/\bTOTAL\b/i.test(l)&&!/TAX|SAV|NUMBER|ITEMS|PURCHASE|BOXES|QTY/i.test(l)){const m=l.match(/(\d{1,5})[.,](\d{2})(?!\d)/);if(m)return +(m[1]+'.'+m[2])}}
+  return null}
 function makeThumb(){try{if(!S.img)return null;const w=S.img.naturalWidth||S.img.width,h=S.img.naturalHeight||S.img.height;let b={x:0,y:0,w,h};try{b=prepReceipt(S.img,{boxOnly:true})}catch(e){}
   const k=Math.min(1,320/b.w);const c=document.createElement('canvas');c.width=Math.round(b.w*k);c.height=Math.round(Math.min(b.h,b.w*4)*k);c.getContext('2d').drawImage(S.img,b.x,b.y,b.w,c.height/k,0,0,c.width,c.height);return c.toDataURL('image/jpeg',0.68)}catch(e){return null}}
 /* ---------- saved on this device (per browser) ---------- */
@@ -1910,8 +1931,8 @@ document.addEventListener('input',e=>{
   if(el.id==='fq'){S.q=el.value;const pos=el.selectionStart;render();const n=document.getElementById('fq');if(n){n.focus();try{n.setSelectionRange(pos,pos)}catch(e){}}}
   if(el.dataset&&el.dataset.note!==undefined){S.runs[+el.dataset.note].notes=el.value;const o=document.getElementById('logout');if(o)o.value=logText()}
 });
-window.__proto={magnetPayload,magnetUrl,recipeMatch,RECIPES,prettyName,mergeParsed,S,drawReceipt,parseReceipt,prepReceipt,receiptDate,matchFood,TODAY,iso};
-restore();applyTheme();try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme)}catch(e){}readJoin();if(!S.onboarded&&!S.joinData)S.onb=0;render();
+window.__proto={foodProb,loadFoodModel,findTotal,findSubtotal,magnetPayload,magnetUrl,recipeMatch,RECIPES,prettyName,mergeParsed,S,drawReceipt,parseReceipt,prepReceipt,receiptDate,matchFood,TODAY,iso};
+restore();applyTheme();loadFoodModel();try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme)}catch(e){}readJoin();if(!S.onboarded&&!S.joinData)S.onb=0;render();
 if('serviceWorker' in navigator&&/github\.io$|netlify\.app$|^localhost/.test(location.hostname)){navigator.serviceWorker.register('sw.js').catch(()=>{})}
 notifyCheck(false);document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){notifyCheck(false);loadNews(false)}});
 /* fetch fresh recalls and news as soon as the phone is back online (e.g. joins Wi-Fi), and once at start-up */
