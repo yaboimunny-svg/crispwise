@@ -496,7 +496,7 @@ const PRICE=/(\$?\s?\d{1,3}\s?[.,'’`]\s?\d{2})\s*-?\s*[A-Z0]{0,2}\W{0,4}$/;
 const PRICE_GAP=/(?:\$|\b)(\d{1,2})\s(\d{2})\s?[A-Z0]{0,2}\W{0,4}$/;
 /* where the item list ends */
 /* things people buy at the grocery store that never go in the fridge */
-const NONFOOD=/\b(FAB\s?SHT|FABSHT|DRYER\s?SHEETS?|LAUND\w*|DETERG\w*|BLADES?|SENSOR\s?BLADE|PAPER\s?TOWELS?|TOWELS?|TISSUES?|KLEENEX|BOUNTY|CHARMIN|ROYALE|CASHMERE|TOILET|BATH\s?TISSUE|NAPKINS?|DETERGENT|TIDE|GAIN|DOWNY|BOUNCE|FABRIC|BLEACH|CLOROX|LYSOL|CLEANER|CLEANING|WINDEX|WIPES?|SPONGES?|DISH\s?SOAP|DAWN|CASCADE|FINISH\s?PODS?|PODS|SOAP|BODY\s?WASH|SHAMPOO|CONDITIONER|TOOTHPASTE|COLGATE|CREST|TOOTHBRUSH|FLOSS|MOUTHWASH|DEODORANT|RAZORS?|LOTION|SUNSCREEN|DIAPERS?|\bDIPR\b|\bPMPR\b|PAMPERS|HUGGIES|BABY\s?WIPES|BATTER(Y|IES)|DURACELL|ENERGIZER|FOIL|PLASTIC\s?WRAP|CLING|ZIPLOC|GARBAGE|TRASH|BIN\s?BAGS?|GLAD|CANDLES?|BULBS?|CHARGER|CABLE|HDMI|USB|GIFT\s?CARD|MAGAZINE|GREETING|SOCKS|SHIRT|PANTS|HANGERS?|ADVIL|TYLENOL|ADVIL|BAND.?AIDS?|DOG\s?FOOD|CAT\s?FOOD|LITTER|PEDIGREE|PURINA|MEOW|FLOWERS?|BOUQUET|PLANTS?|BAG\s?FEE|SHOPPING\s?BAGS?|REUSABLE\s?BAGS?|LIGHTER|MATCHES|PROPANE|CHARCOAL|MOTOR\s?OIL|WASHER\s?FLUID|LOTTO|LOTTERY)\b/i;
+const NONFOOD=/\b(PULLOVER|LEGGINGS?|SOCKS|JEANS|HENLEY|T-?SHIRT|TEE ?SHIRT|SHORTS?|TANK ?TOP|\d{1,2}W-?\d{2}|MOTOR OIL|PEBBLES?|TOPSOIL|SEWING|ROUTER|WIFI|PARACETAMOL|IBUPROFEN|ACETAMINOPHEN|TYLENOL|ADVIL|NAPPIES|DIAPERS?|BABY ?W?IPE?S?|MUFFIN TRAY|BAKEWARE|GIFT ?CARD|LOTTERY|LOTTO|BAG FEE|BAG CHARGE|BOTTLE DEP\w*|DEPOSIT|ENVELOPES?|PAPER ?PLATES?|CUTLERY|CANDLES?|BATTERY|BATTERIES|LIGHT ?BULBS?|SHAMPOO|CONDITIONER|DEODORANT|TOOTHPASTE|FLOSS|RAZOR|SHAVE|LOTION|VITAMINS?|FAB\s?SHT|FABSHT|DRYER\s?SHEETS?|LAUND\w*|DETERG\w*|BLADES?|SENSOR\s?BLADE|PAPER\s?TOWELS?|TOWELS?|TISSUES?|KLEENEX|BOUNTY|CHARMIN|ROYALE|CASHMERE|TOILET|BATH\s?TISSUE|NAPKINS?|DETERGENT|TIDE|GAIN|DOWNY|BOUNCE|FABRIC|BLEACH|CLOROX|LYSOL|CLEANER|CLEANING|WINDEX|WIPES?|SPONGES?|DISH\s?SOAP|DAWN|CASCADE|FINISH\s?PODS?|PODS|SOAP|BODY\s?WASH|SHAMPOO|CONDITIONER|TOOTHPASTE|COLGATE|CREST|TOOTHBRUSH|FLOSS|MOUTHWASH|DEODORANT|RAZORS?|LOTION|SUNSCREEN|DIAPERS?|\bDIPR\b|\bPMPR\b|PAMPERS|HUGGIES|BABY\s?WIPES|BATTER(Y|IES)|DURACELL|ENERGIZER|FOIL|PLASTIC\s?WRAP|CLING|ZIPLOC|GARBAGE|TRASH|BIN\s?BAGS?|GLAD|CANDLES?|BULBS?|CHARGER|CABLE|HDMI|USB|GIFT\s?CARD|MAGAZINE|GREETING|SOCKS|SHIRT|PANTS|HANGERS?|ADVIL|TYLENOL|ADVIL|BAND.?AIDS?|DOG\s?FOOD|CAT\s?FOOD|LITTER|PEDIGREE|PURINA|MEOW|FLOWERS?|BOUQUET|PLANTS?|BAG\s?FEE|SHOPPING\s?BAGS?|REUSABLE\s?BAGS?|LIGHTER|MATCHES|PROPANE|CHARCOAL|MOTOR\s?OIL|WASHER\s?FLUID|LOTTO|LOTTERY)\b/i;
 /* Trained food / non-food model (naive Bayes on ~114,000 labelled receipt lines, lxe/receipt-line-items-taxonomy, MIT).
    It catches the long tail a word list can't: hoodies, doorbells, lawn fertiliser, phone cases. Loaded once, cached offline. */
 let FOODNB=null;
@@ -564,15 +564,26 @@ function classify(label){
   for(const [re,k] of RULES)if(re.test(t))return{key:k,score:0.92};
   return matchFood(t)}
 const money=s=>{const m=String(s).replace(/\s/g,'').match(/(\d{1,3})[.,'’`](\d{2})/);return m?+(m[1]+'.'+m[2]):null};
-function receiptDate(text){
-  // PaddleOCR often runs the time straight on (2026/11/1415:22:48), so the day may be followed by more digits
-  let m=text.match(/\b(20\d\d)[-\/.](\d{1,2})[-\/.](\d{2}|\d(?!\d))/);
-  if(m)return valid(+m[1],+m[2],+m[3]);
-  m=text.match(/\b([A-Za-z]{3})[a-z]*\.?\s+(\d{1,2}),?\s+(20\d\d)\b/);
-  if(m){const mo=MON.findIndex(x=>x.toLowerCase()===m[1].toLowerCase());if(mo>=0)return valid(+m[3],mo+1,+m[2])}
-  m=text.match(/\b(\d{1,2})[-\/.](\d{1,2})[-\/.](20\d\d|\d\d\b)/);
-  // month first (11/14/2026) unless that can't be a date, then day first (15/01/2026), which many Canadian tills print
-  if(m){const y=m[3].length===2?2000+ +m[3]:+m[3];return valid(y,+m[1],+m[2])||valid(y,+m[2],+m[1])}
+function receiptDate(text,dayFirst){
+  const mi=w=>MON.findIndex(x=>x.toLowerCase()===String(w).slice(0,3).toLowerCase());
+  const yr=y=>y.length===2?2000+ +y:+y;
+  // 2026-11-21, 2026/11/21 (a time may be run straight on: 2026/11/1415:22:48)
+  let m=text.match(/\b(20\d\d)([-\/.])(\d{1,2})\2(\d{2}|\d(?!\d))/);
+  if(m)return valid(+m[1],+m[3],+m[4]);
+  // Nov 21, 2026 / NOV 21 26
+  m=text.match(/\b([A-Za-z]{3})[a-z]*\.?\s+(\d{1,2}),?\s+'?(20\d\d|\d\d)(?!\d)/);
+  if(m&&mi(m[1])>=0)return valid(yr(m[3]),mi(m[1])+1,+m[2]);
+  // 21 NOV 26 / 21-Nov-2026 / 21NOV2026
+  m=text.match(/\b(\d{1,2})[\s\-\/.]?([A-Za-z]{3})[a-z]*[\s\-\/.,]*'?(20\d\d|\d\d)(?!\d)/);
+  if(m&&mi(m[2])>=0)return valid(yr(m[3]),mi(m[2])+1,+m[1]);
+  // 11/21/26, 21/11/2026 14:02, 7/21/1107:45 (time glued on). Same separator throughout; a range (10/17/11-12/16/11) is a promotion, not the purchase date.
+  const re=/(?<![\d\/.\-])(\d{1,2})([-\/.])(\d{1,2})\2(20\d\d|\d\d)(?=\d{1,2}:\d{2}|[^\d]|$)/g;
+  let x;
+  while((x=re.exec(text))){
+    const after=text.slice(x.index+x[0].length);
+    if(/^\s*-\s*\d{1,2}[-\/.]\d{1,2}/.test(after))continue;
+    const y=yr(x[4]),a=+x[1],b=+x[3];
+    return dayFirst?(valid(y,b,a)||valid(y,a,b)):(valid(y,a,b)||valid(y,b,a))}
   return null}
 function valid(y,mo,d){const x=new Date(y,mo-1,d);return x.getFullYear()===y&&x.getMonth()===mo-1&&x.getDate()===d?x:null}
 const title=s=>s.toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());
@@ -622,6 +633,8 @@ async function enrichUPC(items){
 function fixLine(text){
   let t=String(text).replace(/[^\x00-\x7F]+/g,' ').trim();
   if(/LI.{0,2}[IM]?.?TED\s*.?UAN|QUAN?.?TITY\s*.?R?ICE/i.test(t))return '';
+  // warehouse-club style lines: leading item numbers and house-brand prefixes (KS = Kirkland, MM = Member's Mark)
+  t=t.replace(/^\W*(\d{1,2}\s+)?\d{5,7}\s+(?=[A-Za-z])/,'').replace(/^\W*(KS|MM)\s+(?=[A-Za-z]{3})/i,'');
   t=t.replace(/\b5(?=[A-Z]{3})/g,'S').replace(/\bF[O0]RK?(?=\s*(STEAK|CHOP))/i,'PORK').replace(/\bNN\s*L[DU]?NCH/i,'NN LUNCH');
   t=t.replace(/(\d):(\d{2})\s*([A-Z]?)\s*$/,'$1.$2 $3').trim();
   if(/[A-Za-z]{3}/.test(t)){
@@ -630,7 +643,24 @@ function fixLine(text){
     t=t.replace(/\s\.(\d{2})\s*([A-Z]{0,2})\s*$/,' 0.$1 $2').trim();
     if(/^[^0-9]*[A-Za-z&]{2,}\s+\d{2}\s*$/.test(t))t=t.replace(/\s(\d{2})\s*$/,' 0.$1')}
   return t.trim()}
+/* Lines that describe the payment, not a product: coupons, savings, tender, change, balance, card, cash, points,
+   "reg price" notes and misread TOTAL words. Most of the line's words must be payment words. Matched on word starts so
+   OCR-glued words ("CASHTEND", "YourSavings") still count. */
+const NOT_ITEM_PREFIX=['COUPON','CPN','SAVINGS','SAVED','YOUSAVED','YOURSAVINGS','CASHTEND','CHANGE','BALANCE','POINTS','PAYMENT','REGPRICE','MVPPRICE','PRICEYOUPAY','DISCOUNT','REWARD','GIFTCARD','LOYALTY','MEMBER','INSTANTSAV','MFRCOUPON','STORECOUPON','ROUNDING','SUBTOTAL','TOTAL'];
+const NOT_ITEM_EXACT=new Set(['TENDER','TENDERED','CASH','CARD','VISA','DEBIT','CREDIT','MASTERCARD','AMEX','PRICE','REG','MVP','DUE','PAID','TIP','TAX','TAXES']);
+function notAnItem(t){
+  const up=t.toUpperCase();
+  if(/X{4,}/.test(up))return true;   // masked card or account number
+  const words=up.replace(/[^A-Z ]/g,' ').split(/\s+/).filter(w=>w.length>=3);
+  if(!words.length)return false;
+  const glued=up.replace(/[^A-Z]/g,'');
+  if(['COUPON','YOURSAVINGS','YOUSAVED','CHANGEDUE','CASHTEND','REGPRICE','MVPPRICE','AMOUNTDUE','BALANCEDUE'].some(k=>glued.includes(k)))return true;
+  const fuzzyTotal=w=>w.length>=5&&w.length<=6&&lev(w,'TOTAL')<=1;
+  const hits=words.filter(w=>NOT_ITEM_EXACT.has(w)||NOT_ITEM_PREFIX.some(k=>w.startsWith(k))||fuzzyTotal(w));
+  return hits.length>0&&hits.length*2>words.length}
 function parseReceipt(lines){
+  // UK, Irish, Australian and other day-first receipts: currency or tax words decide which way round 05/03 is read
+  const dayFirst=/£|€|\bVAT\b|\bABN\b|\bAUD\b|\bGBP\b|\bEUR\b/i.test(lines.map(l=>l.text).join(' '));
   let date=null,dateConf=100,dateAlt=false,ended=false,pending=null;const items=[],nonFood=[];
   const add=(text,conf,priceTxt,cls)=>{
     const code=findCode(text),upc=code&&code.upc||null;
@@ -640,7 +670,7 @@ function parseReceipt(lines){
     const m=cls||classify(label);
     if(!m){
       /* an unknown line still counts as an item if it looks like words, not OCR noise */
-      const words=label.split(' ').filter(w=>/^[A-Za-z']{3,}$/.test(w));
+      const words=label.split(' ').filter(w=>/^[A-Za-z']{3,}$/.test(w)||/[A-Za-z]{4,}\d/.test(w));
       if(!(words.length&&ocr>=0.45)&&!upc)return}
     if(NONFOOD.test(label)&&(!m||m.score<0.9)){nonFood.push(label);return}
     // not a food we know for sure, and the trained model says it probably isn't food either
@@ -652,7 +682,7 @@ function parseReceipt(lines){
   lines.forEach(({text,conf})=>{
     // a name run into its code ("GRND0000050") gets its space back
     const t=fixLine(text).replace(/([A-Za-z]{2,})(\d{5,})/g,'$1 $2').replace(/(\d{5,})([A-Za-z]{2})/g,'$1 $2').replace(/([A-Za-z]{3})(G?[MHI]RJ|MAJ)\b/g,'$1 $2').replace(/(?<=[A-Za-z])0(?=[A-Za-z])|\b0(?=[A-Za-z]{3})/g,'O').replace(/[A-Za-z]{6,}/g,splitGlued);if(!t)return;
-    {const d=receiptDate(t);if(d){if(!date){date=d;dateConf=conf}else if(diffDays(d,date)!==0)dateAlt=true}}
+    {const d=receiptDate(t,dayFirst);if(d){if(!date){date=d;dateConf=conf}else if(diffDays(d,date)!==0)dateAlt=true}}
     if(ended)return;
     if(END.test(t)&&items.length){ended=true;return}
     const last=items[items.length-1];
@@ -674,6 +704,7 @@ function parseReceipt(lines){
       if(pending&&pm){add(pending.text+' '+pm[1],Math.min(pending.conf,conf),pm[1]);pending=null}
       return}
     if(/\bYOU\b/i.test(t)||SKIP.test(t)||SKIP_GLUED.test(t)){pending=null;return}
+    if(notAnItem(t)){pending=null;return}
     const words=t.toUpperCase().replace(/[^A-Z ]/g,' ').split(/\s+/).filter(w=>w.length>=5);
     if(words.some(w=>NOISE.some(n=>lev(w,n)<=(n.length>=7?2:1)))){pending=null;return}
     let pm=t.match(PRICE);if(!pm){const g=t.match(PRICE_GAP);if(g&&/[A-Za-z]{3}/.test(t))pm=[g[0],g[1]+'.'+g[2]]}
