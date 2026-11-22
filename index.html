@@ -633,6 +633,8 @@ function fixLine(text){
 function parseReceipt(lines){
   let date=null,dateConf=100,dateAlt=false,ended=false,pending=null;const items=[],nonFood=[],dropped=[];
   const add=(text,conf,priceTxt,cls)=>{
+    // "1.00 OFF" / "2.50 CPN" lines are discounts on the item above, not items to add
+    if(/^\W*\d+[.,]\d{2}\s*(OFF|CPN|COUPON)\b/i.test(String(text).trim()))return;
     const code=findCode(text),upc=code&&code.upc||null;
     if(code&&code.plu&&!cls){const [k,nmP]=PLU[code.plu];cls={key:k,score:0.97,plu:code.plu,name:(code.organic?'Organic ':'')+nmP}}
     const label=text.replace(PRICE,'').replace(UPCTOK,' ').replace(/\b\d{3,}\b/g,' ').replace(/[^A-Za-z0-9 %.\/'"-]/g,' ').replace(/\s+/g,' ').trim();
