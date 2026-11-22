@@ -496,7 +496,7 @@ const PRICE=/(\$?\s?\d{1,3}\s?[.,'’`]\s?\d{2})\s*-?\s*[A-Z0]{0,2}\W{0,4}$/;
 const PRICE_GAP=/(?:\$|\b)(\d{1,2})\s(\d{2})\s?[A-Z0]{0,2}\W{0,4}$/;
 /* where the item list ends */
 /* things people buy at the grocery store that never go in the fridge */
-const NONFOOD=/\b(FAB\s?SHT|FABSHT|DRYER\s?SHEETS?|LAUND\w*|DETERG\w*|BLADES?|SENSOR\s?BLADE|PAPER\s?TOWELS?|TOWELS?|TISSUES?|KLEENEX|BOUNTY|CHARMIN|ROYALE|CASHMERE|TOILET|BATH\s?TISSUE|NAPKINS?|DETERGENT|TIDE|GAIN|DOWNY|BOUNCE|FABRIC|BLEACH|CLOROX|LYSOL|CLEANER|CLEANING|WINDEX|WIPES?|SPONGES?|DISH\s?SOAP|DAWN|CASCADE|FINISH\s?PODS?|PODS|SOAP|BODY\s?WASH|SHAMPOO|CONDITIONER|TOOTHPASTE|COLGATE|CREST|TOOTHBRUSH|FLOSS|MOUTHWASH|DEODORANT|RAZORS?|LOTION|SUNSCREEN|DIAPERS?|\bDIPR\b|\bPMPR\b|PAMPERS|HUGGIES|BABY\s?WIPES|BATTER(Y|IES)|DURACELL|ENERGIZER|FOIL|PLASTIC\s?WRAP|CLING|ZIPLOC|GARBAGE|TRASH|BIN\s?BAGS?|GLAD|CANDLES?|BULBS?|CHARGER|CABLE|HDMI|USB|GIFT\s?CARD|MAGAZINE|GREETING|SOCKS|SHIRT|PANTS|HANGERS?|ADVIL|TYLENOL|ADVIL|BAND.?AIDS?|DOG\s?FOOD|CAT\s?FOOD|LITTER|PEDIGREE|PURINA|MEOW|FLOWERS?|BOUQUET|PLANTS?|BAG\s?FEE|SHOPPING\s?BAGS?|REUSABLE\s?BAGS?|LIGHTER|MATCHES|PROPANE|CHARCOAL|MOTOR\s?OIL|WASHER\s?FLUID|LOTTO|LOTTERY)\b/i;
+const NONFOOD=/\b(SHVGL|SHV\s?GEL|SHAVE|SHAVING|MACH\s?3|HACH\s?3|IRISH\s?SP|FAB\s?SHT|FABSHT|DRYER\s?SHEETS?|LAUND\w*|DETERG\w*|BLADES?|SENSOR\s?BLADE|PAPER\s?TOWELS?|TOWELS?|TISSUES?|KLEENEX|BOUNTY|CHARMIN|ROYALE|CASHMERE|TOILET|BATH\s?TISSUE|NAPKINS?|DETERGENT|TIDE|GAIN|DOWNY|BOUNCE|FABRIC|BLEACH|CLOROX|LYSOL|CLEANER|CLEANING|WINDEX|WIPES?|SPONGES?|DISH\s?SOAP|DAWN|CASCADE|FINISH\s?PODS?|PODS|SOAP|BODY\s?WASH|SHAMPOO|CONDITIONER|TOOTHPASTE|COLGATE|CREST|TOOTHBRUSH|FLOSS|MOUTHWASH|DEODORANT|RAZORS?|LOTION|SUNSCREEN|DIAPERS?|\bDIPR\b|\bPMPR\b|PAMPERS|HUGGIES|BABY\s?WIPES|BATTER(Y|IES)|DURACELL|ENERGIZER|FOIL|PLASTIC\s?WRAP|CLING|ZIPLOC|GARBAGE|TRASH|BIN\s?BAGS?|GLAD|CANDLES?|BULBS?|CHARGER|CABLE|HDMI|USB|GIFT\s?CARD|MAGAZINE|GREETING|SOCKS|SHIRT|PANTS|HANGERS?|ADVIL|TYLENOL|ADVIL|BAND.?AIDS?|DOG\s?FOOD|CAT\s?FOOD|LITTER|PEDIGREE|PURINA|MEOW|FLOWERS?|BOUQUET|PLANTS?|BAG\s?FEE|SHOPPING\s?BAGS?|REUSABLE\s?BAGS?|LIGHTER|MATCHES|PROPANE|CHARCOAL|MOTOR\s?OIL|WASHER\s?FLUID|LOTTO|LOTTERY)\b/i;
 /* Trained food / non-food model (naive Bayes on ~114,000 labelled receipt lines, lxe/receipt-line-items-taxonomy, MIT).
    It catches the long tail a word list can't: hoodies, doorbells, lawn fertiliser, phone cases. Loaded once, cached offline. */
 let FOODNB=null;
@@ -635,6 +635,7 @@ function fixLine(text){
 function parseReceipt(lines){
   let date=null,dateConf=100,dateAlt=false,ended=false,pending=null;const items=[],nonFood=[],dropped=[];
   let wBuf=null; /* weight-priced item waiting for its price line */
+  let nonFoodSum=0; /* prices of lines left out as non-food, so totals still add up */
   const markWeighed=()=>{const l=items[items.length-1];if(l)l.weighed=true}; /* its price checks out as weight x rate */
   const add=(text,conf,priceTxt,cls)=>{
     // "1.00 OFF" / "2.50 CPN" lines are discounts on the item above, not items to add
@@ -645,15 +646,17 @@ function parseReceipt(lines){
     if(code&&code.plu&&!cls){const [k,nmP]=PLU[code.plu];cls={key:k,score:0.97,plu:code.plu,name:(code.organic?'Organic ':'')+nmP}}
     const label=text.replace(PRICE,'').replace(UPCTOK,' ').replace(/\b\d{3,}\b/g,' ').replace(/[^A-Za-z0-9 %.\/'"-]/g,' ').replace(/\s+/g,' ').trim();
     const ocr=Math.max(0,Math.min(1,conf/100));
-    const m=cls||classify(label);
+    let m=cls||classify(label);
+    /* "BEA HOM 2L" / "BEA SKIM 2L" / "BEA 1 4L": dairy brand shorthand with a litre size is milk */
+    if((!m||m.key==='other')&&/^\W*BE[AR]\s?[\dA-Z]*\b/i.test(label)&&/(HOMO?|HOK|SKI[MH]|\b[12]\s?%|\b[124]\s?L\b|[124]L?J?\b|ZL\b)/i.test(label))m={key:'milk',score:0.9,name:['Milk',(label.match(/SKI[MH]/i)&&'skim')||(label.match(/HO[MK]/i)&&'homo')||(label.match(/\b1\b/)&&'1%')||'',((label.match(/([124])\s?L/i)||[])[1]||'2')+'L'].filter(Boolean).join(' ')};
     if(!m){
       /* an unknown line still counts as an item if it looks like words, not OCR noise */
       const words=label.split(' ').filter(w=>/^[A-Za-z']{3,}$/.test(w));
       if(!(words.length&&ocr>=0.45)&&!upc){dropped.push({text:label||text,why:'unrecognised'});return}}
-    if(NONFOOD.test(label)&&(!m||m.score<0.9)){nonFood.push(label);if(!/\b(OFF|SAVE|SAVED|COUPON|MFR|CARTWHEEL)\b/i.test(label))dropped.push({text:label,why:'non-food'});return}
+    if((NONFOOD.test(label)||/SHVGL|SHAVE|RAZOR/i.test(label))&&(!m||m.score<0.9)){nonFood.push(label);nonFoodSum+=money(priceTxt)||0;if(!/\b(OFF|SAVE|SAVED|COUPON|MFR|CARTWHEEL)\b/i.test(label))dropped.push({text:label,why:'non-food'});return}
     // not a food we know for sure, and the trained model says it probably isn't food either
     // the model can overrule a loose name match too, but only when it is close to certain ("EG LAWN FERT" is not eggs)
-    {const p=foodProb(label),pw=foodProb(label,true);if(p!=null&&((!m||m.score<0.9)&&p<0.35||(!m||m.score<0.98)&&pw<0.03)){nonFood.push(label);dropped.push({text:label,why:'non-food'});return}}
+    {const p=foodProb(label),pw=foodProb(label,true);if(p!=null&&((!m||m.score<0.9)&&p<0.35||(!m||m.score<0.98)&&pw<0.03)){nonFood.push(label);nonFoodSum+=money(priceTxt)||0;dropped.push({text:label,why:'non-food'});return}}
     const key=m?m.key:'other',match=m?m.score:0.3;
     const c=0.55*match+0.45*ocr;
     items.push({nice:m&&m.name?m.name:null,raw:text+(m&&m.plu?'  [PLU '+m.plu+(code.organic?', organic':'')+']':''),label:m&&m.name?m.name:(label||'Item '+(upc||'')),key,guessKey:key,conf:c,ocr,match,flagged:c<THRESH,upc,upcVerified:!!(code&&code.verified),organic:!!(code&&code.organic),upcOnly:!m,price:money(priceTxt),discount:0,markdown:false})};
@@ -715,7 +718,7 @@ function parseReceipt(lines){
     const pct=it.discountPct||(it.price&&it.discount?it.discount/(it.price):0);
     it.discountPct=pct;
     if(it.markdown||pct>=0.3){it.clearance=true;it.flagged=true}});
-  return{date,items,dateConf,dateAlt,nonFood,dropped:dropped.filter(d=>!/\b(off|coupon|savings?|saved)\b/i.test(d.text))}}
+  return{date,items,dateConf,dateAlt,nonFood,nonFoodSum,dropped:dropped.filter(d=>!/\b(off|coupon|savings?|saved)\b/i.test(d.text))}}
 /* Several OCR passes over differently prepared images: keep what they agree on, fill gaps from the others. */
 function sharesWord(a,b){const w=x=>new Set(x.toUpperCase().match(/[A-Z]{4,}/g)||[]);const A=w(a);for(const t of w(b))if(A.has(t))return true;return false}
 function mergeParsed(list){
@@ -1748,7 +1751,7 @@ const fmtLines=lines=>lines.map(l=>l.text.trim()+'   ['+Math.round(l.conf)+'%]')
    If dropping one item's leading digit makes them add up exactly, that was the misread. */
 function fixByTotal(parsed,sub){
   if(!sub||!parsed||!parsed.items.length)return;
-  const sum=parsed.items.reduce((a,i)=>a+(i.price||0)-(i.discount||0),0);
+  const sum=parsed.items.reduce((a,i)=>a+(i.price||0)-(i.discount||0),0)+(parsed.nonFoodSum||0);
   if(Math.abs(sum-sub)<=0.02)return;
   for(const it of parsed.items){if(!it.price||it.price<10)continue;
     const s=it.price.toFixed(2),alt=+s.slice(1);
@@ -1758,12 +1761,12 @@ async function recognizePasses(isPhoto,forceTess){
     const lines=await withTimeout(ppRead(isPhoto?S.img:S.canvas,p=>setBar(.05+.9*p,p<.25?'Finding the lines of text…':'Reading line by line…')),180000,'Reading the receipt took too long. Try a smaller or sharper photo.');
     const text='--- PaddleOCR ---\n'+fmtLines(lines),parsed=parseReceipt(lines);
     const sub=findSubtotal(lines.map(l=>l.text).join('\n'));fixByTotal(parsed,sub);
-    const sum=parsed.items.reduce((a,i)=>a+(i.price||0)-(i.discount||0),0);
+    const sum=parsed.items.reduce((a,i)=>a+(i.price||0)-(i.discount||0),0)+(parsed.nonFoodSum||0);
     if(!sub||Math.abs(sum-sub)<=Math.max(.06,sub*.01))return{parsed,text};
     // the items don't add up: also try the older reader and keep whichever comes closer to the receipt's own total
     try{setBar(.9,'Double-checking against the receipt total…');
       const keep=S.ocr;if(!S.worker){await ensureTesseract()}S.ocr=keep;if(!S.worker)throw 0;
-      const alt=await recognizePasses(isPhoto,true),altSum=alt.parsed.items.reduce((a,i)=>a+(i.price||0)-(i.discount||0),0);
+      const alt=await recognizePasses(isPhoto,true),altSum=alt.parsed.items.reduce((a,i)=>a+(i.price||0)-(i.discount||0),0)+(alt.parsed.nonFoodSum||0);
       S.engine='paddle';
       if(Math.abs(altSum-sub)<Math.abs(sum-sub))return{parsed:alt.parsed,text:text+'\n'+alt.text}}catch(e){S.engine='paddle'}
     return{parsed,text}}
