@@ -1,0 +1,142 @@
+id,split,store,ok,error,secs,used_fallback,labelled_items,food_items,food_priced,nonfood_items,nonfood_priced,food_no_price,found,found_strict,missed,extras,food_dropped_as_nonfood,nonfood_dropped,nonfood_kept,date_ok,total_ok,extra_examples
+021beb3db61de372cdc5c67a937aa7fa38d50730,train,Target,True,,10.886,False,7,6,6,1,1,0,3,3,3,1,3,1,0,,True,8110100198001  MFR COUPON  $1.50-
+024c85790df155cd055da74579dab8fe5126db32,test,Trader Joe's,True,,4.383,False,7,6,6,1,1,0,4,3,2,0,0,1,0,,,
+02683d90a74b3573988b5763c45bf0df51a670b4,train,Publix,True,,10.128,False,16,13,9,3,3,4,7,7,2,0,2,3,0,,True,
+03dd7bee9110ab404811a8a9a151023677998706,test,Costco,True,,11.391,True,8,7,7,1,1,0,6,6,1,0,0,1,0,True,False,
+07a4b5f838e7260ccd66a0ad85d934f2691ffc6e,train,Walmart,True,,4.85,False,1,0,0,1,1,0,0,0,0,0,0,1,0,,False,
+0a17dc110a2a86ecc763fb6e3270ba9f87689273,test,Foodtown,True,,3.704,False,12,11,9,1,1,2,9,9,0,0,0,0,1,False,True,
+0b4d75232a1bea39c670aa6551a81844e19d68fa,train,Walmart,True,,8.174,False,1,0,0,0,0,0,0,0,0,0,0,0,0,True,True,
+0bac2b0f9f7af4742ac3400fecb9f9185ebb310c,test,Trader Joe's,True,,7.053,False,8,8,8,0,0,0,8,5,0,14,0,0,0,,False,SPARK ING SFRING WATER CRAN CL  0.79T | ORGAAIC CARROT JUICE PTS  2.99T | SPARK ING SFRING WATER CRAN CL  3.16T
+0bda337518ced88e59f31c39a63bb2405a828420,test,Waitrose,True,,5.262,False,14,14,14,0,0,0,14,14,0,0,0,0,0,False,True,
+10f3049a163b0b6a89f636f7ab97baed6d102c6f,train,Walmart,True,,5.761,False,6,6,6,0,0,0,6,6,0,0,0,0,0,True,True,
+123a5b197ed8c6286af15f27657c041d41a5cebb,train,Aldi,True,,4.568,False,7,7,7,0,0,0,7,7,0,0,0,0,0,False,True,
+12789c766727eff801a3cf20fa832cc4942e3112,train,Walmart,True,,10.741,False,2,1,1,0,0,0,0,0,1,4,0,0,0,True,False,UAISYNHXI  097413001578  22.47 | FILIER  000910001025  5.94 X | MB IS UNECK  880552315922  5.00 X
+145,train,Aldi,True,,8.343,True,14,12,12,2,2,0,2,2,10,1,0,2,0,,False,Sparkling Apple 2.29 45 |
+14549a21ec0fb302ea3665a81d7eef894bde06ce,train,Target,True,,7.002,False,9,5,5,4,4,0,3,3,2,0,0,4,0,True,True,
+147,train,Aldi,True,,3.373,True,4,4,4,0,0,0,0,0,4,6,0,0,0,,True,Mushrooms 2.36 FI | Mushrooms 2.36 FI | Mushrooms 2.36 FI
+16,test,Morrisons,True,,6.277,False,4,4,4,0,0,0,3,3,1,0,1,0,0,True,False,
+1641529e4933ca870600a3ce85559f8f858f3c8c,val,Target,True,,6.743,False,6,1,1,5,5,0,1,1,0,0,0,4,1,True,True,
+165d67e579cc7172f6529d2e03e8d1ede96e17bb,train,Target,True,,14.876,False,34,0,0,34,34,0,0,0,0,0,0,20,14,True,True,
+1751,train,Kroger,True,,4.625,False,19,19,14,0,0,5,13,4,1,4,0,0,0,,,FRI GNGR ORG  2.49B | MISF TORTLLA  2.59B | HAAS AVOCADO  2.67B
+179c27de6866c10e4389916b36a9abf516625540,train,Target,True,,3.552,False,6,0,0,6,6,0,0,0,0,1,0,6,0,True,True,524200613827  MFR COUPON  $2.00-
+18,test,Morrisons,True,,5.37,False,6,5,5,0,0,0,4,3,1,2,0,0,0,True,False,Paynent tine:05/12/2016  10:04.27 | 1Create Oun Breakfast  FO.00  50.00A
+1a8be293586a17a1f1f68e727d16be7eb4120188,train,Safeway,True,,5.768,False,9,9,9,0,0,0,9,9,0,0,0,0,0,,,
+1ac6e357fa397cc5fd59ae98d719fda6a3e527de,train,Target,True,,3.856,False,4,4,4,0,0,0,4,4,0,0,0,0,0,True,True,
+1ba6e2a161c3ccc234be68946c62edcc61a754ee,train,Target,True,,7.452,True,10,10,10,0,0,0,10,7,0,3,0,0,0,True,False,266090012 1.5LB GRAPES FN $5.98 # | 266090011 1.5LB GRAPES FN $7.98 | 266090011 1.5LB GRAPES FN $7.98
+1d7af62e6493036f1122e98bfd3011846a56508a,train,Walmart,True,,9.802,True,17,17,17,0,0,0,15,15,2,3,0,0,0,,True,4 ss LB WHT CORN  6002733100038 F 3.360 | F CELERY SVALK 003398365522 I 1.46 N | CORN CHEX 0016000407596 X 3.16 0
+20d9a562ebcee8840c23efbe5444e51165a86a0b,train,Walmart,True,,7.415,False,0,0,0,0,0,0,0,0,0,0,0,0,0,False,,
+222463feb66c1a585453a005399f4d096a06a22e,test,Meijer,True,,13.874,False,7,6,2,0,0,4,2,2,0,0,0,0,0,True,True,
+22f8715c2abe8e87ef052f5408ca1bf5d1e724c7,train,Tesco,True,,6.624,False,4,2,2,0,0,0,1,1,1,0,0,0,0,False,True,
+251d734712cb56b971b9c5ee0a40f0545c34264c,train,Walmart,True,,3.123,False,6,6,6,0,0,0,6,6,0,0,0,0,0,True,True,
+2576b926189eccb5aaf8974289d0dcbf91e26241,val,Target,True,,5.221,False,1,0,0,1,1,0,0,0,0,1,0,1,0,True,True,T=NJTAX   7.0000%on  $24.98  $1.75
+261558d91f817a0e1123904c11faa94e625369a9,train,Asda,True,,8.652,True,3,0,0,3,3,0,0,0,0,0,0,1,2,True,True,
+2914,val,Tesco,True,,7.132,False,6,5,1,0,0,4,1,1,0,0,0,0,0,False,True,
+2a1dab6bb5c2315f94c4ae611e6850655186ab1f,test,Albertsons,True,,4.877,False,5,5,4,0,0,1,4,4,0,0,0,0,0,True,True,
+2a2b03409148c6f285035e185e9d686f5e8f4821,train,Walmart,True,,7.294,True,11,0,0,10,9,0,0,0,0,0,0,6,3,,True,
+2a2d38ad90cf8774bfc57e657ab1124f898cafb6,train,Whole Foods,True,,2.418,False,1,1,1,0,0,0,1,1,0,1,0,0,0,,,2375E.1st Ave  68.63
+2bf9b596d10126cab5a5ce3dca694d11b7c35d1b,train,Target,True,,9.4,False,1,0,0,0,0,0,0,0,0,0,0,0,0,True,True,
+32c6def6f55ba732dd6f9275478c16ce1d61e70b,test,Crest Foods,True,,9.396,True,15,14,13,0,0,1,11,11,2,0,0,0,0,True,True,
+3587,train,Food Lion,True,,4.79,False,11,10,10,1,1,0,7,7,3,3,1,1,0,False,False,HVP Price  2.99 | MVP Prico  1.29 | MVP Price  1.79
+35b916cd10b9c92ba583919e3af0b998e7e458b3,train,Walmart,True,,9.525,False,1,0,0,0,0,0,0,0,0,0,0,0,0,True,True,
+35bdd94f64f7ee7bfca64e576267c5fc0b9d3ca0,train,Walmart,True,,6.098,False,4,0,0,4,4,0,0,0,0,0,0,2,2,,True,
+3600,train,Sam's Club,True,,7.509,False,11,10,10,0,0,0,3,3,7,0,3,0,0,True,True,
+3716a29f41402e22fe4c96b85d539b8119f6218a,test,Costco,True,,4.893,False,11,11,11,0,0,0,2,2,9,8,0,0,0,,False,134991 ORGANIC PAST | 172246 PELED CAROTS | 5623 BROCCOLI
+38dd978f311a6b6e373563bbc0559628af13aa7b,train,Walmart,True,,3.952,False,0,0,0,0,0,0,0,0,0,5,0,0,0,,False,B2BPKORP  005200020871  4.99 | BATORADE  005200033582  1.58 | TAXT  6.5001  0.71
+39042dc9ebd672d287fe4c4cdf8a904ca5cea663,train,Walmart,True,,12.609,True,2,0,0,2,2,0,0,0,0,0,0,1,1,True,True,
+412d297566c6fd4c826700d1d1e1e772f5e91dab,test,Safeway,True,,2.113,False,2,1,1,1,1,0,0,0,1,0,0,1,0,,,
+42095d393dbf2a3e4ead5a65ab7dde83d53c7ad1,train,Walmart,True,,13.495,True,27,27,24,0,0,3,20,19,4,5,0,0,0,,True,TOMATOES 002700037837 F 1.68 0 | . GV BRN SUGAR 007874237221 F 1.60 0 | 3 YLW ONION 081565001 000KI 2 18 N
+4377,train,Safeway,True,,3.826,False,1,0,0,0,0,0,0,0,0,0,0,0,0,False,False,
+4378,train,Safeway,True,,5.163,False,5,5,5,0,0,0,2,2,3,0,0,0,0,False,,
+4381,test,Costco,True,,3.019,False,11,11,11,0,0,0,2,2,9,7,0,0,0,,False,134991 ORGANIC PAST | 172246 PELED CAROTS | 5623 BROCCOLI
+44abca3ec7d13b4f47a9c1858aefb2d1716867a6,train,Target,True,,5.109,False,6,0,0,6,4,0,0,0,0,0,0,2,2,True,True,
+4617b21124e44bab77b5cdd0eb6f8295a402c483,train,Walmart,True,,6.91,False,3,2,0,1,1,2,0,0,0,0,0,0,1,False,False,
+4889b959e86b9a9f02ea55affaf13e4543370a56,val,Walmart,True,,17.657,True,37,35,34,1,1,1,26,20,8,1,0,1,0,,,}} GR BTR TSTN 001800000183 F 0.99 T
+49944794e9288897d52f7bdb11a082c8cfbc7d22,train,Sainsbury's,True,,2.5,False,5,2,2,3,3,0,2,2,0,0,0,2,1,,,
+499edd655772b3980339e361c8d82160966f0705,train,Target,True,,9.844,True,1,0,0,1,1,0,0,0,0,1,0,1,0,True,True,: TCTAL $124.59
+4c8ef1aec743ffbc5d54225affc283c58c9fd0e2,train,Publix,True,,10.076,False,16,15,9,1,1,6,2,2,7,0,4,1,0,,,
+4d0b6b4cff099990041480caeeeb5a70a0f49029,val,Safeway,True,,5.409,False,3,3,3,0,0,0,3,3,0,3,0,0,0,,,201.99NNU  JVERS  3.98 | FAGE 1OTAL24  1.25 | 20.50  GREEN BE.L FEPPERS  1.00=
+4dc8a23e7c4fcb461a308980764576e56fdcbaf8,train,Sam's Club,True,,2.829,False,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,
+51c6036665d0f4b562ef7ba44e01eb683204cc29,train,Target,True,,6.659,True,7,3,3,4,4,0,1,1,2,0,0,3,1,True,True,
+54461025f04cec91ea4c7331286965ad578e05a6,train,Target,True,,9.157,False,3,2,2,1,1,0,2,2,0,0,0,1,0,False,True,
+595b5da8ab99e474662ec93fc1e7ae689d856999,train,Walmart,True,,9.193,False,9,8,5,1,1,3,3,3,2,0,2,1,0,,True,
+5b74988dfc7f0cb1c187632fe7490be9a83e6e18,train,Walmart,True,,13.302,True,13,7,7,6,6,0,4,4,3,0,0,5,1,False,True,
+5bab50153bf3d3329d90a6824b4c5bdc070e802f,test,Al Manama Hypermarket,True,,11.541,False,27,27,27,0,0,0,23,23,4,0,1,0,0,False,True,
+5be66423183188f46cde09f6bb6e5fb20fb81db0,test,Northgate Market,True,,2.646,False,6,5,4,1,1,1,4,4,0,0,0,1,0,,,
+5de6358b757e1cf4c3de78096cfe36e433e6de54,val,Walmart,True,,15.951,False,26,6,6,20,16,0,6,6,0,2,0,11,5,,True,COUPOH47400054740022000  1.87-0 | COCPON 80878 058087858000  1.00-0
+5ef42ec49bb10b6c6633764c5fba384aaa2e795d,train,Walmart,True,,8.993,False,2,0,0,2,2,0,0,0,0,0,0,2,0,True,True,
+607fd5ce9a4dda99649e4c7b4e74ec7218dfb73d,test,Trader Joe's,True,,3.174,False,13,13,13,0,0,0,13,13,0,0,0,0,0,True,True,
+610449104202e60715cf3ecce9d3867c72374f96,test,99 Ranch Market,True,,5.038,False,1,1,1,0,0,0,1,1,0,0,0,0,0,True,True,
+62d264383ba652ed838bedb07c573fe327f61ec9,train,Kroger,True,,2.204,False,11,0,0,0,0,0,0,0,0,0,0,0,0,,False,
+63ec0d3552faffc110dd38e6732c79d73e2afbdd,test,Costco,True,,5.012,False,6,6,0,0,0,6,0,0,0,0,0,0,0,,,
+6520aaca037115c99e6212fd416d5f1efe10bae3,train,Albertsons,True,,5.465,False,8,0,0,4,4,0,0,0,0,0,0,4,0,False,False,
+69c4ad29f50e25e0037359c7b807028986c1ddde,train,Tesco,True,,14.259,True,56,53,45,3,3,8,40,34,5,2,0,3,0,,,5 @ EURO .55 2.75 | CEREALS - 2.39
+6a92a264318dbf97795e8cda176ed3ea1eaf41d7,train,Walmart,True,,3.475,False,6,0,0,0,0,0,0,0,0,0,0,0,0,,True,
+6d1dbb1cd71551cf03ca387f804a9783f7eb771f,val,Lidl,True,,5.813,False,2,2,2,0,0,0,2,2,0,4,0,0,0,False,True,RANA CAPPELLETTE PRO  5.50 | CREMA CON OCCEOLE  1.49 | SUGO PONOD.BASIL  0.99
+6e55e1cd4369fddadf254f648ac4969119459c84,val,Target,True,,4.721,False,1,1,1,0,0,0,1,1,0,0,0,0,0,True,True,
+6f16e7e8010b5bc8cba98388c96c770020887656,test,Meijer,True,,9.693,True,4,4,0,0,0,4,0,0,0,0,0,0,0,True,False,
+70b438fb3e559e3068c88318dd929b1bd6a98f5a,train,Target,True,,4.556,False,1,1,1,0,0,0,1,1,0,0,0,0,0,True,True,
+71513cf74da2d87c2b27332b737d49d1194fec2e,train,Target,True,,7.015,False,2,0,0,2,2,0,0,0,0,1,0,2,0,,True,CH-IANGE DUE  $28.77
+71cf46a7ecd49018f87f3386631759c636496e63,train,Walmart,True,,6.148,False,2,0,0,2,2,0,0,0,0,0,0,1,1,True,True,
+724c3236258b6e00eb8fb9286556878da55a6fb5,train,Asda,True,,7.37,False,13,13,11,0,0,2,6,2,5,2,0,0,0,,True,BROWN ONIONS 505085451490  0.60D | L/G RICE  000002115713  0.40D
+72572ef98fe32b45b7d0fd725056bdc877e525a5,train,Safeway,True,,5.974,False,2,0,0,2,1,0,0,0,0,0,0,1,0,False,,
+744122caca09cef445526e059ff05e59fcfe1780,test,Woolworths,True,,4.189,False,1,0,0,1,1,0,0,0,0,0,0,1,0,False,True,
+7d5ab1c22cb6336717dd77267720dcac7a2cec34,val,Walmart,True,,16.89,False,50,6,6,42,42,0,4,3,2,1,0,32,10,True,True,BABY SO NEU  07467751728927  12.27
+80e89dfdbbd08a82eb5176ad9148b44df0816579,train,Stop & Shop,True,,4.47,False,2,2,2,0,0,0,0,0,2,2,0,0,0,True,False,APPLE RED DEL  0.58* | BANANAS  0.55
+824bbeb3420c141dbaed3c603713abcb1a303cb2,train,No Frills,True,,12.491,False,8,8,6,0,0,2,5,4,1,0,0,0,0,,True,
+8258ab01b293fd05bb1cc3308b877870e4113d79,train,Walmart,True,,11.576,False,10,4,4,5,5,0,3,3,1,0,0,5,0,True,True,
+8478b4dc8864a5c95abbd708a4279792d5c218c2,test,Trader Joe's,True,,3.783,False,3,3,3,0,0,0,3,3,0,0,0,0,0,True,True,
+887ce47e5f762709b52e5b44f182732fae038240,test,Stop & Shop,True,,6.562,False,2,2,2,0,0,0,1,0,1,3,0,0,0,False,True,APPIEFEO DEL  0.88 * | ota  $3.21 | Cregt  $3.21
+89f2d8d97bc72ece57c7daceffc66ccd0927d223,val,Safeway,True,,2.938,False,2,0,0,0,0,0,0,0,0,0,0,0,0,False,False,
+8a76c125f0143d88256b132dafee6e48f11c6468,train,Waitrose,True,,4.326,False,14,13,12,1,1,1,12,9,0,1,0,1,0,,True,ROYRLGALA APPLES  0.29
+8a9553d144a873c47aabe1b8e685ec0673768618,train,Walmart,True,,4.781,False,2,0,0,2,0,0,0,0,0,0,0,0,0,False,False,
+90fed6c9f197d913ddd9ecaa15f31bb8a5b17cbb,val,Walmart,True,,11.858,False,20,0,0,17,17,0,0,0,0,0,0,11,6,False,True,
+9175953996c22f196cfcae07390cc9205e99b283,train,Walmart,True,,9.009,True,1,0,0,1,1,0,0,0,0,0,0,0,1,True,True,
+92d2c3bd557d1d5e6b03ca24a28808c087ebc51b,test,Walmart,True,,10.388,False,0,0,0,0,0,0,0,0,0,0,0,0,0,,,
+95b26fc6e8c969335fa86e4a2709e8ac6ff317df,train,Walmart,True,,10.358,False,4,0,0,1,1,0,0,0,0,0,0,1,0,True,True,
+96ae21a2a6cc19e60b28647bdb2d0603365bd0f0,test,Walmart,True,,8.513,False,23,13,13,1,1,0,8,5,5,0,0,1,0,,,
+96e1646e0c7d260dac02c0e4a43f7a1192724dc4,test,Morrisons,True,,2.136,False,1,1,0,0,0,1,0,0,0,0,0,0,0,,False,
+98fb02bf56d4221681d5faf89b3ab57395b22e36,test,Al Manama Hypermarket,True,,11.128,True,27,27,27,0,0,0,27,27,0,1,0,0,0,True,True,0.89 POTATO SAUDI - 4.44. -
+9bbeb3f7ee5caf426397666f966509806c02346c,test,Metro,True,,3.497,False,2,0,0,2,2,0,0,0,0,1,0,2,0,False,False,COUPONS TENDERED  4.00
+9bcf7d8a8ae8bdfff3ad786ad8c4d2d90a841078,train,Giant,True,,4.016,False,0,0,0,0,0,0,0,0,0,1,0,0,0,False,False,Your Savings  110.97
+9d19e188b4aab8f25f2736f3d9216ab2da5d41b4,test,Tesco,True,,4.014,False,5,2,2,3,2,0,2,0,0,0,0,1,1,,True,
+9d2ff71edd56d96c0c10166d32ce5d0210616035,train,Target,True,,9.254,False,9,9,9,0,0,0,8,7,1,1,1,0,0,True,True,snng  0.00
+9e33546ee55b55da21db0af4cce8dbe324bc663b,val,Walmart,True,,9.245,False,5,0,0,2,2,0,0,0,0,0,0,0,2,True,True,
+9fb3f023acdc1d1b2e17962535f4869b99fe5ca4,train,Tesco,True,,4.059,False,10,10,9,0,0,1,8,1,1,1,0,0,0,,True,VALUE JUICE  0.62
+a1c43f6c632841c318af73fd876e24d49f022074,train,Walmart,True,,4.041,False,1,0,0,1,0,0,0,0,0,0,0,0,0,False,False,
+a1f993060e8cea4ae797b371479872c15a7b766e,val,Coles,True,,10.451,False,20,19,19,0,0,0,19,19,0,0,0,0,0,False,False,
+a36478d3bb0ae9bfe870236fd8e1f9a8a9358ccf,val,Target,True,,4.887,False,1,0,0,1,1,0,0,0,0,0,0,1,0,True,True,
+a3a00049a62f8a6cec4203a51338a2c9db4f99a4,train,Walmart,True,,7.386,False,1,0,0,0,0,0,0,0,0,0,0,0,0,True,True,
+a7804eb2f2f127977d3c6fbbe2eb8b505af3e58d,val,Sam's Club,True,,7.248,False,11,10,10,0,0,0,3,3,7,0,2,0,0,True,True,
+a804b8a6065507261bedf92c267dc12d8e2e0f9e,train,Tesco,True,,9.588,False,9,5,5,3,3,0,0,0,5,0,0,1,2,,True,
+ac973eaf54490cdcfd651ca74e8e643a488abf48,train,Walmart,True,,6.652,True,5,2,2,3,3,0,2,2,0,0,0,2,1,True,True,
+acb48a86efabfb4414dd3ae1312fecf533ead35f,train,Walmart,True,,3.948,False,2,2,1,0,0,1,1,1,0,0,0,0,0,True,True,
+afa61748ef431aecf2598221d6e78e27ff98c537,val,ShopRite,True,,6.641,False,34,14,13,18,17,1,13,10,0,1,0,13,4,True,False,MC  IS BERTOLLI PASTA  1.10-F
+b0a88d6170751b3bcaa500aba9ecde7e2f1bb6bf,train,Walmart,True,,6.632,False,5,2,2,3,3,0,1,1,1,0,1,2,1,False,True,
+b118bac4a4c6b50ec732d51e72ae3b85571008cd,test,Costco,True,,9.848,True,15,9,9,5,5,0,8,8,1,1,0,4,1,,False,{ 54153 5 PISTACHIO 34 194.99
+b2f91845b83b824f06ec52036f5fb2e3ca82657f,test,Co-op Food,True,,4.344,False,9,9,8,0,0,1,6,3,2,1,1,0,0,True,False,PR  CO-OP SOFT CHSE  1.05
+b449ef7611ce6e73caa248d92a7e89d5ad487384,val,Target,True,,3.323,False,6,0,0,6,6,0,0,0,0,1,0,6,0,True,True,524200613827  MFR COUPON  $2.00-
+b523a01dbe40c58a96b719a7df2bd61ae9b02fa1,train,Walmart,True,,9.893,False,2,0,0,0,0,0,0,0,0,1,0,0,0,True,,CASHTEND  10.00
+b63df5a10ea9b46ede001708a09a455da3ab2361,test,Meijer,True,,9.865,False,9,2,1,7,6,1,1,1,0,0,0,5,1,False,True,
+b64022dbad5d4addad2678a7829873e663c453e2,train,Walmart,True,,10.518,False,4,0,0,4,4,0,0,0,0,0,0,3,1,True,True,
+b898c63d08281321e9ca0b2ea9fc36d3ad0324ad,train,Kroger,True,,10.538,True,8,0,0,8,8,0,0,0,0,0,0,7,1,,False,
+c01c0e3ec05d504cfe21bf63e03ec9b477b87557,train,Target,True,,5.288,False,4,2,2,2,2,0,2,2,0,0,0,2,0,True,True,
+c04a57508f6d3da61c3ed86c845d33df1c4e255d,train,Publix,True,,5.266,False,10,10,9,0,0,1,8,6,1,1,0,0,0,,,DELIZZA EG/NG PUFF  3.99
+c12ab1ed412fe6f21d766092311044a4b7b9b889,train,Woolworths,True,,2.421,False,6,6,6,0,0,0,3,3,3,1,1,0,0,,,Tb132/1  Chk2372  Gst2  12.45
+c2dcd250c5162c11ca06d864666abb0ec1458f59,test,Trader Joe's,True,,4.155,False,13,13,13,0,0,0,13,13,0,0,0,0,0,True,,
+c62899025130c58c5feae16834d7f3f4f11701ee,test,Sainsbury's,True,,3.903,False,1,1,1,0,0,0,1,1,0,0,0,0,0,False,False,
+c63ac7cfbd2b118a0b8bcaeeb787d2047bf99efe,train,Aldi,True,,12.277,False,34,33,33,1,1,0,33,33,0,0,0,1,0,,True,
+d5de7f2a20751e50b84c747c17a24cd98bed3554,train,Safeway,True,,3.596,False,7,6,1,0,0,5,0,0,1,5,0,0,0,,,RegPrice  3.79 | RegPrice  4.19 | RegPrice  3.99
+d7732d42528decf2645835b7735add65d21d7611,test,Aldi,True,,6.558,False,16,16,16,0,0,0,15,15,1,2,0,0,0,,True,Price Over  1.49  -1.00 A | Price Over  $3.99  -1.00 A
+e1d13c1216492dd618defd7a560d5b94e975dd74,train,Northgate Market,True,,3.226,False,1,0,0,1,0,0,0,0,0,1,0,0,0,True,True,Tatal=30.00
+e1e433cb0248593a224537d0be401c7d4734fef1,train,Costco,True,,8.964,True,4,0,0,0,0,0,0,0,0,0,0,0,0,True,True,
+e368026983ab8c87212fcd1c8d4ad15420140d76,test,Morrisons,True,,14.192,True,50,19,19,30,30,0,18,18,1,1,0,29,1,True,False,"""M' MOZZARELLA BLOCK 2.36 0"
+e7a85463e3125f8d344e830424010b8f0e726331,train,Target,True,,2.819,False,1,0,0,0,0,0,0,0,0,0,0,0,0,True,,
+ead5dfae77c4434af40b7a109955a04b0f3fb60b,train,Target,True,,3.677,False,1,1,1,0,0,0,1,1,0,0,0,0,0,True,True,
+eba847883e55248c14fd840826d041880b9c3315,train,Walmart,True,,6.281,True,5,5,5,0,0,0,5,5,0,0,0,0,0,True,True,
+ee02c9e40dcd5f6c091546fd62851edd50d9f312,val,Foodtown,True,,4.143,False,17,16,15,1,1,1,5,5,10,6,3,1,0,False,,GREEN THAI CHILI PER LB  82.70 | CHIFLES CASSAVA REGULAR 120  3  83.59 | MAMA INSTFLAT NOODLES CLEAR  80.49F
+ef6aea1a7ca2ff593b724a13383c62248851ea23,train,Whole Foods,True,,6.122,False,5,5,4,0,0,1,4,4,0,0,0,0,0,,True,
+f1d6e77e1df3dc5071333c15cc06b8e1075018a1,test,Hannaford,True,,4.407,False,16,16,10,0,0,6,9,8,1,2,0,0,0,,False,HRD LENTILS DRIED     1.39 | POLANER BLKCHRY  1.99
+f3a6cdbce4c39bd7718de9b309fe2ce4bf776d83,train,Giant,True,,4.709,False,14,4,4,8,8,0,4,4,0,0,0,8,0,False,False,
+f4bb5ce76d2bc39f560fade5d3bc8aee9edaee6a,train,Walmart,True,,9.014,False,15,0,0,15,15,0,0,0,0,0,0,13,2,True,True,
+fbc251625cc78cb072460ea1000bf3bf228e8432,train,Kroger,True,,7.7,False,23,23,21,0,0,2,19,18,2,4,0,0,0,,False,SC54  ATNO HUMMUS 1.00)  2.99-B | SC 5427 ATN0 HUMMUS (1.0  2.99-B | SC 3960KR0 CORN BF(1.19)  0.10-B
+fe14e6e60cd33d2f70ea9c86017986e076279b37,val,Safeway,True,,4.268,False,5,5,5,0,0,0,2,2,3,0,0,0,0,False,False,
