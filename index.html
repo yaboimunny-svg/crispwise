@@ -509,11 +509,11 @@ function foodProb(label,wordsOnly){if(!FOODNB)return null;let s=FOODNB.prior;for
 const SKIP_GLUED=/^\W*(SUB)?TOTAL[A-Z]|NU?M?BER\s*OF\s*ITEMS|ITEMS\s*SO\w{0,2}D|CHANGE\s*DUE|AMOUNT\s*DUE|(VISA|MASTERCARD|DEBIT)\s*TEND/i;
 const END=/SUB\s?-?\s?TOTAL|\*{2,}\s*TOTAL|^\W*TOTAL\W*\$?\s*\d|BALANCE\s+DUE|\bTOTAL\s+\$\s?\d/i;
 /* discounts, coupons and markdowns that belong to the item above them */
-const ABBR_CAT=[[/\bX\s?LEAN\b|EXTRA\s?LEAN|\bLN\s?GRD|\bGRD\s?BF/i,'beef'],[/\bSWEET\s?PO(T|TATO(ES)?)?\b/i,'veg'],[/\bCAN(NED)?\s?LEG/i,'pantry'],[/\bPANC(ETTA)?\b/i,'deli'],[/\bMICRO\s?POP|POPCORN/i,'snack'],[/[MH]SHRMS?\b|MSHRM/i,'mushroom'],[/\bCRL\b|\bCEREAL\b/i,'pantry'],[/\bSNK\s?PK\b/i,'snack'],[/\bPNT\b.*\b(SWT|SLT)\b|\b(SWT|SLT)\b.*\bPNT\b/i,'snack']];
+const ABBR_CAT=[[/\bX\s?LEAN\b|EXTRA\s?LEAN|\bLN\s?GRD|\bGRD\s?BF/i,'beef'],[/\bSWEET\s?PO(T|TATO(ES)?)?\b/i,'veg'],[/\bCAN(NED)?\s?LEG/i,'pantry'],[/\bPANC(ETTA)?\b/i,'deli'],[/\bMICRO\s?POP|POPCORN/i,'snack'],[/[MH]SHRMS?\b|MSHRM/i,'mushroom'],[/\bCRL\b|\bCEREAL\b/i,'pantry'],[/STRAW\w*\s?SPR|\bSPRD\b|\bSPREAD\b/i,'pantry'],[/\bCRT\s?BBY\b|BABY\s?CARROT/i,'carrot'],[/\bTONIC\b|TWIST\s?UP|\bV8\b/i,'drink'],[/MCRN\s?CHS|MAC\s?(&|N)?\s?CHEESE/i,'pantry'],[/HIMALAYAN|SEA\s?SALT|GRNDR/i,'pantry'],[/BBQ\s?CHI?X|ROTISS/i,'chicken'],[/\bSNK\s?PK\b/i,'snack'],[/\bPNT\b.*\b(SWT|SLT)\b|\b(SWT|SLT)\b.*\bPNT\b/i,'snack']];
 const PROMO=/\$?\d+[.,]\d{2}\s*ea\b|\bea\s*[oa]r\b|\d\s*\/\s*\$\s?\d|\b\d+\s*Pts\b|\b[lI1][mn]t\s?\d|\d\s*AT\s*\d+\s*FOR/i;
 const DEPT=/^\W*(\d{1,2}\s*-\s*)?(GROCERY|MEATS?|PRODUCE|DELI|FROZEN(\s+FOODS?)?|DAIRY|BAKERY(\s+COMMERCIAL)?|SEAFOOD|NATURAL\s+FOODS?|BULK\s+FOODS?|HBC|PHARMACY|GENERAL\s+MERCH\w*)\W*$/i;
 const DISC=/\bTPD\b|INSTANT\s+SAV|\bCOUPON|%\s*OFF|\bYOU\s+SAVED|\bSAVED\b|\bROLLBACK|\bREDUCED|MARK\s?DOWN|CLEARANCE|\bCLR\b|\bDISC(OUNT)?\b|^\W*-\s?\$?\d{1,3}[.,]\d{2}\W*$|\d[.,]\d{2}\s?-\s*[A-Z]?\W*$/i;
-const DISC_WORD=/\s-\s?\$?\d{1,3}[.,]\d{2}\W*$|S[AR]VED|\bWAS\s?S?\$?\s?\d|\bTPD\b|INSTANT\s+SAV|\bCOUPON|%\s*OFF|\bYOU\s+SAVED|\bSAVED\b|\bSAVINGS?\b|\bROLLBACK|\bREDUCED|MARK\s?DOWN|CLEARANCE|\bCLR\b|\bDISC(OUNT)?\b/i;
+const DISC_WORD=/CARD\s*SAV\w*|\s-\s?\$?\d{1,3}[.,]\d{2}\W*$|S[AR]VED|\bWAS\s?S?\$?\s?\d|\bTPD\b|INSTANT\s+SAV|\bCOUPON|%\s*OFF|\bYOU\s+SAVED|\bSAVED\b|\bSAVINGS?\b|\bROLLBACK|\bREDUCED|MARK\s?DOWN|CLEARANCE|\bCLR\b|\bDISC(OUNT)?\b/i;
 const MARKDOWN=/CLEARANCE|\bCLR\b|REDUCED|MARK\s?DOWN|\bMGR\s?SPEC/i;
 /* weight / multi-buy lines: "0.265 kg @ $4.94 /kg  $1.31", "2 @ 0.99" */
 const QTY=/^\W*\d+\s*@\s*\$?\d|\d\s*(kg|lb|ks)\b.*@|@\s*\$?\d+[.,]\d\d\s*\/\s*(kg|lb|ks)|\/\s*(k[gqas9]|lb|1b)\b|^\W*\d[.,]\d{2,3}\s*[xk]?\s*[gq9]?\s*[@x]?\s*\$?\d+[.,]\d\d\s*\/\s*k/i;
@@ -578,6 +578,7 @@ function receiptDate(text){
   if(m){const y=m[3].length===2?2000+ +m[3]:+m[3];
     const c=[valid(y,+m[1],+m[2]),valid(y,+m[2],+m[1])];
     if(m[3].length===2&&m[1].length===2)c.push(valid(2000+ +m[1],+m[2],+m[3]));
+    if(m[3].length===4)return c[0]||c[1];
     const now=new Date();const ok=c.filter(x=>x&&x-now<864e5);
     if(!ok.length)return c.find(Boolean)||null;
     return ok.sort((a,b)=>Math.abs(now-a)-Math.abs(now-b))[0]}
@@ -679,12 +680,21 @@ function parseReceipt(lines){
     items.push({nice:m&&m.name?m.name:null,raw:text+(m&&m.plu?'  [PLU '+m.plu+(code.organic?', organic':'')+']':''),label:m&&m.name?m.name:(label||'Item '+(upc||'')),key,guessKey:key,conf:c,ocr,match,flagged:c<THRESH,upc,upcVerified:!!(code&&code.verified),organic:!!(code&&code.organic),upcOnly:!m,price:money(priceTxt),discount:0,markdown:false})};
   lines.forEach(({text,conf})=>{
     // a name run into its code ("GRND0000050") gets its space back
-    const t=fixLine(text).replace(/@\s*[sS](?=\d)/g,'@$').replace(/^(\W*\d{11,13}\s+[A-Za-z][A-Za-z ]*[A-Za-z])(\d{1,2})(\d{2})\s*$/,'$1 $2.$3').replace(/^(\W*\d{4})([A-Za-z]{2})/,'$1 $2').replace(/(?<=\b[A-Za-z]{1,2})\.(?=[A-Za-z]{4,})/g,'').replace(/(?<=[A-Za-z].*\s)(\d{1,2})(\d{2})\.\s*$/,'$1.$2').replace(/([A-Za-z]{2,})(\d{5,})/g,'$1 $2').replace(/(\d{5,})([A-Za-z]{2})/g,'$1 $2').replace(/([A-Za-z]{3})(G?[MHI]RJ|MAJ)\b/g,'$1 $2').replace(/(?<=[A-Za-z])0(?=[A-Za-z])|\b0(?=[A-Za-z]{2,}\b)|(?<=[A-Za-z]{2})0\b/g,'O').replace(/[A-Za-z]{6,}/g,splitGlued);if(!t)return;
+    let t=fixLine(text).replace(/(?<=[A-Za-z].*\s)(\d{1,2})(\d{2})\s?([FNXTSBDEO])\s*$/,'$1.$2$3').replace(/@\s*[sS](?=\d)/g,'@$').replace(/^(\W*\d{11,13}\s+[A-Za-z][A-Za-z ]*[A-Za-z])(\d{1,2})(\d{2})\s*$/,'$1 $2.$3').replace(/^(\W*\d{4})([A-Za-z]{2})/,'$1 $2').replace(/(?<=\b[A-Za-z]{1,2})\.(?=[A-Za-z]{4,})/g,'').replace(/(?<=[A-Za-z].*\s)(\d{1,2})(\d{2})\.\s*$/,'$1.$2').replace(/([A-Za-z]{2,})(\d{5,})/g,'$1 $2').replace(/(\d{5,})([A-Za-z]{2})/g,'$1 $2').replace(/([A-Za-z]{3})(G?[MHI]RJ|MAJ)\b/g,'$1 $2').replace(/(?<=[A-Za-z])0(?=[A-Za-z])|\b0(?=[A-Za-z]{2,}\b)|(?<=[A-Za-z]{2})0\b/g,'O').replace(/[A-Za-z]{6,}/g,splitGlued);if(!t)return;
     {const d=receiptDate(t);if(d){if(!date){date=d;dateConf=conf}else if(diffDays(d,date)!==0)dateAlt=true}}
     if(ended)return;
+    /* "252.47", "182.27", "2s3.97", "38$3.78": the reader lost the "@" of "2 @ $2.47" and read it as a digit or letter.
+       Rewrite only when it makes sense here: there is an unpriced name waiting, or the line above is exactly qty x unit. */
+    {const qm=t.match(/^\W*([1-9]|1[0-2])\s*([58s9$@]{1,2})\s*\$?\s*(\d{1,3}[.,]\d{2})(?=\s*(ea|a)?\b)/i);
+     if(qm&&!/@/.test(qm[2])&&!/[A-Za-z]{3}/.test(t.replace(/\bea\b/gi,''))){const q=+qm[1],u=money(qm[3]),L=items[items.length-1];
+       if(pending||(L&&L.price&&Math.abs(L.price-q*u)<0.02))t=t.replace(qm[0],qm[1]+' @ $'+qm[3])}}
+    /* Safeway: "Regular Price 7.98  5.00S" -- the last amount is the price of the unpriced name above; otherwise the line is not an item */
+    if(/R[ae][gs][uv]?lar\s*Pri?ce/i.test(t)){const a=t.replace(/(\d)(\d{2})([A-Z])\s*$/,'$1.$2$3').match(/\d+[.,]\d{2}/g)||[];
+      if(a.length>=2&&(pending||prevName)){const nm=pending||prevName;add(nm.text,nm.conf,a[a.length-1],nm.cls);pending=null}return}
     /* weight-priced layout: "NAME CODE" / "0.280 kg @ $3.24/kg" / "$0.91 NEXTNAME CODE".
        The price after a weight line belongs to the name above the weight, and the rest of that line is the next name. */
-    {const wm=t.match(/^\W*(\d+[.,]\d{2,3})\s*(kg|lb|k[g9q8]?)(?=\W|Net|NET|$).*?(\d+[.,]\d{2})\s*\/\s*(kg|lb|k[g9q8]?)/i);
+    {let wm=t.match(/^\W*(\d+[.,]\d{2,3})\s*(kg|lb|[1I]b|k[g9q8]?)(?=\W|Net|NET|$).*?(\d+[.,]\d{2})\s*\/\s*(kg|lb|[1I]b|k[g9q8]?)/i);
+     if(!wm){const w2=t.match(/^\W*(\d+[.,]\d{2,3})\s*(lb|[1I]b)\b.*?\/\s*\.?(\d*[.,]\d{2})/i);if(w2)wm=[w2[0],w2[1],w2[2],w2[3].replace(/^[.,]/,'0.')]}
      if(wm){const expected=Math.round(+wm[1].replace(',','.')*+wm[3].replace(',','.')*100)/100;
        const tail=t.match(/(\d+[.,]\d{2,3})\D*$/);
        const nm=pending||prevName;
@@ -703,6 +713,7 @@ function parseReceipt(lines){
     {const sv=t.match(/SAV\w*\s+\$?(\d+[.,]\d{2})\s+\$?(\d+[.,]\d{2})\W*$/i);
      if(sv){const nm=pending||prevName,lastI=items[items.length-1];
        if(nm){add(nm.text,nm.conf,sv[2],nm.cls);const L=items[items.length-1];if(L&&L.price)L.discount+=money(sv[1]);pending=null;return}
+       if(lastI&&lastI.price&&lastI.qty>1){items[items.length-1].discount+=money(sv[1]);return}
        if(lastI&&lastI.price){const tot=money(sv[2]);for(let k=2;k<=6;k++)if(Math.abs(lastI.price*k-tot)<=0.02){lastI.qty=k;for(let c=1;c<k;c++)items.push({...lastI,copy:c});break}
          items[items.length-1].discount+=money(sv[1]);return}}}
     const last=items[items.length-1];
@@ -718,7 +729,7 @@ function parseReceipt(lines){
     if(MARKDOWN.test(t)&&last){last.markdown=true}
     /* price-info and points lines ("$3.99 ea or 3/$9.00", "$2.99 lmt 6, $3.79 ea", "FIBRE1 100 Pts 9.00") are not items.
        A plain amount at the very end of one is the price of the unpriced name above. */
-    if(PROMO.test(t)&&!/^\W*\d{1,2}\s*@/.test(t)){const tl=t.match(/(?<![$\/\d.,])(\d{1,3}[.,]\d{2})\s*[A-Z]?\s*$/);
+    if(PROMO.test(t)&&!/^\W*\d{1,2}\s*@/.test(t)){const tl=t.match(/(?<![$\/\d.,sS])(\d{1,3}[.,]\d{2})\s*[A-Z]?\s*$/);
       if(tl&&pending){add(pending.text,pending.conf,tl[1],pending.cls);pending=null}
       return}
     if(!PRICE.test(t)&&(/\b(GROSS|TARE|NET\s*W)/i.test(t)||/^\W*-?\d+[.,]\d{2,3}\s*(kg|k9|lb|ks)\b/i.test(t)))return;
@@ -728,7 +739,8 @@ function parseReceipt(lines){
       if(!pending&&q&&last&&last.price&&+q[1]>1&&+q[1]<=12){const unit=+(q[2]+'.'+q[3]);
         if(Math.abs(unit*+q[1]-last.price)<0.02){last.price=unit;last.qty=+q[1];for(let k=1;k<+q[1];k++)items.push({...last,copy:k})}return}
       const pm=t.match(PRICE);
-      if(pending&&pm){add(pending.text+' '+pm[1],Math.min(pending.conf,conf),pm[1]);pending=null;const L=items[items.length-1];if(L)L.fromAt=true}
+      if(pending&&pm){const unit=q?q[2]+'.'+q[3]:pm[1];add(pending.text+' '+unit,Math.min(pending.conf,conf),unit,pending.cls);pending=null;const L=items[items.length-1];
+        if(L){L.fromAt=true;const n=q?+q[1]:1;L.lineTotal=Math.round(money(unit)*n*100)/100;if(q&&n>1&&n<=12){L.qty=n;for(let k=1;k<n;k++)items.push({...L,copy:k})}}}
       return}
     if(/\bYOU\b/i.test(t)||SKIP.test(t)||SKIP_GLUED.test(t)){pending=null;return}
     const words=t.toUpperCase().replace(/[^A-Z ]/g,' ').split(/\s+/).filter(w=>w.length>=5);
@@ -744,10 +756,12 @@ function parseReceipt(lines){
       prevName=(t.match(/[A-Za-z]/g)||[]).length>=4?{text:t,conf,cls}:null;return}
     // a weight line ("0.400 kg @ $6.55/kg") carries the per-kg rate, not the item price: keep the name pending for the real price line
     if(/\d+[.,]\d{2,3}\s*(kg|lb)\b.*@|@.*\/\s*(kg|lb)\b/i.test(t))return;
-    const letters=(t.replace(PRICE,'').replace(UPCTOK,'').match(/[A-Za-z]/g)||[]).length;
+    const letters=(t.replace(PRICE,'').replace(UPCTOK,'').replace(/\b[GPMHKU]{0,3}R\.?[JQO0]\b/gi,'').match(/[A-Za-z]/g)||[]).length;
     if(letters<3){if(pending){add(pending.text+' '+pm[1],Math.min(pending.conf,conf),pm[1],pending.cls);pending=null}return}
     if(pending&&pending.code)add(pending.text,pending.conf,null,pending.cls);
     pending=null;carryPrice=null;
+    {const L=items[items.length-1],one=(t.match(/\d{1,3}[.,]\d{2}/g)||[]).length===1;
+     if(one&&L&&L.fromAt&&L.lineTotal&&Math.abs(money(pm[1])-L.lineTotal)<0.005){L.fromAt=false;pending={text:t.replace(PRICE,' ').trim(),conf,cls:classify(t.replace(PRICE,' ')),code:false};return}}
     {const all=t.match(/\d{1,3}[.,]\d{2}/g)||[],L=items[items.length-1];
      if(all.length>=2&&L&&L.fromAt&&L.price!=null&&Math.abs(money(all[all.length-1])-L.price)<0.005&&Math.abs(money(all[all.length-2])-L.price)>0.005){add(t.replace(PRICE,' '),conf,all[all.length-2]);return}}
     add(t,conf,pm[1]);
@@ -1809,13 +1823,16 @@ async function recognizePasses(isPhoto,forceTess){
     const sub=findSubtotal(lines.map(l=>l.text).join('\n'));fixByTotal(parsed,sub);
     const sum=parsed.items.reduce((a,i)=>a+(i.price||0)-(i.discount||0),0)+(parsed.nonFoodSum||0);
     /* a "subtotal" far below the items is a misread line (an item's price printed beside SUBTOTAL), not something to check against */
-    if(!sub||sub<sum*0.5||Math.abs(sum-sub)<=Math.max(.06,sub*.01))return{parsed,text};
+    /* many product-code lines with no price: the reader missed the price column, so the older reader gets a try too */
+    const coded=lines.filter(l=>/\d{9,}/.test(l.text)),bare=coded.filter(l=>!PRICE.test(fixLine(l.text))).length,thin=coded.length>=5&&bare>coded.length*0.4;
+    if(!thin&&(!sub||sub<sum*0.5||Math.abs(sum-sub)<=Math.max(.06,sub*.01)))return{parsed,text};
     // the items don't add up: also try the older reader and keep whichever comes closer to the receipt's own total
     try{setBar(.9,'Double-checking against the receipt total…');
       const keep=S.ocr;if(!S.worker){await ensureTesseract()}S.ocr=keep;if(!S.worker)throw 0;
       const alt=await recognizePasses(isPhoto,true),altSum=alt.parsed.items.reduce((a,i)=>a+(i.price||0)-(i.discount||0),0)+(alt.parsed.nonFoodSum||0);
       S.engine='paddle';
-      if(Math.abs(altSum-sub)<Math.abs(sum-sub))return{parsed:alt.parsed,text:text+'\n'+alt.text}}catch(e){S.engine='paddle'}
+      const priced=r=>r.items.filter(i=>i.price!=null).length;
+      if(thin?priced(alt.parsed)>priced(parsed):(sub&&Math.abs(altSum-sub)<Math.abs(sum-sub)))return{parsed:alt.parsed,text:text+'\n'+alt.text}}catch(e){S.engine='paddle'}
     return{parsed,text}}
   const run=async cv=>{const res=await withTimeout(S.worker.recognize(cv),240000,'Reading the receipt took too long. Try a smaller or sharper photo.');return linesFrom(res.data)};
   try{await S.worker.setParameters({tessedit_pageseg_mode:'6'})}catch(e){}
