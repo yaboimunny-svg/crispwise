@@ -633,6 +633,7 @@ function fixLine(text){
 function parseReceipt(lines){
   let date=null,dateConf=100,dateAlt=false,ended=false,pending=null;const items=[],nonFood=[],dropped=[];
   let wBuf=null; /* weight-priced item waiting for its price line */
+  const markWeighed=()=>{const l=items[items.length-1];if(l)l.weighed=true}; /* its price checks out as weight x rate */
   const add=(text,conf,priceTxt,cls)=>{
     // "1.00 OFF" / "2.50 CPN" lines are discounts on the item above, not items to add
     if(/^\W*\d+[.,]\d{2}\s*(OFF|CPN|COUPON)\b/i.test(String(text).trim()))return;
@@ -664,10 +665,10 @@ function parseReceipt(lines){
     {const wm=t.match(/^\W*(\d+[.,]\d{2,3})\s*(kg|lb|k[g9q8]?)\b.*?(\d+[.,]\d{2})\s*\/\s*(kg|lb|k[g9q8]?)/i);
      if(wm){const expected=Math.round(+wm[1].replace(',','.')*+wm[3].replace(',','.')*100)/100;
        const tail=t.match(/(\d+[.,]\d{2,3})\D*$/);
-       if(pending&&tail&&Math.abs(+tail[1].replace(',','.')-expected)<=0.02){add(pending.text,pending.conf,tail[1].slice(0,tail[1].search(/[.,]/)+3),pending.cls);pending=null;return}
+       if(pending&&tail&&Math.abs(+tail[1].replace(',','.')-expected)<=0.02){add(pending.text,pending.conf,tail[1].slice(0,tail[1].search(/[.,]/)+3),pending.cls);markWeighed();pending=null;return}
        wBuf=pending?{name:pending.text,conf:pending.conf,cls:pending.cls,expected}:null;pending=null;return}
      if(wBuf){const pm2=t.match(PRICE);
-       if(pm2&&Math.abs(money(pm2[1])-wBuf.expected)<=0.02){add(wBuf.name,wBuf.conf,pm2[1],wBuf.cls);wBuf=null;
+       if(pm2&&Math.abs(money(pm2[1])-wBuf.expected)<=0.02){add(wBuf.name,wBuf.conf,pm2[1],wBuf.cls);markWeighed();wBuf=null;
          const rest=t.replace(PRICE,' ').replace(UPCTOK,' ').trim();if((rest.match(/[A-Za-z]/g)||[]).length>=4)pending={text:rest,conf,cls:null,code:false};return}}}
     if(END.test(t)&&items.length){ended=true;return}
     const last=items[items.length-1];
@@ -725,7 +726,9 @@ function mergeParsed(list){
   Object.keys(groups).forEach(gk=>{const g=groups[gk];
     const passes=Object.values(g.passes),support=passes.length;
     /* base = the pass that saw the most items at this price; other passes vote on unknown ones */
-    const base=passes.sort((a,b)=>(b.length-a.length)||(b.reduce((x,i)=>x+i.conf,0)-a.reduce((x,i)=>x+i.conf,0)))[0].map(it=>Object.assign({},it,{support}));
+    const wt=a=>a.filter(i=>i.weighed).length;
+    /* a pass whose item at this price was checked against weight x rate knows which name the price belongs to */
+    const base=passes.sort((a,b)=>(wt(b)-wt(a))||(b.length-a.length)||(b.reduce((x,i)=>x+i.conf,0)-a.reduce((x,i)=>x+i.conf,0)))[0].map(it=>Object.assign({},it,{support}));
     const votes={};g.items.forEach(it=>{if(it.key!=='other')votes[it.key]=(votes[it.key]||0)+1});
     const used=new Set(base.map(i=>i.key));
     base.forEach(it=>{if(it.key==='other'){const k=Object.keys(votes).filter(k=>!used.has(k)).sort((a,b)=>votes[b]-votes[a])[0];
