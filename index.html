@@ -496,7 +496,8 @@ const PRICE=/(\$?\s?\d{1,3}\s?[.,'’`]\s?\d{2})\s*-?\s*[A-Z0]{0,2}\W{0,4}$/;
 const PRICE_GAP=/(?:\$|\b)(\d{1,2})\s(\d{2})\s?[A-Z0]{0,2}\W{0,4}$/;
 /* where the item list ends */
 /* things people buy at the grocery store that never go in the fridge */
-const NONFOOD=/\b(PULLOVER|LEGGINGS?|SOCKS|JEANS|HENLEY|T-?SHIRT|TEE ?SHIRT|SHORTS?|TANK ?TOP|\d{1,2}W-?\d{2}|MOTOR OIL|PEBBLES?|TOPSOIL|SEWING|ROUTER|WIFI|PARACETAMOL|IBUPROFEN|ACETAMINOPHEN|TYLENOL|ADVIL|NAPPIES|DIAPERS?|BABY ?W?IPE?S?|MUFFIN TRAY|BAKEWARE|GIFT ?CARD|LOTTERY|LOTTO|BAG FEE|BAG CHARGE|BOTTLE DEP\w*|DEPOSIT|ENVELOPES?|PAPER ?PLATES?|CUTLERY|CANDLES?|BATTERY|BATTERIES|LIGHT ?BULBS?|SHAMPOO|CONDITIONER|DEODORANT|TOOTHPASTE|FLOSS|RAZOR|SHAVE|LOTION|VITAMINS?|FAB\s?SHT|FABSHT|DRYER\s?SHEETS?|LAUND\w*|DETERG\w*|BLADES?|SENSOR\s?BLADE|PAPER\s?TOWELS?|TOWELS?|TISSUES?|KLEENEX|BOUNTY|CHARMIN|ROYALE|CASHMERE|TOILET|BATH\s?TISSUE|NAPKINS?|DETERGENT|TIDE|GAIN|DOWNY|BOUNCE|FABRIC|BLEACH|CLOROX|LYSOL|CLEANER|CLEANING|WINDEX|WIPES?|SPONGES?|DISH\s?SOAP|DAWN|CASCADE|FINISH\s?PODS?|PODS|SOAP|BODY\s?WASH|SHAMPOO|CONDITIONER|TOOTHPASTE|COLGATE|CREST|TOOTHBRUSH|FLOSS|MOUTHWASH|DEODORANT|RAZORS?|LOTION|SUNSCREEN|DIAPERS?|\bDIPR\b|\bPMPR\b|PAMPERS|HUGGIES|BABY\s?WIPES|BATTER(Y|IES)|DURACELL|ENERGIZER|FOIL|PLASTIC\s?WRAP|CLING|ZIPLOC|GARBAGE|TRASH|BIN\s?BAGS?|GLAD|CANDLES?|BULBS?|CHARGER|CABLE|HDMI|USB|GIFT\s?CARD|MAGAZINE|GREETING|SOCKS|SHIRT|PANTS|HANGERS?|ADVIL|TYLENOL|ADVIL|BAND.?AIDS?|DOG\s?FOOD|CAT\s?FOOD|LITTER|PEDIGREE|PURINA|MEOW|FLOWERS?|BOUQUET|PLANTS?|BAG\s?FEE|SHOPPING\s?BAGS?|REUSABLE\s?BAGS?|LIGHTER|MATCHES|PROPANE|CHARCOAL|MOTOR\s?OIL|WASHER\s?FLUID|LOTTO|LOTTERY)\b/i;
+const NONFOOD2=/TOWEL|TISSUE|CURTAIN|SHWR|PAINT|MAGAZINE|NEWSPAPER|GASOLINE|UNLEAD|SCOOTER|BINDER|ERASER|PEDICURE|FLOSS|LEGGING|PULLOVER|SKIRT|DRESS(?!ING)|WIPES|DETERG|(?<!UN)BLEACH(?!ED)|CLOROX|WINDEX|LISTERINE|KLEENEX|GILLETTE|SHOVEL|CHARGER|FERTILI|TOOTHP|TTHPST|NAIL ?(POL|FIL|COL)|RAWHIDE|ODOREAT|^RX ?#|\bTEE\b|TEESHIR|\bTAPE\b|SDCARD|REPLACEMENT PLAN|RPLPLAN|DISH ?SOAP|AUTODISH|LIQ ?DISH|DAWN ?ULT|SPRAY ?PAINT|INDOOR ?MAT|BATH ?MAT|DOOR ?MAT/i;
+const NONFOOD=/\b(PULLOVER|LEGGINGS?|SOCKS|JEANS|HENLEY|T-?SHIRT|TEE ?SHIRT|SHORTS?|TANK ?TOP|\d{1,2}W-?\d{2}|MOTOR OIL|PEBBLES?|TOPSOIL|SEWING|ROUTER|WIFI|PARACETAMOL|IBUPROFEN|ACETAMINOPHEN|TYLENOL|ADVIL|NAPPIES|DIAPERS?|BABY ?W?IPE?S?|MUFFIN TRAY|BAKEWARE|GIFT ?CARD|LOTTERY|LOTTO|BAG FEE|BAG CHARGE|BOTTLE DEP\w*|DEPOSIT|ENVELOPES?|PAPER ?PLATES?|CUTLERY|CANDLES?|BATTERY|BATTERIES|LIGHT ?BULBS?|SHAMPOO|CONDITIONER|DEODORANT|TOOTHPASTE|FLOSS|RAZOR|SHAVE|LOTION|VITAMINS?|FAB\s?SHT|FABSHT|DRYER\s?SHEETS?|LAUND\w*|DETERG\w*|BLADES?|SENSOR\s?BLADE|PAPER\s?TOWELS?|TOWELS?|TISSUES?|KLEENEX|BOUNTY|CHARMIN|ROYALE|CASHMERE|TOILET|BATH\s?TISSUE|NAPKINS?|DETERGENT|TIDE|GAIN|DOWNY|BOUNCE|FABRIC|(?<!UN)BLEACH(?!ED)|CLOROX|LYSOL|CLEANER|CLEANING|WINDEX|WIPES?|SPONGES?|DISH\s?SOAP|DAWN|CASCADE|FINISH\s?PODS?|PODS|SOAP|BODY\s?WASH|SHAMPOO|CONDITIONER|TOOTHPASTE|COLGATE|CREST|TOOTHBRUSH|FLOSS|MOUTHWASH|DEODORANT|RAZORS?|LOTION|SUNSCREEN|DIAPERS?|\bDIPR\b|\bPMPR\b|PAMPERS|HUGGIES|BABY\s?WIPES|BATTER(Y|IES)|DURACELL|ENERGIZER|FOIL|PLASTIC\s?WRAP|CLING|ZIPLOC|GARBAGE|TRASH|BIN\s?BAGS?|GLAD|CANDLES?|BULBS?|CHARGER|CABLE|HDMI|USB|GIFT\s?CARD|MAGAZINE|GREETING|SOCKS|SHIRT|PANTS|HANGERS?|ADVIL|TYLENOL|ADVIL|BAND.?AIDS?|DOG\s?FOOD|CAT\s?FOOD|LITTER|PEDIGREE|PURINA|MEOW|FLOWERS?|BOUQUET|PLANTS?|BAG\s?FEE|SHOPPING\s?BAGS?|REUSABLE\s?BAGS?|LIGHTER|MATCHES|PROPANE|CHARCOAL|MOTOR\s?OIL|WASHER\s?FLUID|LOTTO|LOTTERY)\b/i;
 /* Trained food / non-food model (naive Bayes on ~114,000 labelled receipt lines, lxe/receipt-line-items-taxonomy, MIT).
    It catches the long tail a word list can't: hoodies, doorbells, lawn fertiliser, phone cases. Loaded once, cached offline. */
 let FOODNB=null;
@@ -634,7 +635,10 @@ function fixLine(text){
   let t=String(text).replace(/[^\x00-\x7F]+/g,' ').trim();
   if(/LI.{0,2}[IM]?.?TED\s*.?UAN|QUAN?.?TITY\s*.?R?ICE/i.test(t))return '';
   // warehouse-club style lines: leading item numbers and house-brand prefixes (KS = Kirkland, MM = Member's Mark)
-  t=t.replace(/^\W*(\d{1,2}\s+)?\d{5,7}\s+(?=[A-Za-z])/,'').replace(/^\W*(KS|MM)\s+(?=[A-Za-z]{3})/i,'');
+  t=t.replace(/^\W*(\d{1,5}\s+)?\d{5,7}\s+(?=[A-Za-z0-9]*[A-Za-z]{2})/,'').replace(/^\W*(KS|MM)\s+(?=[A-Za-z]{3})/i,'');
+  // misread letters inside words: in a mostly-letter word, 0/1/5/6/8 are O/I/S/G/B ("OLIUE 0IL", "E660WAFFLES")
+  t=t.split(/(\s+)/).map(w=>{if(!/^[A-Za-z0-9]{3,}$/.test(w))return w;const L=(w.match(/[A-Za-z]/g)||[]).length,D=w.length-L;
+    if(D===0||L<2*D||/^\d/.test(w)&&L<3)return w;return w.replace(/[01568]/g,c=>({0:'O',1:'I',5:'S',6:'G',8:'B'})[c])}).join('');
   t=t.replace(/\b5(?=[A-Z]{3})/g,'S').replace(/\bF[O0]RK?(?=\s*(STEAK|CHOP))/i,'PORK').replace(/\bNN\s*L[DU]?NCH/i,'NN LUNCH');
   t=t.replace(/(\d):(\d{2})\s*([A-Z]?)\s*$/,'$1.$2 $3').trim();
   if(/[A-Za-z]{3}/.test(t)){
@@ -648,7 +652,7 @@ function fixLine(text){
    OCR-glued words ("CASHTEND", "YourSavings") still count. */
 const NOT_ITEM_PREFIX=['COUPON','CPN','SAVINGS','SAVED','YOUSAVED','YOURSAVINGS','CASHTEND','CHANGE','BALANCE','POINTS','PAYMENT','REGPRICE','MVPPRICE','PRICEYOUPAY','DISCOUNT','REWARD','GIFTCARD','LOYALTY','MEMBER','INSTANTSAV','MFRCOUPON','STORECOUPON','ROUNDING','SUBTOTAL','TOTAL'];
 const NOT_ITEM_EXACT=new Set(['TENDER','TENDERED','CASH','CARD','VISA','DEBIT','CREDIT','MASTERCARD','AMEX','PRICE','REG','MVP','DUE','PAID','TIP','TAX','TAXES']);
-function notAnItem(t){
+function notAnItem(t){if(/TAX/i.test(t)&&/\d\s*%/.test(t))return true;
   const up=t.toUpperCase();
   if(/X{4,}/.test(up))return true;   // masked card or account number
   const words=up.replace(/[^A-Z ]/g,' ').split(/\s+/).filter(w=>w.length>=3);
@@ -672,7 +676,7 @@ function parseReceipt(lines){
       /* an unknown line still counts as an item if it looks like words, not OCR noise */
       const words=label.split(' ').filter(w=>/^[A-Za-z']{3,}$/.test(w)||/[A-Za-z]{4,}\d/.test(w));
       if(!(words.length&&ocr>=0.45)&&!upc)return}
-    if(NONFOOD.test(label)&&(!m||m.score<0.9)){nonFood.push(label);return}
+    if((NONFOOD.test(label)||NONFOOD2.test(label.replace(/\s+/g,'')))&&(!m||m.score<0.9)){nonFood.push(label);return}
     // not a food we know for sure, and the trained model says it probably isn't food either
     // the model can overrule a loose name match too, but only when it is close to certain ("EG LAWN FERT" is not eggs)
     {const p=foodProb(label),pw=foodProb(label,true);if(p!=null&&((!m||m.score<0.9)&&p<0.35||(!m||m.score<0.98)&&pw<0.03)){nonFood.push(label);return}}
@@ -1866,9 +1870,11 @@ function flagPerishables(){S.review.forEach(r=>{if(PRODUCE.has(r.key)||/\bORG(AN
 const STORES=[[/COSTCO|C0STCO|WHOLESALE/i,'Costco'],[/WAL\s?MART/i,'Walmart'],[/DOMINO/i,"Domino's"],[/LOBLAW/i,'Loblaws'],[/NO\s?FRILLS/i,'No Frills'],[/\bMETRO\b/i,'Metro'],[/SOBEYS/i,'Sobeys'],[/FOOD\s?BASICS/i,'Food Basics'],[/FRESHCO/i,'FreshCo'],[/T\s?&\s?T/i,'T&T'],[/SHOPPERS/i,'Shoppers'],[/ZEHRS/i,'Zehrs'],[/FORTINOS/i,'Fortinos'],[/GIANT\s?TIGER/i,'Giant Tiger'],[/FARM\s?BOY/i,'Farm Boy'],[/REAL\s?CANADIAN/i,'Real Canadian Superstore'],[/LONGO/i,"Longo's"],[/WHOLE\s?FOODS/i,'Whole Foods'],[/SAFEWAY/i,'Safeway'],[/ADONIS/i,'Adonis']];
 function detectStore(t){for(const [re,n] of STORES)if(re.test(t||''))return n;return null}
 /* grand total: the largest amount on a TOTAL line that isn't a count, a saving or a before-tax figure */
-function findTotal(t){const L=String(t||'').split('\n');let best=null;
-  for(const l of L){if(!/TOTAL/i.test(l)||/SUB\s?-?TOTAL|QTY|QUANTITY|NUMBER|ITEMS?\b|SAV|DISC|EXCL|BEFORE|ROUND|TAX\s*TOTAL|POINTS?|PURCHASE|BOXES/i.test(l))continue;
-    const ms=[...l.matchAll(/(\d{1,5})[.,](\d{2})(?!\d)/g)];if(!ms.length)continue;const v=+(ms[ms.length-1][1]+'.'+ms[ms.length-1][2]);if(best==null||v>best)best=v}
+function findTotal(t){const L=String(t||'').split('\n');let best=null;const AMT=/(\d{0,5})[.,](\d{2})(?!\d)/g;
+  const KEY=/TOT[AO0]L|BAL(?:I?ANCE)?(?![A-Z])|AMOUNT\s*DUE|AMT\s*DUE/i,BAD=/SUB\s?-?T[O0]T|QTY|QUANTITY|NUMBER|ITEMS?\b|SAV|DISC|COUP|EXCL|BEFORE|ROUND|TAX\s*TOTAL|POINTS?|PURCHASE|BOXES|CHANGE|EARN|REDEEM|TENDER/i;
+  for(let i=0;i<L.length;i++){const l=L[i];if(!KEY.test(l)||BAD.test(l))continue;
+    let ms=[...l.matchAll(AMT)];if(!ms.length&&i+1<L.length&&/^\W*\$?\s*\d{0,5}[.,]\d{2}\W*$/.test(L[i+1]))ms=[...L[i+1].matchAll(AMT)];
+    if(!ms.length)continue;const m=ms[ms.length-1];const v=+((m[1]||'0')+'.'+m[2]);if(best==null||v>best)best=v}
   return best!=null?best:findSubtotal(t)}
 /* what the items should add up to: SUBTOTAL when the till prints one, otherwise the total */
 function findSubtotal(t){const L=String(t||'').split('\n');
