@@ -632,6 +632,7 @@ function fixLine(text){
   return t.trim()}
 function parseReceipt(lines){
   let date=null,dateConf=100,dateAlt=false,ended=false,pending=null;const items=[],nonFood=[],dropped=[];
+  let wBuf=null; /* weight-priced item waiting for its price line */
   const add=(text,conf,priceTxt,cls)=>{
     // "1.00 OFF" / "2.50 CPN" lines are discounts on the item above, not items to add
     if(/^\W*\d+[.,]\d{2}\s*(OFF|CPN|COUPON)\b/i.test(String(text).trim()))return;
@@ -658,6 +659,16 @@ function parseReceipt(lines){
     const t=fixLine(text).replace(/([A-Za-z]{2,})(\d{5,})/g,'$1 $2').replace(/(\d{5,})([A-Za-z]{2})/g,'$1 $2').replace(/([A-Za-z]{3})(G?[MHI]RJ|MAJ)\b/g,'$1 $2').replace(/(?<=[A-Za-z])0(?=[A-Za-z])|\b0(?=[A-Za-z]{3})/g,'O').replace(/[A-Za-z]{6,}/g,splitGlued);if(!t)return;
     {const d=receiptDate(t);if(d){if(!date){date=d;dateConf=conf}else if(diffDays(d,date)!==0)dateAlt=true}}
     if(ended)return;
+    /* weight-priced layout: "NAME CODE" / "0.280 kg @ $3.24/kg" / "$0.91 NEXTNAME CODE".
+       The price after a weight line belongs to the name above the weight, and the rest of that line is the next name. */
+    {const wm=t.match(/^\W*(\d+[.,]\d{2,3})\s*(kg|lb|k[g9q8]?)\b.*?(\d+[.,]\d{2})\s*\/\s*(kg|lb|k[g9q8]?)/i);
+     if(wm){const expected=Math.round(+wm[1].replace(',','.')*+wm[3].replace(',','.')*100)/100;
+       const tail=t.match(/(\d+[.,]\d{2,3})\D*$/);
+       if(pending&&tail&&Math.abs(+tail[1].replace(',','.')-expected)<=0.02){add(pending.text,pending.conf,tail[1].slice(0,tail[1].search(/[.,]/)+3),pending.cls);pending=null;return}
+       wBuf=pending?{name:pending.text,conf:pending.conf,cls:pending.cls,expected}:null;pending=null;return}
+     if(wBuf){const pm2=t.match(PRICE);
+       if(pm2&&Math.abs(money(pm2[1])-wBuf.expected)<=0.02){add(wBuf.name,wBuf.conf,pm2[1],wBuf.cls);wBuf=null;
+         const rest=t.replace(PRICE,' ').replace(UPCTOK,' ').trim();if((rest.match(/[A-Za-z]/g)||[]).length>=4)pending={text:rest,conf,cls:null,code:false};return}}}
     if(END.test(t)&&items.length){ended=true;return}
     const last=items[items.length-1];
     /* discounts belong to the item above */
