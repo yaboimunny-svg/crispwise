@@ -509,8 +509,8 @@ function foodProb(label,wordsOnly){if(!FOODNB)return null;let s=FOODNB.prior;for
 const SKIP_GLUED=/^\W*(SUB)?TOTAL[A-Z]|NU?M?BER\s*OF\s*ITEMS|ITEMS\s*SO\w{0,2}D|CHANGE\s*DUE|AMOUNT\s*DUE|(VISA|MASTERCARD|DEBIT)\s*TEND/i;
 const END=/SUB\s?-?\s?TOTAL|\*{2,}\s*TOTAL|^\W*TOTAL\W*\$?\s*\d|BALANCE\s+DUE|\bTOTAL\s+\$\s?\d/i;
 /* discounts, coupons and markdowns that belong to the item above them */
-const ABBR_CAT=[[/\bX\s?LEAN\b|EXTRA\s?LEAN|\bLN\s?GRD|\bGRD\s?BF/i,'beef'],[/\bSWEET\s?PO(T|TATO(ES)?)?\b/i,'veg'],[/\bCAN(NED)?\s?LEG/i,'pantry'],[/\bPANC(ETTA)?\b/i,'deli'],[/\bMICRO\s?POP|POPCORN/i,'snack'],[/[MH]SHRMS?\b|MSHRM/i,'mushroom']];
-const PROMO=/\$?\d+[.,]\d{2}\s*ea\b|\bea\s*[oa]r\b|\d\s*\/\s*\$\s?\d|\b\d+\s*Pts\b|\blmt\s?\d/i;
+const ABBR_CAT=[[/\bX\s?LEAN\b|EXTRA\s?LEAN|\bLN\s?GRD|\bGRD\s?BF/i,'beef'],[/\bSWEET\s?PO(T|TATO(ES)?)?\b/i,'veg'],[/\bCAN(NED)?\s?LEG/i,'pantry'],[/\bPANC(ETTA)?\b/i,'deli'],[/\bMICRO\s?POP|POPCORN/i,'snack'],[/[MH]SHRMS?\b|MSHRM/i,'mushroom'],[/\bCRL\b|\bCEREAL\b/i,'pantry'],[/\bSNK\s?PK\b/i,'snack'],[/\bPNT\b.*\b(SWT|SLT)\b|\b(SWT|SLT)\b.*\bPNT\b/i,'snack']];
+const PROMO=/\$?\d+[.,]\d{2}\s*ea\b|\bea\s*[oa]r\b|\d\s*\/\s*\$\s?\d|\b\d+\s*Pts\b|\b[lI1][mn]t\s?\d|\d\s*AT\s*\d+\s*FOR/i;
 const DEPT=/^\W*(\d{1,2}\s*-\s*)?(GROCERY|MEATS?|PRODUCE|DELI|FROZEN(\s+FOODS?)?|DAIRY|BAKERY(\s+COMMERCIAL)?|SEAFOOD|NATURAL\s+FOODS?|BULK\s+FOODS?|HBC|PHARMACY|GENERAL\s+MERCH\w*)\W*$/i;
 const DISC=/\bTPD\b|INSTANT\s+SAV|\bCOUPON|%\s*OFF|\bYOU\s+SAVED|\bSAVED\b|\bROLLBACK|\bREDUCED|MARK\s?DOWN|CLEARANCE|\bCLR\b|\bDISC(OUNT)?\b|^\W*-\s?\$?\d{1,3}[.,]\d{2}\W*$|\d[.,]\d{2}\s?-\s*[A-Z]?\W*$/i;
 const DISC_WORD=/\s-\s?\$?\d{1,3}[.,]\d{2}\W*$|S[AR]VED|\bWAS\s?S?\$?\s?\d|\bTPD\b|INSTANT\s+SAV|\bCOUPON|%\s*OFF|\bYOU\s+SAVED|\bSAVED\b|\bSAVINGS?\b|\bROLLBACK|\bREDUCED|MARK\s?DOWN|CLEARANCE|\bCLR\b|\bDISC(OUNT)?\b/i;
@@ -650,13 +650,15 @@ function parseReceipt(lines){
     // "1.00 OFF" / "2.50 CPN" lines are discounts on the item above, not items to add
     if(/^\W*\d+[.,]\d{2}\s*(OFF|CPN|COUPON)\b/i.test(String(text).trim()))return;
     // payment and terminal lines are not items
-    if(/\bTAX\s?\d*\b|COUPON|\bCPN\b|[X*]{4,}|\d\s?AT\s?\d+\s?FO|\d\s?FOR\s?\$?\d/i.test(String(text)))return;
+    if(/\bTAX\s?\d*\b|COUPON|\bCPN\b|[X*]{4,}|\d\s*AT\s*\d+\s*FO|\d\s*FOR\s*\$?\d/i.test(String(text)))return;
     if(/\b(TERMINAL|APPROVAL|CHANGE DUE|MCARD|VISA\s+TEND)\b/i.test(String(text)))return;
     const code=findCode(text),upc=code&&code.upc||null;
     if(code&&code.plu&&!cls){const [k,nmP]=PLU[code.plu];cls={key:k,score:0.97,plu:code.plu,name:(code.organic?'Organic ':'')+nmP}}
     prevName=null;
-    const label=text.replace(/(?<=[A-Za-z])\.(?=[A-Za-z])/g,' ').replace(PRICE,'').replace(UPCTOK,' ').replace(/\b\d{3,}\b/g,' ').replace(/[^A-Za-z0-9 %.\/'"-]/g,' ').replace(/\s+/g,' ').trim();
+    let label=text.replace(/(?<=[A-Za-z])\.(?=[A-Za-z])/g,' ').replace(PRICE,'').replace(UPCTOK,' ').replace(/\b\d{3,}\b/g,' ').replace(/[^A-Za-z0-9 %.\/'"-]/g,' ').replace(/\s+/g,' ').trim();
     const ocr=Math.max(0,Math.min(1,conf/100));
+    /* lower-case words on an upper-case line are text showing through the paper, not part of the name */
+    if((label.match(/\b[A-Z]{2,}\b/g)||[]).length>=2)label=label.split(' ').filter(w=>!/^[a-z][a-z0-9]*$/.test(w)&&!/^[a-z]+[A-Z]{1,2}[a-z0-9.]*$/.test(w)).join(' ');
     let m=cls||classify(label);
     /* common receipt abbreviations the name matcher misses */
     /* "21 GROCERY MR 2.99": an item rung up under its department number, not a header */
@@ -677,7 +679,7 @@ function parseReceipt(lines){
     items.push({nice:m&&m.name?m.name:null,raw:text+(m&&m.plu?'  [PLU '+m.plu+(code.organic?', organic':'')+']':''),label:m&&m.name?m.name:(label||'Item '+(upc||'')),key,guessKey:key,conf:c,ocr,match,flagged:c<THRESH,upc,upcVerified:!!(code&&code.verified),organic:!!(code&&code.organic),upcOnly:!m,price:money(priceTxt),discount:0,markdown:false})};
   lines.forEach(({text,conf})=>{
     // a name run into its code ("GRND0000050") gets its space back
-    const t=fixLine(text).replace(/^(\W*\d{4})([A-Za-z]{2})/,'$1 $2').replace(/(?<=\b[A-Za-z]{1,2})\.(?=[A-Za-z]{4,})/g,'').replace(/(?<=[A-Za-z].*\s)(\d{1,2})(\d{2})\.\s*$/,'$1.$2').replace(/([A-Za-z]{2,})(\d{5,})/g,'$1 $2').replace(/(\d{5,})([A-Za-z]{2})/g,'$1 $2').replace(/([A-Za-z]{3})(G?[MHI]RJ|MAJ)\b/g,'$1 $2').replace(/(?<=[A-Za-z])0(?=[A-Za-z])|\b0(?=[A-Za-z]{2,}\b)|(?<=[A-Za-z]{2})0\b/g,'O').replace(/[A-Za-z]{6,}/g,splitGlued);if(!t)return;
+    const t=fixLine(text).replace(/@\s*[sS](?=\d)/g,'@$').replace(/^(\W*\d{11,13}\s+[A-Za-z][A-Za-z ]*[A-Za-z])(\d{1,2})(\d{2})\s*$/,'$1 $2.$3').replace(/^(\W*\d{4})([A-Za-z]{2})/,'$1 $2').replace(/(?<=\b[A-Za-z]{1,2})\.(?=[A-Za-z]{4,})/g,'').replace(/(?<=[A-Za-z].*\s)(\d{1,2})(\d{2})\.\s*$/,'$1.$2').replace(/([A-Za-z]{2,})(\d{5,})/g,'$1 $2').replace(/(\d{5,})([A-Za-z]{2})/g,'$1 $2').replace(/([A-Za-z]{3})(G?[MHI]RJ|MAJ)\b/g,'$1 $2').replace(/(?<=[A-Za-z])0(?=[A-Za-z])|\b0(?=[A-Za-z]{2,}\b)|(?<=[A-Za-z]{2})0\b/g,'O').replace(/[A-Za-z]{6,}/g,splitGlued);if(!t)return;
     {const d=receiptDate(t);if(d){if(!date){date=d;dateConf=conf}else if(diffDays(d,date)!==0)dateAlt=true}}
     if(ended)return;
     /* weight-priced layout: "NAME CODE" / "0.280 kg @ $3.24/kg" / "$0.91 NEXTNAME CODE".
@@ -716,7 +718,7 @@ function parseReceipt(lines){
     if(MARKDOWN.test(t)&&last){last.markdown=true}
     /* price-info and points lines ("$3.99 ea or 3/$9.00", "$2.99 lmt 6, $3.79 ea", "FIBRE1 100 Pts 9.00") are not items.
        A plain amount at the very end of one is the price of the unpriced name above. */
-    if(PROMO.test(t)){const tl=t.match(/\s(\d{1,3}[.,]\d{2})\s*$/);
+    if(PROMO.test(t)&&!/^\W*\d{1,2}\s*@/.test(t)){const tl=t.match(/(?<![$\/\d.,])(\d{1,3}[.,]\d{2})\s*[A-Z]?\s*$/);
       if(tl&&pending){add(pending.text,pending.conf,tl[1],pending.cls);pending=null}
       return}
     if(!PRICE.test(t)&&(/\b(GROSS|TARE|NET\s*W)/i.test(t)||/^\W*-?\d+[.,]\d{2,3}\s*(kg|k9|lb|ks)\b/i.test(t)))return;
@@ -726,7 +728,7 @@ function parseReceipt(lines){
       if(!pending&&q&&last&&last.price&&+q[1]>1&&+q[1]<=12){const unit=+(q[2]+'.'+q[3]);
         if(Math.abs(unit*+q[1]-last.price)<0.02){last.price=unit;last.qty=+q[1];for(let k=1;k<+q[1];k++)items.push({...last,copy:k})}return}
       const pm=t.match(PRICE);
-      if(pending&&pm){add(pending.text+' '+pm[1],Math.min(pending.conf,conf),pm[1]);pending=null}
+      if(pending&&pm){add(pending.text+' '+pm[1],Math.min(pending.conf,conf),pm[1]);pending=null;const L=items[items.length-1];if(L)L.fromAt=true}
       return}
     if(/\bYOU\b/i.test(t)||SKIP.test(t)||SKIP_GLUED.test(t)){pending=null;return}
     const words=t.toUpperCase().replace(/[^A-Z ]/g,' ').split(/\s+/).filter(w=>w.length>=5);
@@ -746,6 +748,8 @@ function parseReceipt(lines){
     if(letters<3){if(pending){add(pending.text+' '+pm[1],Math.min(pending.conf,conf),pm[1],pending.cls);pending=null}return}
     if(pending&&pending.code)add(pending.text,pending.conf,null,pending.cls);
     pending=null;carryPrice=null;
+    {const all=t.match(/\d{1,3}[.,]\d{2}/g)||[],L=items[items.length-1];
+     if(all.length>=2&&L&&L.fromAt&&L.price!=null&&Math.abs(money(all[all.length-1])-L.price)<0.005&&Math.abs(money(all[all.length-2])-L.price)>0.005){add(t.replace(PRICE,' '),conf,all[all.length-2]);return}}
     add(t,conf,pm[1]);
   });
   if(pending&&pending.code&&!ended)add(pending.text,pending.conf,null,pending.cls);
@@ -806,7 +810,7 @@ function status(it){const r=rem(it);
 const flagCls=c=>c<.6?'bad':'warn';
 const sorted=()=>S.inv.filter(i=>!i.used).sort((a,b)=>rem(a)-rem(b));
 /* Product names: the receipt's own wording, with store abbreviations spelled out. The food type is shown underneath. */
-const ABBR={YU:'Yu',MSHRMS:'Mushrooms',HSHRMS:'Mushrooms',PCHSHRMS:'PC Mushrooms',PCMSHRMS:'PC Mushrooms',BULK:'Bulk',BLKBARN:'Bulk Barn',NESTS:'Nests',FREE:'Free',OATS:'Oats',FIBER:'Fiber',FIBRE:'Fibre',FLL:'Field',FLD:'Field',GRNS:'Greens',SLD:'Salad',CHI:'Chicken',CRUM:'Drumsticks',DRUM:'Drumsticks',STL:'Stella',PAR:'Parmesan',KFT:'Kraft',SIG:'Signature',RASP:'Raspberry',VIN:'Vinaigrette',DAIR:'Dairyland',CHO:'Chocolate',TAGLIATELLE:'Tagliatelle',BOCCONCINI:'Bocconcini',PC:'PC',PO:'PC',BRWN:'Brown',BRUN:'Brown',CAK:'Cakes',CAKS:'Cakes',CRACKR:'Crackers',CRKR:'Crackers',NT2U:'Nuts to You',PISTA:'Pistachio',IMAG:'Imagine',BRTH:'Broth',CHK:'Chicken',LS:'Low Sodium',SDL:'Seedless',PURP:'Purple',PRESERV:'Preserves',PRESERU:'Preserves',PRSRV:'Preserves',VEG:'Vegetable',NN:'No Name',BLK:'Black',DEMP:"Dempster's",WWH:'Whole Wheat',WW:'Whole Wheat',GRN:'Green',PEP:'Pepper',GRD:'Ground',BF:'Beef',CHD:'Cheddar',SMK:'Smokies',OJ:'Orange Juice',PINEAP:'Pineapple',JU:'Juice',JCE:'Juice',HOMO:'Homo',MED:'Méditerranée',LG:'Large',ORG:'Organic',BNNA:'Bananas',BNN:'Bananas',CHKN:'Chicken',BRST:'Breast',BNLS:'Boneless',SKNLS:'Skinless',MLK:'Milk',YGRT:'Yogurt',YGT:'Yogurt',GRK:'Greek',SPNCH:'Spinach',BBY:'Baby',SLMN:'Salmon',FLT:'Fillet',BRD:'Bread',WHL:'Whole',WHT:'Wheat',TOM:'Tomatoes',GV:'Great Value',KS:'Kirkland Signature',LIBERTE:'Liberté',BRIOCHE:'Brioche',BUN:'Buns',BUNS:'Buns',HMBRG:'Hamburger',HMB:'Hamburger',BGR:'Burger',STRWB:'Strawberries',FRZ:'Frozen',CKD:'Cooked',SLCD:'Sliced',SHRD:'Shredded',MOZZ:'Mozzarella',PARM:'Parmesan',CRM:'Cream',BTR:'Butter',VICKIES:"Vickie's",WELCHS:"Welch's",WELCH:"Welch's",FILET:'Fillet',SLICE:'Slices',TKY:'Turkey',TRKY:'Turkey',SSG:'Sausage',POT:'Potatoes',ONI:'Onions',CUC:'Cucumber',LTTC:'Lettuce',BROC:'Broccoli',MSHRM:'Mushrooms',AVO:'Avocado',APL:'Apples',GRP:'Grapes'};
+const ABBR={SWT:'Sweet',SLT:'Salty',PNT:'Peanut',CRNBRY:'Cranberry',CRL:'Cereal',KTCHN:'Kitchen',YU:'Yu',MSHRMS:'Mushrooms',HSHRMS:'Mushrooms',PCHSHRMS:'PC Mushrooms',PCMSHRMS:'PC Mushrooms',BULK:'Bulk',BLKBARN:'Bulk Barn',NESTS:'Nests',FREE:'Free',OATS:'Oats',FIBER:'Fiber',FIBRE:'Fibre',FLL:'Field',FLD:'Field',GRNS:'Greens',SLD:'Salad',CHI:'Chicken',CRUM:'Drumsticks',DRUM:'Drumsticks',STL:'Stella',PAR:'Parmesan',KFT:'Kraft',SIG:'Signature',RASP:'Raspberry',VIN:'Vinaigrette',DAIR:'Dairyland',CHO:'Chocolate',TAGLIATELLE:'Tagliatelle',BOCCONCINI:'Bocconcini',PC:'PC',PO:'PC',BRWN:'Brown',BRUN:'Brown',CAK:'Cakes',CAKS:'Cakes',CRACKR:'Crackers',CRKR:'Crackers',NT2U:'Nuts to You',PISTA:'Pistachio',IMAG:'Imagine',BRTH:'Broth',CHK:'Chicken',LS:'Low Sodium',SDL:'Seedless',PURP:'Purple',PRESERV:'Preserves',PRESERU:'Preserves',PRSRV:'Preserves',VEG:'Vegetable',NN:'No Name',BLK:'Black',DEMP:"Dempster's",WWH:'Whole Wheat',WW:'Whole Wheat',GRN:'Green',PEP:'Pepper',GRD:'Ground',BF:'Beef',CHD:'Cheddar',SMK:'Smokies',OJ:'Orange Juice',PINEAP:'Pineapple',JU:'Juice',JCE:'Juice',HOMO:'Homo',MED:'Méditerranée',LG:'Large',ORG:'Organic',BNNA:'Bananas',BNN:'Bananas',CHKN:'Chicken',BRST:'Breast',BNLS:'Boneless',SKNLS:'Skinless',MLK:'Milk',YGRT:'Yogurt',YGT:'Yogurt',GRK:'Greek',SPNCH:'Spinach',BBY:'Baby',SLMN:'Salmon',FLT:'Fillet',BRD:'Bread',WHL:'Whole',WHT:'Wheat',TOM:'Tomatoes',GV:'Great Value',KS:'Kirkland Signature',LIBERTE:'Liberté',BRIOCHE:'Brioche',BUN:'Buns',BUNS:'Buns',HMBRG:'Hamburger',HMB:'Hamburger',BGR:'Burger',STRWB:'Strawberries',FRZ:'Frozen',CKD:'Cooked',SLCD:'Sliced',SHRD:'Shredded',MOZZ:'Mozzarella',PARM:'Parmesan',CRM:'Cream',BTR:'Butter',VICKIES:"Vickie's",WELCHS:"Welch's",WELCH:"Welch's",FILET:'Fillet',SLICE:'Slices',TKY:'Turkey',TRKY:'Turkey',SSG:'Sausage',POT:'Potatoes',ONI:'Onions',CUC:'Cucumber',LTTC:'Lettuce',BROC:'Broccoli',MSHRM:'Mushrooms',AVO:'Avocado',APL:'Apples',GRP:'Grapes'};
 const WORDS='BEAN BEANS SPROUTS OAT OATS ZERO CURRY GROUND LEAN MEDIUM EXTRA FRESH FROZEN ORGANIC WHOLE WHEAT WHITE BROWN LARGE SMALL BABY GREEN RED YELLOW SWEET SLICED SLICES SMOKED SMOKIES BONELESS SKINLESS BREAST THIGHS FILLET STEAK LOAF BUNS BURGER HOT DOG DOGS CHEDDAR MARBLE CREAM SOUR JUICE ORANGE APPLE PINEAPPLE GRAPE LEMON LIME MILK HOMO SKIM BUTTER YOGURT GREEK VANILLA PLAIN STRAWBERRY STRAWBERRIES BLUEBERRY BLUEBERRIES BANANA BANANAS TOMATO TOMATOES POTATO POTATOES ONION ONIONS PEPPER PEPPERS LETTUCE ROMAINE SPINACH CARROT CARROTS CUCUMBER BROCCOLI MUSHROOM MUSHROOMS CABBAGE GRAPES PEAR PEARS APPLES AVOCADO AVOCADOS BREAD BAGELS TORTILLA TORTILLAS WRAPS PITA RICE PASTA SUGAR FLOUR SALT CHIPS COOKIES CRACKERS SNACKS CHICKEN BEEF PORK LAMB TURKEY SAUSAGE SAUSAGES BACON HAM SALMON TUNA SHRIMP EGGS CHEESE PIZZA WATER SODA POP TEA ICED COFFEE PACK BRIOCHE HAMBURGER MOZZARELLA PARMESAN FETA DELI WINGS DRUMSTICKS ROAST MINCED CHUNKS FRUIT SNACK CEREAL OATS GRANOLA HONEY JAM PEANUT CHOCOLATE FREE RUN RANGE NATURAL CLASSIC ORIGINAL DIET ZERO LIGHT FAMILY SIZE FAIRLIFE NATREL LACTANTIA NEILSON BEATRICE DEMPSTERS WONDER CHRISTIES OASIS TROPICANA SIMPLY NESTEA LIBERTE ACTIVIA OIKOS IOGO DANONE ASTRO KRAFT SCHNEIDERS BURNBRAE GRAY RIDGE KIRKLAND SIGNATURE GREAT VALUE COMPLIMENTS SELECTION SAPUTO ARMSTRONG OLYMPIC SILK ALMOND OAT LAYS DORITOS PRINGLES OREO RITZ GOLDFISH HEINZ CAMPBELLS KELLOGGS CHEERIOS QUAKER DOLE CHIQUITA SUNKIST ZESPRI PRESIDENTS CHOICE KARTAGO VERKA PURFILTRE MAPLE LEAF CRACKER BARREL PHILADELPHIA BABYBEL TROPICANA MINUTE MAID COKE PEPSI SPRITE GATORADE'.split(' ');
 let VOCAB=null;
 function vocab(){if(VOCAB)return VOCAB;VOCAB=new Set(WORDS);FOOD_KEYS.forEach(k=>FOOD[k].kw.forEach(w=>VOCAB.add(w)));Object.keys(ABBR).forEach(k=>VOCAB.add(k));Object.values(ABBR).forEach(v=>v.toUpperCase().replace(/[^A-ZÉ' ]/g,'').split(' ').forEach(w=>w&&VOCAB.add(w)));return VOCAB}
@@ -827,6 +831,8 @@ function splitGlued(w){const V=vocab(),U=w.toUpperCase();if(V.has(U)||U.length>2
 function prettyName(r){
   if(r.nice)return r.nice;
   const low=r.ocr!=null&&r.ocr<0.68;
+  // lower-case words on an upper-case receipt line are text showing through from the back of the paper
+  {const raw=String(r.label||'');if((raw.match(/\b[A-Z]{2,}\b/g)||[]).length>=2)r={...r,label:raw.split(/\s+/).filter(w=>!/^[a-z][a-z0-9]*$/.test(w)&&!/^[a-z]+[A-Z]{1,2}[a-z0-9.]*$/.test(w)).join(' ')}}
   // a zero read inside a word is the letter O ("EAR0 0AT" -> "EARO OAT")
   let t=String(r.label||'').replace(/(?<=[A-Za-z]{2})0\b|\b0(?=[A-Za-z]{2}\b)/g,'O');
   // word pairs a till abbreviates back to front
