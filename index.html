@@ -694,7 +694,7 @@ function parseReceipt(lines){
     const pct=it.discountPct||(it.price&&it.discount?it.discount/(it.price):0);
     it.discountPct=pct;
     if(it.markdown||pct>=0.3){it.clearance=true;it.flagged=true}});
-  return{date,items,dateConf,dateAlt,nonFood,dropped}}
+  return{date,items,dateConf,dateAlt,nonFood,dropped:dropped.filter(d=>!/\b(off|coupon|savings?|saved)\b/i.test(d.text))}}
 /* Several OCR passes over differently prepared images: keep what they agree on, fill gaps from the others. */
 function sharesWord(a,b){const w=x=>new Set(x.toUpperCase().match(/[A-Z]{4,}/g)||[]);const A=w(a);for(const t of w(b))if(A.has(t))return true;return false}
 function mergeParsed(list){
