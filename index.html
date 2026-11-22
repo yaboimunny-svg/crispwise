@@ -677,12 +677,12 @@ function parseReceipt(lines){
     items.push({nice:m&&m.name?m.name:null,raw:text+(m&&m.plu?'  [PLU '+m.plu+(code.organic?', organic':'')+']':''),label:m&&m.name?m.name:(label||'Item '+(upc||'')),key,guessKey:key,conf:c,ocr,match,flagged:c<THRESH,upc,upcVerified:!!(code&&code.verified),organic:!!(code&&code.organic),upcOnly:!m,price:money(priceTxt),discount:0,markdown:false})};
   lines.forEach(({text,conf})=>{
     // a name run into its code ("GRND0000050") gets its space back
-    const t=fixLine(text).replace(/(?<=\b[A-Za-z]{1,2})\.(?=[A-Za-z]{4,})/g,'').replace(/(?<=[A-Za-z].*\s)(\d{1,2})(\d{2})\.\s*$/,'$1.$2').replace(/([A-Za-z]{2,})(\d{5,})/g,'$1 $2').replace(/(\d{5,})([A-Za-z]{2})/g,'$1 $2').replace(/([A-Za-z]{3})(G?[MHI]RJ|MAJ)\b/g,'$1 $2').replace(/(?<=[A-Za-z])0(?=[A-Za-z])|\b0(?=[A-Za-z]{2,}\b)|(?<=[A-Za-z]{2})0\b/g,'O').replace(/[A-Za-z]{6,}/g,splitGlued);if(!t)return;
+    const t=fixLine(text).replace(/^(\W*\d{4})([A-Za-z]{2})/,'$1 $2').replace(/(?<=\b[A-Za-z]{1,2})\.(?=[A-Za-z]{4,})/g,'').replace(/(?<=[A-Za-z].*\s)(\d{1,2})(\d{2})\.\s*$/,'$1.$2').replace(/([A-Za-z]{2,})(\d{5,})/g,'$1 $2').replace(/(\d{5,})([A-Za-z]{2})/g,'$1 $2').replace(/([A-Za-z]{3})(G?[MHI]RJ|MAJ)\b/g,'$1 $2').replace(/(?<=[A-Za-z])0(?=[A-Za-z])|\b0(?=[A-Za-z]{2,}\b)|(?<=[A-Za-z]{2})0\b/g,'O').replace(/[A-Za-z]{6,}/g,splitGlued);if(!t)return;
     {const d=receiptDate(t);if(d){if(!date){date=d;dateConf=conf}else if(diffDays(d,date)!==0)dateAlt=true}}
     if(ended)return;
     /* weight-priced layout: "NAME CODE" / "0.280 kg @ $3.24/kg" / "$0.91 NEXTNAME CODE".
        The price after a weight line belongs to the name above the weight, and the rest of that line is the next name. */
-    {const wm=t.match(/^\W*(\d+[.,]\d{2,3})\s*(kg|lb|k[g9q8]?)\b.*?(\d+[.,]\d{2})\s*\/\s*(kg|lb|k[g9q8]?)/i);
+    {const wm=t.match(/^\W*(\d+[.,]\d{2,3})\s*(kg|lb|k[g9q8]?)(?=\W|Net|NET|$).*?(\d+[.,]\d{2})\s*\/\s*(kg|lb|k[g9q8]?)/i);
      if(wm){const expected=Math.round(+wm[1].replace(',','.')*+wm[3].replace(',','.')*100)/100;
        const tail=t.match(/(\d+[.,]\d{2,3})\D*$/);
        const nm=pending||prevName;
@@ -730,7 +730,7 @@ function parseReceipt(lines){
       return}
     if(/\bYOU\b/i.test(t)||SKIP.test(t)||SKIP_GLUED.test(t)){pending=null;return}
     const words=t.toUpperCase().replace(/[^A-Z ]/g,' ').split(/\s+/).filter(w=>w.length>=5);
-    if(words.some(w=>NOISE.some(n=>lev(w,n)<=(n.length>=7?2:1)))){pending=null;dropped.push({text:t,why:'noise word'});return}
+    if(words.some(w=>NOISE.some(n=>Math.abs(w.length-n.length)<=1&&lev(w,n)<=(n.length>=7?2:1)))){pending=null;dropped.push({text:t,why:'noise word'});return}
     let pm=t.match(PRICE);if(!pm){const g=t.match(PRICE_GAP);if(g&&/[A-Za-z]{3}/.test(t))pm=[g[0],g[1]+'.'+g[2]]}
     if(!pm){
       if(carryPrice&&(t.match(/[A-Za-z]/g)||[]).length>=4){add(t,conf,carryPrice);carryPrice=null;pending=null;return}
