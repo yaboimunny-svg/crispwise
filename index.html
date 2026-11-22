@@ -642,7 +642,7 @@ function parseReceipt(lines){
       /* an unknown line still counts as an item if it looks like words, not OCR noise */
       const words=label.split(' ').filter(w=>/^[A-Za-z']{3,}$/.test(w));
       if(!(words.length&&ocr>=0.45)&&!upc){dropped.push({text:label||text,why:'unrecognised'});return}}
-    if(NONFOOD.test(label)&&(!m||m.score<0.9)){nonFood.push(label);dropped.push({text:label,why:'non-food'});return}
+    if(NONFOOD.test(label)&&(!m||m.score<0.9)){nonFood.push(label);if(!/\b(OFF|SAVE|SAVED|COUPON|MFR|CARTWHEEL)\b/i.test(label))dropped.push({text:label,why:'non-food'});return}
     // not a food we know for sure, and the trained model says it probably isn't food either
     // the model can overrule a loose name match too, but only when it is close to certain ("EG LAWN FERT" is not eggs)
     {const p=foodProb(label),pw=foodProb(label,true);if(p!=null&&((!m||m.score<0.9)&&p<0.35||(!m||m.score<0.98)&&pw<0.03)){nonFood.push(label);dropped.push({text:label,why:'non-food'});return}}
