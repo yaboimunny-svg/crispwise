@@ -509,7 +509,7 @@ function foodProb(label,wordsOnly){if(!FOODNB)return null;let s=FOODNB.prior;for
 const SKIP_GLUED=/^\W*(SUB)?TOTAL[A-Z]|NU?M?BER\s*OF\s*ITEMS|ITEMS\s*SO\w{0,2}D|CHANGE\s*DUE|AMOUNT\s*DUE|(VISA|MASTERCARD|DEBIT)\s*TEND/i;
 const END=/SUB\s?-?\s?TOTAL|\*{2,}\s*TOTAL|^\W*TOTAL\W*\$?\s*\d|BALANCE\s+DUE|\bTOTAL\s+\$\s?\d/i;
 /* discounts, coupons and markdowns that belong to the item above them */
-const ABBR_CAT=[[/\bX\s?LEAN\b|EXTRA\s?LEAN|\bLN\s?GRD|\bGRD\s?BF/i,'beef'],[/\bSWEET\s?PO(T|TATO(ES)?)?\b/i,'veg'],[/\bCAN(NED)?\s?LEG/i,'pantry'],[/\bPANC(ETTA)?\b/i,'deli']];
+const ABBR_CAT=[[/\bX\s?LEAN\b|EXTRA\s?LEAN|\bLN\s?GRD|\bGRD\s?BF/i,'beef'],[/\bSWEET\s?PO(T|TATO(ES)?)?\b/i,'veg'],[/\bCAN(NED)?\s?LEG/i,'pantry'],[/\bPANC(ETTA)?\b/i,'deli'],[/\bMICRO\s?POP|POPCORN/i,'snack']];
 const PROMO=/\$?\d+[.,]\d{2}\s*ea\b|\bea\s*[oa]r\b|\d\s*\/\s*\$\s?\d|\b\d+\s*Pts\b|\blmt\s?\d/i;
 const DEPT=/^\W*(\d{1,2}\s*-\s*)?(GROCERY|MEATS?|PRODUCE|DELI|FROZEN(\s+FOODS?)?|DAIRY|BAKERY(\s+COMMERCIAL)?|SEAFOOD|NATURAL\s+FOODS?|BULK\s+FOODS?|HBC|PHARMACY|GENERAL\s+MERCH\w*)\W*$/i;
 const DISC=/\bTPD\b|INSTANT\s+SAV|\bCOUPON|%\s*OFF|\bYOU\s+SAVED|\bSAVED\b|\bROLLBACK|\bREDUCED|MARK\s?DOWN|CLEARANCE|\bCLR\b|\bDISC(OUNT)?\b|^\W*-\s?\$?\d{1,3}[.,]\d{2}\W*$|\d[.,]\d{2}\s?-\s*[A-Z]?\W*$/i;
@@ -659,7 +659,7 @@ function parseReceipt(lines){
     const ocr=Math.max(0,Math.min(1,conf/100));
     let m=cls||classify(label);
     /* common receipt abbreviations the name matcher misses */
-    if(!m||m.key==='other'){const ab=ABBR_CAT.find(([re])=>re.test(label));if(ab)m={key:ab[1],score:0.85,name:null}}
+    {const ab=ABBR_CAT.find(([re])=>re.test(label));if(ab)m={key:ab[1],score:0.98,name:null}}
     /* "BEA HOM 2L" / "BEA SKIM 2L" / "BEA 1 4L": dairy brand shorthand with a litre size is milk */
     if((!m||m.key==='other')&&/^\W*BE[AR]\s?[\dA-Z]*\b/i.test(label)&&/(HOMO?|HOK|SKI[MH]|\b[12]\s?%|\b[124]\s?L\b|[124]L?J?\b|ZL\b)/i.test(label))m={key:'milk',score:0.9,name:['Milk',(label.match(/SKI[MH]/i)&&'skim')||(label.match(/HO[MK]/i)&&'homo')||(label.match(/\b1\b/)&&'1%')||'',((label.match(/([124])\s?L/i)||[])[1]||'2')+'L'].filter(Boolean).join(' ')};
     if(!m){
