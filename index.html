@@ -580,7 +580,7 @@ const title=s=>s.toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());
 function gtinOk(d){const n=d.length;let s=0;for(let i=n-2;i>=0;i--)s+=(+d[i])*(((n-2-i)%2===0)?3:1);return (10-s%10)%10===+d[n-1]}
 const UPCTOK=/[0-9OoIl|SBZ]{11,14}/g;
 /* Produce PLU codes (IFPS). A 5-digit code starting with 9 is the organic version. */
-const PLU={4011:['banana','Bananas'],4065:['pepper','Green peppers'],4088:['pepper','Red peppers'],4688:['pepper','Red peppers'],4689:['pepper','Yellow peppers'],
+const PLU={4011:['banana','Bananas'],4065:['pepper','Green peppers'],4088:['pepper','Red peppers'],4688:['pepper','Red peppers'],4689:['pepper','Yellow peppers'],4067:['veg','Zucchini'],3082:['broccoli','Broccoli crowns'],
  4664:['tomato','Tomatoes on the vine'],4087:['tomato','Roma tomatoes'],4796:['tomato','Cherry tomatoes'],4799:['tomato','Tomatoes'],4062:['cucumber','Cucumber'],4593:['cucumber','English cucumber'],
  4060:['broccoli','Broccoli'],4072:['potato','Russet potatoes'],4093:['onion','Yellow onions'],4082:['onion','Red onions'],4166:['onion','Sweet onions'],
  4131:['apple','Fuji apples'],4133:['apple','Gala apples'],4017:['apple','Granny Smith apples'],4016:['apple','Red Delicious apples'],3283:['apple','Honeycrisp apples'],4128:['apple','Pink Lady apples'],
@@ -596,7 +596,9 @@ function findCode(t){
     const d=tok.replace(/[Oo]/g,'0').replace(/[Il|]/g,'1').replace(/S/g,'5').replace(/B/g,'8').replace(/Z/g,'2');
     if(!/^\d+$/.test(d))continue;
     const pm=d.match(/^0{4,}(9?\d{4})\d?$/);
-    if(pm&&d.length>=11){const n=+pm[1];const organic=n>=90000;const base=organic?n-90000:n;if(PLU[base])return{plu:base,organic}}
+    if(pm&&d.length>=11){const n=+pm[1];const organic=n>=90000;const base=organic?n-90000:n;if(PLU[base])return{plu:base,organic};
+      /* a zero-padded produce code we do not know is still a store code, not a UPC: looking it up online returns unrelated products */
+      return null}
     if((d.length===12||d.length===13)&&gtinOk(d))return{upc:d,verified:true};
     if(d.length===12)return{upc:d.slice(0,11)+upcCheck(d.slice(0,11)),verified:false}}
   return null}
@@ -669,7 +671,7 @@ function parseReceipt(lines){
        wBuf=pending?{name:pending.text,conf:pending.conf,cls:pending.cls,expected}:null;pending=null;return}
      if(wBuf){const pm2=t.match(PRICE);
        if(pm2&&Math.abs(money(pm2[1])-wBuf.expected)<=0.02){add(wBuf.name,wBuf.conf,pm2[1],wBuf.cls);markWeighed();wBuf=null;
-         const rest=t.replace(PRICE,' ').replace(UPCTOK,' ').trim();if((rest.match(/[A-Za-z]/g)||[]).length>=4)pending={text:rest,conf,cls:null,code:false};return}}}
+         const rest=t.replace(PRICE,' ').trim();if((rest.match(/[A-Za-z]/g)||[]).length>=4)pending={text:rest,conf,cls:null,code:false};return}}}
     if(END.test(t)&&items.length){ended=true;return}
     const last=items[items.length-1];
     /* discounts belong to the item above */
@@ -1742,11 +1744,21 @@ async function ppRead(src,onProg){
    (benchmarked on real Costco, Walmart and Domino's receipts: 1 pass 74-78%, 3 passes 96% of items right). */
 const PASSES=[{label:'sharpened',opts:{C:8,width:1300}},{label:'shadows removed',opts:{mode:'flat',gain:3,width:1800}},{label:'high contrast',opts:{mode:'flat',gain:3,width:1300,lo:100,hi:215}}];
 const fmtLines=lines=>lines.map(l=>l.text.trim()+'   ['+Math.round(l.conf)+'%]').join('\n');
+/* One misread price (a stray leading digit, "53.16" for "3.16") shows up as the items not adding up to the subtotal.
+   If dropping one item's leading digit makes them add up exactly, that was the misread. */
+function fixByTotal(parsed,sub){
+  if(!sub||!parsed||!parsed.items.length)return;
+  const sum=parsed.items.reduce((a,i)=>a+(i.price||0)-(i.discount||0),0);
+  if(Math.abs(sum-sub)<=0.02)return;
+  for(const it of parsed.items){if(!it.price||it.price<10)continue;
+    const s=it.price.toFixed(2),alt=+s.slice(1);
+    if(Math.abs(sum-it.price+alt-sub)<=0.02){it.price=alt;it.priceFixed=true;return}}}
 async function recognizePasses(isPhoto,forceTess){
   if(S.engine==='paddle'&&!forceTess){
     const lines=await withTimeout(ppRead(isPhoto?S.img:S.canvas,p=>setBar(.05+.9*p,p<.25?'Finding the lines of text…':'Reading line by line…')),180000,'Reading the receipt took too long. Try a smaller or sharper photo.');
     const text='--- PaddleOCR ---\n'+fmtLines(lines),parsed=parseReceipt(lines);
-    const sub=findSubtotal(lines.map(l=>l.text).join('\n')),sum=parsed.items.reduce((a,i)=>a+(i.price||0)-(i.discount||0),0);
+    const sub=findSubtotal(lines.map(l=>l.text).join('\n'));fixByTotal(parsed,sub);
+    const sum=parsed.items.reduce((a,i)=>a+(i.price||0)-(i.discount||0),0);
     if(!sub||Math.abs(sum-sub)<=Math.max(.06,sub*.01))return{parsed,text};
     // the items don't add up: also try the older reader and keep whichever comes closer to the receipt's own total
     try{setBar(.9,'Double-checking against the receipt total…');
