@@ -510,7 +510,7 @@ const SKIP_GLUED=/^\W*(SUB)?TOTAL[A-Z]|NU?M?BER\s*OF\s*ITEMS|ITEMS\s*SO\w{0,2}D|
 const END=/SUB\s?-?\s?TOTAL|\*{2,}\s*TOTAL|^\W*TOTAL\W*\$?\s*\d|BALANCE\s+DUE|\bTOTAL\s+\$\s?\d/i;
 /* discounts, coupons and markdowns that belong to the item above them */
 const DISC=/\bTPD\b|INSTANT\s+SAV|\bCOUPON|%\s*OFF|\bYOU\s+SAVED|\bSAVED\b|\bROLLBACK|\bREDUCED|MARK\s?DOWN|CLEARANCE|\bCLR\b|\bDISC(OUNT)?\b|^\W*-\s?\$?\d{1,3}[.,]\d{2}\W*$|\d[.,]\d{2}\s?-\s*[A-Z]?\W*$/i;
-const DISC_WORD=/\bTPD\b|INSTANT\s+SAV|\bCOUPON|%\s*OFF|\bYOU\s+SAVED|\bSAVED\b|\bSAVINGS?\b|\bROLLBACK|\bREDUCED|MARK\s?DOWN|CLEARANCE|\bCLR\b|\bDISC(OUNT)?\b/i;
+const DISC_WORD=/S[AR]VED|\bWAS\s?S?\$?\s?\d|\bTPD\b|INSTANT\s+SAV|\bCOUPON|%\s*OFF|\bYOU\s+SAVED|\bSAVED\b|\bSAVINGS?\b|\bROLLBACK|\bREDUCED|MARK\s?DOWN|CLEARANCE|\bCLR\b|\bDISC(OUNT)?\b/i;
 const MARKDOWN=/CLEARANCE|\bCLR\b|REDUCED|MARK\s?DOWN|\bMGR\s?SPEC/i;
 /* weight / multi-buy lines: "0.265 kg @ $4.94 /kg  $1.31", "2 @ 0.99" */
 const QTY=/^\W*\d+\s*@\s*\$?\d|\d\s*(kg|lb|ks)\b.*@|@\s*\$?\d+[.,]\d\d\s*\/\s*(kg|lb|ks)|\/\s*(k[gqas9]|lb|1b)\b|^\W*\d[.,]\d{2,3}\s*[xk]?\s*[gq9]?\s*[@x]?\s*\$?\d+[.,]\d\d\s*\/\s*k/i;
@@ -678,10 +678,12 @@ function parseReceipt(lines){
     if(END.test(t)&&items.length){ended=true;return}
     const last=items[items.length-1];
     /* discounts belong to the item above */
+    if(!last&&DISC_WORD.test(t))return;
     if(last&&(DISC_WORD.test(t)||(DISC.test(t)&&!classify(t.replace(DISC,' '))))){
       const pct=t.match(/(\d{1,2})\s?%/);const amt=money(t.replace(/.*?(\d{1,3}\s?[.,]\s?\d{2})\D*$/,'$1'));
       if(pct)last.discountPct=Math.max(last.discountPct||0,+pct[1]/100);
-      if(amt&&(!last.price||amt<last.price))last.discount+=amt;
+      /* "WAS $5.00 YOU SAVED $5.00" under a $0.00 line: the item was free, there is nothing to take off */
+      if(amt&&last.price!==0&&(!last.price||amt<last.price))last.discount+=amt;
       if(MARKDOWN.test(t))last.markdown=true;
       return}
     if(MARKDOWN.test(t)&&last){last.markdown=true}
