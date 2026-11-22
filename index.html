@@ -631,7 +631,7 @@ function fixLine(text){
     if(/^[^0-9]*[A-Za-z&]{2,}\s+\d{2}\s*$/.test(t))t=t.replace(/\s(\d{2})\s*$/,' 0.$1')}
   return t.trim()}
 function parseReceipt(lines){
-  let date=null,dateConf=100,dateAlt=false,ended=false,pending=null;const items=[],nonFood=[];
+  let date=null,dateConf=100,dateAlt=false,ended=false,pending=null;const items=[],nonFood=[],dropped=[];
   const add=(text,conf,priceTxt,cls)=>{
     const code=findCode(text),upc=code&&code.upc||null;
     if(code&&code.plu&&!cls){const [k,nmP]=PLU[code.plu];cls={key:k,score:0.97,plu:code.plu,name:(code.organic?'Organic ':'')+nmP}}
@@ -641,11 +641,11 @@ function parseReceipt(lines){
     if(!m){
       /* an unknown line still counts as an item if it looks like words, not OCR noise */
       const words=label.split(' ').filter(w=>/^[A-Za-z']{3,}$/.test(w));
-      if(!(words.length&&ocr>=0.45)&&!upc)return}
-    if(NONFOOD.test(label)&&(!m||m.score<0.9)){nonFood.push(label);return}
+      if(!(words.length&&ocr>=0.45)&&!upc){dropped.push({text:label||text,why:'unrecognised'});return}}
+    if(NONFOOD.test(label)&&(!m||m.score<0.9)){nonFood.push(label);dropped.push({text:label,why:'non-food'});return}
     // not a food we know for sure, and the trained model says it probably isn't food either
     // the model can overrule a loose name match too, but only when it is close to certain ("EG LAWN FERT" is not eggs)
-    {const p=foodProb(label),pw=foodProb(label,true);if(p!=null&&((!m||m.score<0.9)&&p<0.35||(!m||m.score<0.98)&&pw<0.03)){nonFood.push(label);return}}
+    {const p=foodProb(label),pw=foodProb(label,true);if(p!=null&&((!m||m.score<0.9)&&p<0.35||(!m||m.score<0.98)&&pw<0.03)){nonFood.push(label);dropped.push({text:label,why:'non-food'});return}}
     const key=m?m.key:'other',match=m?m.score:0.3;
     const c=0.55*match+0.45*ocr;
     items.push({nice:m&&m.name?m.name:null,raw:text+(m&&m.plu?'  [PLU '+m.plu+(code.organic?', organic':'')+']':''),label:m&&m.name?m.name:(label||'Item '+(upc||'')),key,guessKey:key,conf:c,ocr,match,flagged:c<THRESH,upc,upcVerified:!!(code&&code.verified),organic:!!(code&&code.organic),upcOnly:!m,price:money(priceTxt),discount:0,markdown:false})};
@@ -675,7 +675,7 @@ function parseReceipt(lines){
       return}
     if(/\bYOU\b/i.test(t)||SKIP.test(t)||SKIP_GLUED.test(t)){pending=null;return}
     const words=t.toUpperCase().replace(/[^A-Z ]/g,' ').split(/\s+/).filter(w=>w.length>=5);
-    if(words.some(w=>NOISE.some(n=>lev(w,n)<=(n.length>=7?2:1)))){pending=null;return}
+    if(words.some(w=>NOISE.some(n=>lev(w,n)<=(n.length>=7?2:1)))){pending=null;dropped.push({text:t,why:'noise word'});return}
     let pm=t.match(PRICE);if(!pm){const g=t.match(PRICE_GAP);if(g&&/[A-Za-z]{3}/.test(t))pm=[g[0],g[1]+'.'+g[2]]}
     if(!pm){
       /* a name with no price: keep it in case the next line carries the weight and price */
@@ -694,7 +694,7 @@ function parseReceipt(lines){
     const pct=it.discountPct||(it.price&&it.discount?it.discount/(it.price):0);
     it.discountPct=pct;
     if(it.markdown||pct>=0.3){it.clearance=true;it.flagged=true}});
-  return{date,items,dateConf,dateAlt,nonFood}}
+  return{date,items,dateConf,dateAlt,nonFood,dropped}}
 /* Several OCR passes over differently prepared images: keep what they agree on, fill gaps from the others. */
 function sharesWord(a,b){const w=x=>new Set(x.toUpperCase().match(/[A-Z]{4,}/g)||[]);const A=w(a);for(const t of w(b))if(A.has(t))return true;return false}
 function mergeParsed(list){
@@ -703,7 +703,7 @@ function mergeParsed(list){
   const dk=Object.keys(dates).sort((a,b)=>dates[b]-dates[a])[0];
   const groups={};
   list.forEach((r,pi)=>r.items.forEach(it=>{const k=it.price==null?'?'+it.key:it.price.toFixed(2);(groups[k]=groups[k]||{passes:{},items:[]});(groups[k].passes[pi]=groups[k].passes[pi]||[]).push(it);groups[k].items.push(it)}));
-  const out=[];
+  const out=[],extraDropped=[];
   Object.keys(groups).forEach(gk=>{const g=groups[gk];
     const passes=Object.values(g.passes),support=passes.length;
     /* base = the pass that saw the most items at this price; other passes vote on unknown ones */
@@ -712,11 +712,11 @@ function mergeParsed(list){
     const used=new Set(base.map(i=>i.key));
     base.forEach(it=>{if(it.key==='other'){const k=Object.keys(votes).filter(k=>!used.has(k)).sort((a,b)=>votes[b]-votes[a])[0];
       if(k){const src=g.items.filter(i=>i.key===k).sort((a,b)=>b.conf-a.conf)[0];Object.assign(it,src,{support});used.add(k)}}});
-    base.forEach(it=>{if(support===1&&list.length>2&&!(it.key!=='other'&&it.conf>=0.75))return;out.push(it)})});
+    base.forEach(it=>{if(support===1&&list.length>2&&!(it.key!=='other'&&it.conf>=0.75)){extraDropped.push({text:it.raw||it.label,why:'seen in one OCR pass only'});return}out.push(it)})});
   /* an item whose price was unreadable in one pass but read in another is the same item */
   const final=out.filter(it=>!(it.price==null&&out.some(o=>o!==it&&o.price!=null&&o.key===it.key&&sharesWord(o.raw,it.raw))));
   const first=list.find(r=>r.date&&iso(r.date)===dk);
-  return{date:first?first.date:null,items:final,dateConf:first?first.dateConf:100,dateAlt:Object.keys(dates).length>1&&dates[dk]<list.length/2}}
+  return{date:first?first.date:null,items:final,dateConf:first?first.dateConf:100,dateAlt:Object.keys(dates).length>1&&dates[dk]<list.length/2,nonFood:list.flatMap(r=>r.nonFood||[]),dropped:[...list.flatMap(r=>r.dropped||[]),...extraDropped]}}
 function linesFrom(d){
   if(d.lines&&d.lines.length)return d.lines.map(l=>({text:l.text,conf:l.confidence}));
   if(d.blocks){const o=[];d.blocks.forEach(b=>(b.paragraphs||[]).forEach(p=>(p.lines||[]).forEach(l=>o.push({text:l.text,conf:l.confidence}))));if(o.length)return o}
@@ -1018,6 +1018,7 @@ function reviewScreen(){
   return phone('Check items',live.length+' found','scan',`<div class="note">${open?open+' to check. Tap once per item.':live.length?'All checked. Ready to save.':'No food items found. Add them below or go back.'}</div>
     <div class="note">${esc(dateTxt)}${S.store?' · '+esc(S.store):''}</div>${S.nonFood&&S.nonFood.length?`<div class="note">Left out ${S.nonFood.length} non-food item${S.nonFood.length===1?'':'s'}: ${esc(S.nonFood.slice(0,4).join(', ').toLowerCase())}${S.nonFood.length>4?'…':''}</div>`:''}
     ${unk>2?`<button class="sm" data-a="dropunk">Remove ${unk} unrecognised lines at once</button>`:''}
+    ${S.dropped&&S.dropped.length?`<details class="card"><summary>The OCR read ${S.dropped.length} line${S.dropped.length===1?'':'s'} the app did not add</summary>${S.dropped.map((d,i)=>`<div class="row"><span>${esc(String(d.text).slice(0,60))} <span class="meta">(${esc(d.why)})</span></span><button class="sm" data-a="adddrop" data-v="${i}">Add</button></div>`).join('')}</details>`:''}
     ${flagged}${clear?`<div class="label">Read clearly</div>${clear}`:''}
     <details><summary>What the OCR read</summary><div class="ocrtxt">${esc(S.ocrText)}</div><div id="prepholder"></div></details>
     <div class="card"><div class="label">Missed something?</div><div class="row"><input type="text" id="addname" placeholder="Search item to add" aria-label="Search item to add"><button class="sm" data-a="add">Add</button></div><button class="sm" data-a="bcopen">${svg(P.barcode,'ii')}${S.bcOpen?'Close barcode scanner':'Add by barcode'}</button></div>${S.bcOpen?barcodeBox():''}`,
@@ -1813,7 +1814,7 @@ async function startScan(forceSim){
     await new Promise(r=>setTimeout(r,900))}
   S.run.ocrMs=performance.now()-t0;
   S.store=detectStore(S.ocrText);S.total=findTotal(S.ocrText);S.thumb=makeThumb();
-  const parsed=pre||parseReceipt(lines);S.nonFood=[...(parsed.nonFood||[])];
+  const parsed=pre||parseReceipt(lines);S.nonFood=[...(parsed.nonFood||[])];S.dropped=(parsed.dropped||[]).filter(d=>d&&String(d.text||'').trim()).slice(0,40);
   if(parsed.items.some(i=>i.upc)){setBar(1,'Looking up product codes\u2026');try{parsed.items=await enrichUPC(parsed.items)}catch(e){}}
   let date=parsed.date;S.dateIssue=null;S.dateOK=false;S.lastDateAlt=parsed.dateAlt;
   if(date){const n=diffDays(TODAY,date);
@@ -1893,6 +1894,7 @@ document.addEventListener('click',e=>{
   else if(a==='edit'){const r=S.review.find(x=>x.id===v);if(r.editing){const n=document.getElementById('nm-'+v);if(n&&n.value.trim()&&n.value.trim()!==nm(r))r.nice=n.value.trim();if(r.flagged&&!r.resolved)resolve(v);else r.editing=false}else r.editing=true}
   else if(a==='remove'){const r=S.review.find(x=>x.id===v);r.removed=true;if(S.run)S.run.last=performance.now()}
   else if(a==='dropunk'){S.review.forEach(r=>{if(r.key==='other'&&!r.resolved&&!r.added)r.removed=true});if(S.run)S.run.last=performance.now()}
+  else if(a==='adddrop'){const d=(S.dropped||[])[+v];if(d){addItem(String(d.text),'other',String(d.text));S.dropped.splice(+v,1)}}
   else if(a==='add'){const t=(document.getElementById('addname').value||'').trim();if(t){const m=matchFood(t);addItem(t,m?m.key:'other',t)}}
   else if(a==='camopen'){openCam();return}
   else if(a==='noop')return;
