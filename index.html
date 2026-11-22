@@ -635,6 +635,8 @@ function parseReceipt(lines){
   const add=(text,conf,priceTxt,cls)=>{
     // "1.00 OFF" / "2.50 CPN" lines are discounts on the item above, not items to add
     if(/^\W*\d+[.,]\d{2}\s*(OFF|CPN|COUPON)\b/i.test(String(text).trim()))return;
+    // payment and terminal lines are not items
+    if(/\b(TERMINAL|APPROVAL|CHANGE DUE|MCARD|VISA\s+TEND)\b/i.test(String(text)))return;
     const code=findCode(text),upc=code&&code.upc||null;
     if(code&&code.plu&&!cls){const [k,nmP]=PLU[code.plu];cls={key:k,score:0.97,plu:code.plu,name:(code.organic?'Organic ':'')+nmP}}
     const label=text.replace(PRICE,'').replace(UPCTOK,' ').replace(/\b\d{3,}\b/g,' ').replace(/[^A-Za-z0-9 %.\/'"-]/g,' ').replace(/\s+/g,' ').trim();
@@ -683,7 +685,10 @@ function parseReceipt(lines){
       /* a name with no price: keep it in case the next line carries the weight and price */
       const cls=classify(t);
       if(pending&&pending.code){add(pending.text,pending.conf,null,pending.cls)}
-      pending=cls&&(t.match(/[A-Za-z]/g)||[]).length>=4?{text:t,conf,cls,code:/^\W{0,3}\d{3,8}\s+[A-Za-z]/.test(t)}:null;return}
+      /* an unclassified name is kept only when it carries a product code ("00000000 4689K"), so store headers are not merged */
+      pending=(cls||(/\d{6,}/.test(t)&&(t.match(/[A-Za-z]/g)||[]).length>=4))&&(t.match(/[A-Za-z]/g)||[]).length>=4?{text:t,conf,cls,code:/^\W{0,3}\d{3,8}\s+[A-Za-z]/.test(t)}:null;return}
+    // a weight line ("0.400 kg @ $6.55/kg") carries the per-kg rate, not the item price: keep the name pending for the real price line
+    if(/\d+[.,]\d{2,3}\s*(kg|lb)\b.*@|@.*\/\s*(kg|lb)\b/i.test(t))return;
     const letters=(t.replace(PRICE,'').replace(UPCTOK,'').match(/[A-Za-z]/g)||[]).length;
     if(letters<3){if(pending){add(pending.text+' '+pm[1],Math.min(pending.conf,conf),pm[1],pending.cls);pending=null}return}
     if(pending&&pending.code)add(pending.text,pending.conf,null,pending.cls);
