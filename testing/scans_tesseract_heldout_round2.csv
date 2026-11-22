@@ -1,0 +1,56 @@
+id,split,store,ok,error,secs,used_fallback,labelled_items,food_items,food_priced,nonfood_items,nonfood_priced,food_no_price,found,found_strict,missed,extras,food_dropped_as_nonfood,nonfood_dropped,nonfood_kept,date_ok,total_ok,extra_examples
+024c85790df155cd055da74579dab8fe5126db32,test,Trader Joe's,True,,1.797,,7,6,6,1,1,0,5,4,1,2,0,1,0,,,STAN DUMPLING CHICKEN SOUP 2.93 | VIPS 1 LB 1.73
+03dd7bee9110ab404811a8a9a151023677998706,test,Costco,True,,5.445,,8,7,7,1,1,0,6,6,1,0,0,1,0,True,False,
+0a17dc110a2a86ecc763fb6e3270ba9f87689273,test,Foodtown,True,,3.639,,12,11,9,1,1,2,6,5,3,0,0,1,0,False,False,
+0bac2b0f9f7af4742ac3400fecb9f9185ebb310c,test,Trader Joe's,True,,3.688,,8,8,8,0,0,0,1,1,7,4,0,0,0,,False,eg SPARK ING SPRING WATER CRAN CL 0.79 T | S ROLLE FOR TACINT WITH CHEESE 2.04 T | = MANGE STLIKY RICE SFRING ROLLS 2.99 J
+0bda337518ced88e59f31c39a63bb2405a828420,test,Waitrose,True,,2.494,,14,14,14,0,0,0,14,14,0,5,0,0,0,False,True,"+ AUST WAGYU BEEF ROAS oe 99,15 | BLUEBERRY USA  170GM 24,95 | 3 HOLLAND PLUM TOMATO 45,10"
+16,test,Morrisons,True,,4.617,,4,4,4,0,0,0,3,3,1,0,0,0,0,False,True,
+1641529e4933ca870600a3ce85559f8f858f3c8c,val,Target,True,,2.175,,6,1,1,5,5,0,0,0,1,0,0,4,1,True,True,
+18,test,Morrisons,True,,2.461,,6,5,5,0,0,0,1,1,4,2,0,0,0,True,True,Paynent tine: 05/12/2016 10:04.27 | 1 ==> FRIED  66  2.60  0.69 A
+222463feb66c1a585453a005399f4d096a06a22e,test,Meijer,True,,4.364,,7,6,2,0,0,4,2,2,0,0,0,0,0,True,False,
+2576b926189eccb5aaf8974289d0dcbf91e26241,val,Target,True,,1.955,,1,0,0,1,1,0,0,0,0,0,0,1,0,True,True,
+2914,val,Tesco,True,,1.748,,6,5,1,0,0,4,0,0,1,0,0,0,0,False,True,
+2a1dab6bb5c2315f94c4ae611e6850655186ab1f,test,Albertsons,True,,1.911,,5,5,4,0,0,1,4,4,0,1,0,0,0,True,True,ALB CHOP BROCCOLI 1.23 F
+32c6def6f55ba732dd6f9275478c16ce1d61e70b,test,Crest Foods,True,,4.805,,15,14,13,0,0,1,11,11,2,0,0,0,0,True,True,
+3716a29f41402e22fe4c96b85d539b8119f6218a,test,Costco,True,,4.806,,11,11,11,0,0,0,7,7,4,2,0,0,0,,False,E 91698 RED PEPPERS 1.49 | E 39036 ROMAINE 3.19
+412d297566c6fd4c826700d1d1e1e772f5e91dab,test,Safeway,True,,0.779,,2,1,1,1,1,0,1,1,0,0,0,1,0,,,
+4381,test,Costco,True,,2.112,,11,11,11,0,0,0,8,8,3,5,0,0,0,,False,Ve 134991 ORGANIC PAST 9.99 | E 9623 BROCCOLI 4.99 | E 15994 CANTALOUPE 3.49
+4889b959e86b9a9f02ea55affaf13e4543370a56,val,Walmart,True,,4.183,,37,35,34,1,1,1,26,20,8,1,0,1,0,,,}} GR BTR TSTN 001800000183 F 0.99 T
+4d0b6b4cff099990041480caeeeb5a70a0f49029,val,Safeway,True,,2.901,,3,3,3,0,0,0,0,0,3,2,0,0,0,,,"Nfr. eSouran 1.00- | 2@,50 GREEN BSL FEPFERS 1.00 ="
+5bab50153bf3d3329d90a6824b4c5bdc070e802f,test,Al Manama Hypermarket,True,,3.777,,27,27,27,0,0,0,27,27,0,3,0,0,0,True,True,| 0.31 CUCUMBER PREPACKED == 4.79 | 0.47 AUS LAMB RACK 239.43 | 1 PK KELLOGGS CORNFLAKES 25.50
+5be66423183188f46cde09f6bb6e5fb20fb81db0,test,Northgate Market,True,,3.784,,6,5,4,1,1,1,2,2,2,0,0,1,0,,,
+5de6358b757e1cf4c3de78096cfe36e433e6de54,val,Walmart,True,,3.007,,26,6,6,20,16,0,5,4,1,0,0,12,4,,False,
+607fd5ce9a4dda99649e4c7b4e74ec7218dfb73d,test,Trader Joe's,True,,1.96,,13,13,13,0,0,0,13,13,0,0,0,0,0,True,True,
+610449104202e60715cf3ecce9d3867c72374f96,test,99 Ranch Market,True,,2.33,,1,1,1,0,0,0,0,0,1,0,0,0,0,True,True,
+63ec0d3552faffc110dd38e6732c79d73e2afbdd,test,Costco,True,,3.338,,6,6,0,0,0,6,0,0,0,0,0,0,0,,,
+6d1dbb1cd71551cf03ca387f804a9783f7eb771f,val,Lidl,True,,2.18,,2,2,2,0,0,0,2,2,0,0,0,0,0,False,False,
+6e55e1cd4369fddadf254f648ac4969119459c84,val,Target,True,,3.366,,1,1,1,0,0,0,0,0,1,0,0,0,0,True,True,
+6f16e7e8010b5bc8cba98388c96c770020887656,test,Meijer,True,,3.772,,4,4,0,0,0,4,0,0,0,0,0,0,0,True,False,
+744122caca09cef445526e059ff05e59fcfe1780,test,Woolworths,True,,1.854,,1,0,0,1,1,0,0,0,0,0,0,1,0,True,True,
+7d5ab1c22cb6336717dd77267720dcac7a2cec34,val,Walmart,True,,8.193,,50,6,6,42,42,0,0,0,6,1,0,39,3,True,False,CC IN 6.3LB 001780015016 7.68  X ~
+8478b4dc8864a5c95abbd708a4279792d5c218c2,test,Trader Joe's,True,,2.475,,3,3,3,0,0,0,3,3,0,1,0,0,0,True,True,NUT WALNUT PIECES POINDEXTER 6.93
+887ce47e5f762709b52e5b44f182732fae038240,test,Stop & Shop,True,,8.22,,2,2,2,0,0,0,0,0,2,0,0,0,0,False,True,
+89f2d8d97bc72ece57c7daceffc66ccd0927d223,val,Safeway,True,,1.733,,2,0,0,0,0,0,0,0,0,0,0,0,0,True,True,
+90fed6c9f197d913ddd9ecaa15f31bb8a5b17cbb,val,Walmart,True,,5.816,,20,0,0,17,17,0,0,0,0,0,0,15,2,True,True,
+92d2c3bd557d1d5e6b03ca24a28808c087ebc51b,test,Walmart,True,,3.304,,0,0,0,0,0,0,0,0,0,0,0,0,0,,,
+96ae21a2a6cc19e60b28647bdb2d0603365bd0f0,test,Walmart,True,,2.836,,23,13,13,1,1,0,9,9,4,0,0,1,0,,,
+96e1646e0c7d260dac02c0e4a43f7a1192724dc4,test,Morrisons,True,,1.063,,1,1,0,0,0,1,0,0,0,0,0,0,0,,False,
+98fb02bf56d4221681d5faf89b3ab57395b22e36,test,Al Manama Hypermarket,True,,4.5,,27,27,27,0,0,0,27,27,0,1,0,0,0,True,True,0.89 POTATO SAUDI - 4.44. -
+9bbeb3f7ee5caf426397666f966509806c02346c,test,Metro,True,,4.492,,2,0,0,2,2,0,0,0,0,0,0,2,0,True,False,
+9d19e188b4aab8f25f2736f3d9216ab2da5d41b4,test,Tesco,True,,1.466,,5,2,2,3,2,0,0,0,2,0,0,2,0,,False,
+9e33546ee55b55da21db0af4cce8dbe324bc663b,val,Walmart,True,,2.806,,5,0,0,2,2,0,0,0,0,0,0,0,2,True,True,
+a1f993060e8cea4ae797b371479872c15a7b766e,val,Coles,True,,4.916,,20,19,19,0,0,0,16,16,3,1,0,0,0,True,True,HON&BAL DRESSING 125ML 2.50 23.
+a36478d3bb0ae9bfe870236fd8e1f9a8a9358ccf,val,Target,True,,2.128,,1,0,0,1,1,0,0,0,0,0,0,1,0,True,True,
+a7804eb2f2f127977d3c6fbbe2eb8b505af3e58d,val,Sam's Club,True,,2.611,,11,10,10,0,0,0,1,0,9,0,0,0,0,True,True,
+afa61748ef431aecf2598221d6e78e27ff98c537,val,ShopRite,True,,3.357,,34,14,13,18,17,1,12,10,1,1,0,16,1,True,True,. MC IS BERTOLLI PASTA 1.10-F
+b118bac4a4c6b50ec732d51e72ae3b85571008cd,test,Costco,True,,4.758,,15,9,9,5,5,0,8,8,1,1,0,4,1,,False,{ 54153 5 PISTACHIO 34 194.99
+b2f91845b83b824f06ec52036f5fb2e3ca82657f,test,Co-op Food,True,,4.758,,9,9,8,0,0,1,5,3,3,2,0,0,0,True,False,PR CP TI ClO BEEF 4.29 | | PR Ne TOM PASSATA 6.59 |
+b449ef7611ce6e73caa248d92a7e89d5ad487384,val,Target,True,,2.117,,6,0,0,6,6,0,0,0,0,0,0,6,0,True,True,
+b63df5a10ea9b46ede001708a09a455da3ab2361,test,Meijer,True,,5.215,,9,2,1,7,6,1,1,1,0,0,0,5,1,False,True,
+c2dcd250c5162c11ca06d864666abb0ec1458f59,test,Trader Joe's,True,,4.632,,13,13,13,0,0,0,13,13,0,0,0,0,0,False,,
+c62899025130c58c5feae16834d7f3f4f11701ee,test,Sainsbury's,True,,1.819,,1,1,1,0,0,0,1,1,0,0,0,0,0,True,True,
+d7732d42528decf2645835b7735add65d21d7611,test,Aldi,True,,2.251,,16,16,16,0,0,0,12,12,4,5,0,0,0,,True,"Ckr Brown Rice 100q 1.35 B | Price Over $1.49 - -1.00 A | 6450 Mandaring H/M, 700g_ 4.93 A"
+e368026983ab8c87212fcd1c8d4ad15420140d76,test,Morrisons,True,,5.676,,50,19,19,30,30,0,18,18,1,1,0,29,1,True,False,"""M' MOZZARELLA BLOCK 2.36 0"
+ee02c9e40dcd5f6c091546fd62851edd50d9f312,val,Foodtown,True,,5.677,,17,16,15,1,1,1,0,0,15,0,0,1,0,False,,
+f1d6e77e1df3dc5071333c15cc06b8e1075018a1,test,Hannaford,True,,4.67,,16,16,10,0,0,6,8,8,2,1,0,0,0,,False,HRD LENTILS DRIED 1.39 *
+fe14e6e60cd33d2f70ea9c86017986e076279b37,val,Safeway,True,,4.231,,5,5,5,0,0,0,1,1,4,0,0,0,0,True,True,
