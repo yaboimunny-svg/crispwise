@@ -853,6 +853,8 @@ function prettyName(r){
   {const raw=String(r.label||'');if((raw.match(/\b[A-Z]{2,}\b/g)||[]).length>=2)r={...r,label:raw.split(/\s+/).filter(w=>!/^[a-z][a-z0-9]*$/.test(w)&&!/^[a-z]+[A-Z]{1,2}[a-z0-9.]*$/.test(w)).join(' ')}}
   // a zero read inside a word is the letter O ("EAR0 0AT" -> "EARO OAT")
   let t=String(r.label||'').replace(/(?<=[A-Za-z]{2})0\b|\b0(?=[A-Za-z]{2}\b)/g,'O');
+  // a count run into the word ("3FRUIT BLEND") gets its space back
+  t=t.replace(/\b(\d)([A-Za-z]{3,})\b/g,'$1 $2');
   // word pairs a till abbreviates back to front
   for(const [re,to] of NAME_PHRASES)t=t.replace(re,to);
   // tax and price codes printed after the name ("MRJ", "HRJ", "GST") are not part of it
