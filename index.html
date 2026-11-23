@@ -492,11 +492,11 @@ function matchFood(text){
 const SKIP=/\b(SUB\s?TOTAL|TOTAL|TAX|HST|GST|PST|QST|VISA|MASTER\s?CARD|MCARD|DEBIT|CREDIT|CASH|CHANGE|THANK|WELCOME|APPROVED|CARD|TEL|PHONE|STORE|DATE|BALANCE|POINTS|CASHIER|REF|REFERENCE|SOLD|TEND|PAYMENT|VALIDATION|ACCOUNT|INTERAC|AMOUNT|INVOICE|AUTH|MEMBER|REWARDS|DEPOSIT|ENVIRO|ECO\s?FEE)\b/i;
 const NOISE=['SUBTOTAL','CHANGE','DEBIT','CREDIT','BALANCE','APPROVED','THANK','INTERAC','AMOUNT','REWARDS'];
 /* a price at the end of a line: 3.98  $3.98  3,98  3.98 D  13.99 H  (and 1 98 H when the dot is lost) */
-const PRICE=/(\$?\s?\d{1,3}\s?[.,'’`]\s?\d{2})\s*-?\s*[A-Z0]{0,2}\W{0,4}$/;
+const PRICE=/(\$?\s?\d{1,3}\s?[.,'’`]\s?\d{2})\s*-?\s*[A-Za-z0]{0,2}\W{0,4}$/;
 const PRICE_GAP=/(?:\$|\b)(\d{1,2})\s(\d{2})\s?[A-Z0]{0,2}\W{0,4}$/;
 /* where the item list ends */
 /* things people buy at the grocery store that never go in the fridge */
-const NONFOOD=/\b(PULLOVER|LEGGINGS?|SOCKS|JEANS|HENLEY|T-?SHIRT|TEE ?SHIRT|SHORTS?|TANK ?TOP|\d{1,2}W-?\d{2}|MOTOR OIL|PEBBLES?|TOPSOIL|SEWING|ROUTER|WIFI|PARACETAMOL|IBUPROFEN|ACETAMINOPHEN|TYLENOL|ADVIL|NAPPIES|DIAPERS?|BABY ?W?IPE?S?|MUFFIN TRAY|BAKEWARE|GIFT ?CARD|LOTTERY|LOTTO|BAG FEE|BAG CHARGE|BOTTLE DEP\w*|DEPOSIT|ENVELOPES?|PAPER ?PLATES?|CUTLERY|CANDLES?|BATTERY|BATTERIES|LIGHT ?BULBS?|SHAMPOO|CONDITIONER|DEODORANT|TOOTHPASTE|FLOSS|RAZOR|SHAVE|LOTION|VITAMINS?|FAB\s?SHT|FABSHT|DRYER\s?SHEETS?|LAUND\w*|DETERG\w*|BLADES?|SENSOR\s?BLADE|PAPER\s?TOWELS?|TOWELS?|TISSUES?|KLEENEX|BOUNTY|CHARMIN|ROYALE|CASHMERE|TOILET|BATH\s?TISSUE|NAPKINS?|DETERGENT|TIDE|GAIN|DOWNY|BOUNCE|FABRIC|BLEACH|CLOROX|LYSOL|CLEANER|CLEANING|WINDEX|WIPES?|SPONGES?|DISH\s?SOAP|DAWN|CASCADE|FINISH\s?PODS?|PODS|SOAP|BODY\s?WASH|SHAMPOO|CONDITIONER|TOOTHPASTE|COLGATE|CREST|TOOTHBRUSH|FLOSS|MOUTHWASH|DEODORANT|RAZORS?|LOTION|SUNSCREEN|DIAPERS?|\bDIPR\b|\bPMPR\b|PAMPERS|HUGGIES|BABY\s?WIPES|BATTER(Y|IES)|DURACELL|ENERGIZER|FOIL|PLASTIC\s?WRAP|CLING|ZIPLOC|GARBAGE|TRASH|BIN\s?BAGS?|GLAD|CANDLES?|BULBS?|CHARGER|CABLE|HDMI|USB|GIFT\s?CARD|MAGAZINE|GREETING|SOCKS|SHIRT|PANTS|HANGERS?|ADVIL|TYLENOL|ADVIL|BAND.?AIDS?|DOG\s?FOOD|CAT\s?FOOD|LITTER|PEDIGREE|PURINA|MEOW|FLOWERS?|BOUQUET|PLANTS?|BAG\s?FEE|SHOPPING\s?BAGS?|REUSABLE\s?BAGS?|LIGHTER|MATCHES|PROPANE|CHARCOAL|MOTOR\s?OIL|WASHER\s?FLUID|LOTTO|LOTTERY)\b/i;
+const NONFOOD=/\b(SHVGL|SHV\s?GEL|SHAVE|SHAVING|MACH\s?3|HACH\s?3|IRISH\s?SP|PULLOVER|LEGGINGS?|SOCKS|JEANS|HENLEY|T-?SHIRT|TEE ?SHIRT|SHORTS?|TANK ?TOP|\d{1,2}W-?\d{2}|MOTOR OIL|PEBBLES?|TOPSOIL|SEWING|ROUTER|WIFI|PARACETAMOL|IBUPROFEN|ACETAMINOPHEN|TYLENOL|ADVIL|NAPPIES|DIAPERS?|BABY ?W?IPE?S?|MUFFIN TRAY|BAKEWARE|GIFT ?CARD|LOTTERY|LOTTO|BAG FEE|BAG CHARGE|BOTTLE DEP\w*|DEPOSIT|ENVELOPES?|PAPER ?PLATES?|CUTLERY|CANDLES?|BATTERY|BATTERIES|LIGHT ?BULBS?|SHAMPOO|CONDITIONER|DEODORANT|TOOTHPASTE|FLOSS|RAZOR|SHAVE|LOTION|VITAMINS?|FAB\s?SHT|FABSHT|DRYER\s?SHEETS?|LAUND\w*|DETERG\w*|BLADES?|SENSOR\s?BLADE|PAPER\s?TOWELS?|TOWELS?|TISSUES?|KLEENEX|BOUNTY|CHARMIN|ROYALE|CASHMERE|TOILET|BATH\s?TISSUE|NAPKINS?|DETERGENT|TIDE|GAIN|DOWNY|BOUNCE|FABRIC|BLEACH|CLOROX|LYSOL|CLEANER|CLEANING|WINDEX|WIPES?|SPONGES?|DISH\s?SOAP|DAWN|CASCADE|FINISH\s?PODS?|PODS|SOAP|BODY\s?WASH|SHAMPOO|CONDITIONER|TOOTHPASTE|COLGATE|CREST|TOOTHBRUSH|FLOSS|MOUTHWASH|DEODORANT|RAZORS?|LOTION|SUNSCREEN|DIAPERS?|\bDIPR\b|\bPMPR\b|PAMPERS|HUGGIES|BABY\s?WIPES|BATTER(Y|IES)|DURACELL|ENERGIZER|FOIL|PLASTIC\s?WRAP|CLING|ZIPLOC|GARBAGE|TRASH|BIN\s?BAGS?|GLAD|CANDLES?|BULBS?|CHARGER|CABLE|HDMI|USB|GIFT\s?CARD|MAGAZINE|GREETING|SOCKS|SHIRT|PANTS|HANGERS?|ADVIL|TYLENOL|ADVIL|BAND.?AIDS?|DOG\s?FOOD|CAT\s?FOOD|LITTER|PEDIGREE|PURINA|MEOW|FLOWERS?|BOUQUET|PLANTS?|BAG\s?FEE|SHOPPING\s?BAGS?|REUSABLE\s?BAGS?|LIGHTER|MATCHES|PROPANE|CHARCOAL|MOTOR\s?OIL|WASHER\s?FLUID|LOTTO|LOTTERY)\b/i;
 /* Trained food / non-food model (naive Bayes on ~114,000 labelled receipt lines, lxe/receipt-line-items-taxonomy, MIT).
    It catches the long tail a word list can't: hoodies, doorbells, lawn fertiliser, phone cases. Loaded once, cached offline. */
 let FOODNB=null;
@@ -509,8 +509,11 @@ function foodProb(label,wordsOnly){if(!FOODNB)return null;let s=FOODNB.prior;for
 const SKIP_GLUED=/^\W*(SUB)?TOTAL[A-Z]|NU?M?BER\s*OF\s*ITEMS|ITEMS\s*SO\w{0,2}D|CHANGE\s*DUE|AMOUNT\s*DUE|(VISA|MASTERCARD|DEBIT)\s*TEND/i;
 const END=/SUB\s?-?\s?TOTAL|\*{2,}\s*TOTAL|^\W*TOTAL\W*\$?\s*\d|BALANCE\s+DUE|\bTOTAL\s+\$\s?\d/i;
 /* discounts, coupons and markdowns that belong to the item above them */
+const ABBR_CAT=[[/\bX\s?LEAN\b|EXTRA\s?LEAN|\bLN\s?GRD|\bGRD\s?BF/i,'beef'],[/\bSWEET\s?PO(T|TATO(ES)?)?\b/i,'veg'],[/\bCAN(NED)?\s?LEG/i,'pantry'],[/\bPANC(ETTA)?\b/i,'deli'],[/\bMICRO\s?POP|POPCORN/i,'snack'],[/[MH]SHRMS?\b|MSHRM/i,'mushroom'],[/\bCRL\b|\bCEREAL\b/i,'pantry'],[/\bPEP\b|JALA?PE[NÑ]O/i,'pepper'],[/\bBLKBRY|BLACKBERR/i,'berries'],[/STRA[UW]\w*\s?SPR|\bSPRD\b|\bSPREAD\b/i,'pantry'],[/\bCRT\s?BBY\b|BABY\s?CARROT/i,'carrot'],[/\bTONIC\b|TWIST\s?UP|\bV8\b/i,'drink'],[/MCRN\s?CHS|MAC\s?(&|N)?\s?CHEESE/i,'pantry'],[/HIMALAYAN|SEA\s?SALT|GRNDR/i,'pantry'],[/BBQ\s?CHI?X|ROTISS/i,'chicken'],[/\bSNK\s?PK\b/i,'snack'],[/\bPNT\b.*\b(SWT|SLT)\b|\b(SWT|SLT)\b.*\bPNT\b/i,'snack']];
+const PROMO=/\$?\d+[.,]\d{2}\s*ea\b|\bea\s*[oa]r\b|\d\s*\/\s*[$sS]\s?\d|\b\d+\s*Pts\b|\b[lI1][mn]t\s?\d|\d\s*AT\s*\d+\s*FOR/i;
+const DEPT=/^\W*(\d{1,2}\s*-\s*)?(GROCERY|MEATS?|PRODUCE|DELI|FROZEN(\s+FOODS?)?|DAIRY|BAKERY(\s+COMMERCIAL)?|SEAFOOD|NATURAL\s+FOODS?|BULK\s+FOODS?|HBC|PHARMACY|GENERAL\s+MERCH\w*)\W*$/i;
 const DISC=/\bTPD\b|INSTANT\s+SAV|\bCOUPON|%\s*OFF|\bYOU\s+SAVED|\bSAVED\b|\bROLLBACK|\bREDUCED|MARK\s?DOWN|CLEARANCE|\bCLR\b|\bDISC(OUNT)?\b|^\W*-\s?\$?\d{1,3}[.,]\d{2}\W*$|\d[.,]\d{2}\s?-\s*[A-Z]?\W*$/i;
-const DISC_WORD=/\bTPD\b|INSTANT\s+SAV|\bCOUPON|%\s*OFF|\bYOU\s+SAVED|\bSAVED\b|\bSAVINGS?\b|\bROLLBACK|\bREDUCED|MARK\s?DOWN|CLEARANCE|\bCLR\b|\bDISC(OUNT)?\b/i;
+const DISC_WORD=/CARD\s*SAV\w*|\s-\s?\$?\d{1,3}[.,]\d{2}\W*$|S[AR]VED|\bWAS\s?S?\$?\s?\d|\bTPD\b|INSTANT\s+SAV|\bCOUPON|%\s*OFF|\bYOU\s+SAVED|\bSAVED\b|\bSAVINGS?\b|\bROLLBACK|\bREDUCED|MARK\s?DOWN|CLEARANCE|\bCLR\b|\bDISC(OUNT)?\b/i;
 const MARKDOWN=/CLEARANCE|\bCLR\b|REDUCED|MARK\s?DOWN|\bMGR\s?SPEC/i;
 /* weight / multi-buy lines: "0.265 kg @ $4.94 /kg  $1.31", "2 @ 0.99" */
 const QTY=/^\W*\d+\s*@\s*\$?\d|\d\s*(kg|lb|ks)\b.*@|@\s*\$?\d+[.,]\d\d\s*\/\s*(kg|lb|ks)|\/\s*(k[gqas9]|lb|1b)\b|^\W*\d[.,]\d{2,3}\s*[xk]?\s*[gq9]?\s*[@x]?\s*\$?\d+[.,]\d\d\s*\/\s*k/i;
@@ -583,6 +586,10 @@ function receiptDate(text,dayFirst){
     const after=text.slice(x.index+x[0].length);
     if(/^\s*-\s*\d{1,2}[-\/.]\d{1,2}/.test(after))continue;
     const y=yr(x[4]),a=+x[1],b=+x[3];
+    // two-digit years can also be year first (26/11/09 on Loblaw tills): keep the reading closest to today that is not in the future
+    if(x[4].length===2&&x[1].length===2){const now=new Date();
+      const c=[valid(y,a,b),valid(y,b,a),valid(2000+a,b,+x[4])].filter(d=>d&&d-now<864e5);
+      if(c.length)return c.sort((p,q)=>Math.abs(now-p)-Math.abs(now-q))[0]}
     return dayFirst?(valid(y,b,a)||valid(y,a,b)):(valid(y,a,b)||valid(y,b,a))}
   return null}
 function valid(y,mo,d){const x=new Date(y,mo-1,d);return x.getFullYear()===y&&x.getMonth()===mo-1&&x.getDate()===d?x:null}
@@ -591,7 +598,7 @@ const title=s=>s.toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());
 function gtinOk(d){const n=d.length;let s=0;for(let i=n-2;i>=0;i--)s+=(+d[i])*(((n-2-i)%2===0)?3:1);return (10-s%10)%10===+d[n-1]}
 const UPCTOK=/[0-9OoIl|SBZ]{11,14}/g;
 /* Produce PLU codes (IFPS). A 5-digit code starting with 9 is the organic version. */
-const PLU={4011:['banana','Bananas'],4065:['pepper','Green peppers'],4088:['pepper','Red peppers'],4688:['pepper','Red peppers'],4689:['pepper','Yellow peppers'],
+const PLU={4011:['banana','Bananas'],4065:['pepper','Green peppers'],4088:['pepper','Red peppers'],4688:['pepper','Red peppers'],4689:['pepper','Yellow peppers'],4067:['veg','Zucchini'],3082:['broccoli','Broccoli crowns'],
  4664:['tomato','Tomatoes on the vine'],4087:['tomato','Roma tomatoes'],4796:['tomato','Cherry tomatoes'],4799:['tomato','Tomatoes'],4062:['cucumber','Cucumber'],4593:['cucumber','English cucumber'],
  4060:['broccoli','Broccoli'],4072:['potato','Russet potatoes'],4093:['onion','Yellow onions'],4082:['onion','Red onions'],4166:['onion','Sweet onions'],
  4131:['apple','Fuji apples'],4133:['apple','Gala apples'],4017:['apple','Granny Smith apples'],4016:['apple','Red Delicious apples'],3283:['apple','Honeycrisp apples'],4128:['apple','Pink Lady apples'],
@@ -607,7 +614,9 @@ function findCode(t){
     const d=tok.replace(/[Oo]/g,'0').replace(/[Il|]/g,'1').replace(/S/g,'5').replace(/B/g,'8').replace(/Z/g,'2');
     if(!/^\d+$/.test(d))continue;
     const pm=d.match(/^0{4,}(9?\d{4})\d?$/);
-    if(pm&&d.length>=11){const n=+pm[1];const organic=n>=90000;const base=organic?n-90000:n;if(PLU[base])return{plu:base,organic}}
+    if(pm&&d.length>=11){const n=+pm[1];const organic=n>=90000;const base=organic?n-90000:n;if(PLU[base])return{plu:base,organic};
+      /* a zero-padded produce code we do not know is still a store code, not a UPC: looking it up online returns unrelated products */
+      return null}
     if((d.length===12||d.length===13)&&gtinOk(d))return{upc:d,verified:true};
     if(d.length===12)return{upc:d.slice(0,11)+upcCheck(d.slice(0,11)),verified:false}}
   return null}
@@ -661,39 +670,98 @@ function notAnItem(t){
 function parseReceipt(lines){
   // UK, Irish, Australian and other day-first receipts: currency or tax words decide which way round 05/03 is read
   const dayFirst=/£|€|\bVAT\b|\bABN\b|\bAUD\b|\bGBP\b|\bEUR\b/i.test(lines.map(l=>l.text).join(' '));
-  let date=null,dateConf=100,dateAlt=false,ended=false,pending=null;const items=[],nonFood=[];
+  let date=null,dateConf=100,dateAlt=false,ended=false,pending=null;const items=[],nonFood=[],dropped=[];
+  let wBuf=null; /* weight-priced item waiting for its price line */
+  let nonFoodSum=0; /* prices of lines left out as non-food, so totals still add up */
+  let prevName=null,carryPrice=null; /* last name line with no price; a price printed on a department header line */
+  const markWeighed=()=>{const l=items[items.length-1];if(l)l.weighed=true}; /* its price checks out as weight x rate */
   const add=(text,conf,priceTxt,cls)=>{
+    // "1.00 OFF" / "2.50 CPN" lines are discounts on the item above, not items to add
+    if(/^\W*\d+[.,]\d{2}\s*(OFF|CPN|COUPON)\b/i.test(String(text).trim()))return;
+    // payment and terminal lines are not items
+    if(/\bTAX\s?\d*\b|COUPON|\bCPN\b|[X*]{4,}|\d\s*AT\s*\d+\s*FO|\d\s*FOR\s*\$?\d/i.test(String(text)))return;
+    if(/\b(TERMINAL|APPROVAL|CHANGE DUE|MCARD|VISA\s+TEND)\b/i.test(String(text)))return;
     const code=findCode(text),upc=code&&code.upc||null;
     if(code&&code.plu&&!cls){const [k,nmP]=PLU[code.plu];cls={key:k,score:0.97,plu:code.plu,name:(code.organic?'Organic ':'')+nmP}}
-    const label=text.replace(PRICE,'').replace(UPCTOK,' ').replace(/\b\d{3,}\b/g,' ').replace(/[^A-Za-z0-9 %.\/'"-]/g,' ').replace(/\s+/g,' ').trim();
+    prevName=null;
+    let label=text.replace(/(?<=[A-Za-z])\.(?=[A-Za-z])/g,' ').replace(PRICE,'').replace(UPCTOK,' ').replace(/\b\d{3,}\b/g,' ').replace(/[^A-Za-z0-9 %.\/'"-]/g,' ').replace(/\s+/g,' ').trim();
     const ocr=Math.max(0,Math.min(1,conf/100));
-    const m=cls||classify(label);
+    /* lower-case words on an upper-case line are text showing through the paper, not part of the name */
+    if((label.match(/\b[A-Z]{2,}\b/g)||[]).length>=2)label=label.split(' ').filter(w=>!/^[a-z][a-z0-9]*$/.test(w)&&!/^[a-z]+[A-Z]{1,2}[a-z0-9.]*$/.test(w)).join(' ');
+    let m=cls||classify(label);
+    /* common receipt abbreviations the name matcher misses */
+    /* "21 GROCERY MR 2.99": an item rung up under its department number, not a header */
+    {const dp=label.match(/^\W*\d{1,2}\s+(GROCERY|PRODUCE|DELI|MEATS?|DAIRY|BAKERY|FROZEN|SEAFOOD)\b/i);if(dp&&money(priceTxt)){m={key:'other',score:0.98,name:title(dp[1])+' item'}}}
+    {const ab=ABBR_CAT.find(([re])=>re.test(label));if(ab)m={key:ab[1],score:0.98,name:null}}
+    /* "BEA HOM 2L" / "BEA SKIM 2L" / "BEA 1 4L": dairy brand shorthand with a litre size is milk */
+    if((!m||m.key==='other')&&/^\W*BE[AR]\s?[\dA-Z]*\b/i.test(label)&&/(HOMO?|HOK|SKI[MH]|\b[12]\s?%|\b[124]\s?L\b|[124]L?J?\b|ZL\b)/i.test(label))m={key:'milk',score:0.9,name:['Milk',(label.match(/SKI[MH]/i)&&'skim')||(label.match(/HO[MK]/i)&&'homo')||(label.match(/\b1\b/)&&'1%')||'',((label.match(/([124])\s?L/i)||[])[1]||'2')+'L'].filter(Boolean).join(' ')};
     if(!m){
       /* an unknown line still counts as an item if it looks like words, not OCR noise */
-      const words=label.split(' ').filter(w=>/^[A-Za-z']{3,}$/.test(w)||/[A-Za-z]{4,}\d/.test(w));
-      if(!(words.length&&ocr>=0.45)&&!upc)return}
-    if(NONFOOD.test(label)&&(!m||m.score<0.9)){nonFood.push(label);return}
+      const words=label.split(/[^A-Za-z']+/).filter(w=>/^[A-Za-z']{3,}$/.test(w)||/[A-Za-z]{4,}\d/.test(w));
+      if(!(words.length&&ocr>=0.45)&&!upc){dropped.push({text:label||text,why:'unrecognised'});return}}
+    if((NONFOOD.test(label)||/SHVGL|SHAVE|RAZOR/i.test(label))&&(!m||m.score<0.9)){nonFood.push(label);nonFoodSum+=money(priceTxt)||0;if(!/\b(OFF|SAVE|SAVED|COUPON|MFR|CARTWHEEL)\b/i.test(label))dropped.push({text:label,why:'non-food'});return}
     // not a food we know for sure, and the trained model says it probably isn't food either
     // the model can overrule a loose name match too, but only when it is close to certain ("EG LAWN FERT" is not eggs)
-    {const p=foodProb(label),pw=foodProb(label,true);if(p!=null&&((!m||m.score<0.9)&&p<0.35||(!m||m.score<0.98)&&pw<0.03)){nonFood.push(label);return}}
+    {const p=foodProb(label),pw=foodProb(label,true);if(p!=null&&((!m||m.score<0.9)&&p<0.35||(!m||m.score<0.98)&&pw<0.03)){nonFood.push(label);nonFoodSum+=money(priceTxt)||0;dropped.push({text:label,why:'non-food'});return}}
     const key=m?m.key:'other',match=m?m.score:0.3;
     const c=0.55*match+0.45*ocr;
     items.push({nice:m&&m.name?m.name:null,raw:text+(m&&m.plu?'  [PLU '+m.plu+(code.organic?', organic':'')+']':''),label:m&&m.name?m.name:(label||'Item '+(upc||'')),key,guessKey:key,conf:c,ocr,match,flagged:c<THRESH,upc,upcVerified:!!(code&&code.verified),organic:!!(code&&code.organic),upcOnly:!m,price:money(priceTxt),discount:0,markdown:false})};
   lines.forEach(({text,conf})=>{
     // a name run into its code ("GRND0000050") gets its space back
-    const t=fixLine(text).replace(/([A-Za-z]{2,})(\d{5,})/g,'$1 $2').replace(/(\d{5,})([A-Za-z]{2})/g,'$1 $2').replace(/([A-Za-z]{3})(G?[MHI]RJ|MAJ)\b/g,'$1 $2').replace(/(?<=[A-Za-z])0(?=[A-Za-z])|\b0(?=[A-Za-z]{3})/g,'O').replace(/[A-Za-z]{6,}/g,splitGlued);if(!t)return;
+    let t=fixLine(text).replace(/(?<=[A-Za-z].*\s)(\d{1,2})(\d{2})\s?([FNXTSBDEO])\s*$/,'$1.$2$3').replace(/@\s*[sS](?=\d)/g,'@$').replace(/^(\W*\d{11,13}\s+[A-Za-z][A-Za-z ]*[A-Za-z])(\d{1,2})(\d{2})\s*$/,'$1 $2.$3').replace(/^(\W*\d{4})([A-Za-z]{2})/,'$1 $2').replace(/(?<=\b[A-Za-z]{1,2})\.(?=[A-Za-z]{4,})/g,'').replace(/(?<=[A-Za-z].*\s)(\d{1,2})(\d{2})\.\s*$/,'$1.$2').replace(/([A-Za-z]{2,})(\d{5,})/g,'$1 $2').replace(/(\d{5,})([A-Za-z]{2})/g,'$1 $2').replace(/([A-Za-z]{3})(G?[MHI]RJ|MAJ)\b/g,'$1 $2').replace(/(?<=[A-Za-z])0(?=[A-Za-z])|\b0(?=[A-Za-z]{2,}\b)|(?<=[A-Za-z]{2})0\b/g,'O').replace(/[A-Za-z]{6,}/g,splitGlued);if(!t)return;
     {const d=receiptDate(t,dayFirst);if(d){if(!date){date=d;dateConf=conf}else if(diffDays(d,date)!==0)dateAlt=true}}
     if(ended)return;
-    if(END.test(t)&&items.length){ended=true;return}
+    /* "252.47", "182.27", "2s3.97", "38$3.78": the reader lost the "@" of "2 @ $2.47" and read it as a digit or letter.
+       Rewrite only when it makes sense here: there is an unpriced name waiting, or the line above is exactly qty x unit. */
+    {const qm=t.match(/^\W*([1-9]|1[0-2])\s*([0358s9$@]{1,2})\s*\$?\s*(\d{1,3}[.,]\d{2})(?=\s*(ea|a)?\b)/i);
+     if(qm&&!/@/.test(qm[2])&&!/[A-Za-z]{3}/.test(t.replace(/\bea\b/gi,''))){const q=+qm[1],u=money(qm[3]),L=items[items.length-1];
+       if(pending||(L&&L.price&&Math.abs(L.price-q*u)<0.02))t=t.replace(qm[0],qm[1]+' @ $'+qm[3])}}
+    /* Safeway: "Regular Price 7.98  5.00S" -- the last amount is the price of the unpriced name above; otherwise the line is not an item */
+    if(/R[ae][gs][uv]?lar\s*Pri?ce/i.test(t)){const a=t.replace(/(\d)(\d{2})([A-Z])\s*$/,'$1.$2$3').match(/\d+[.,]\d{2}/g)||[];
+      if(a.length>=2&&(pending||prevName)){const nm=pending||prevName;add(nm.text,nm.conf,a[a.length-1],nm.cls);pending=null}return}
+    /* weight-priced layout: "NAME CODE" / "0.280 kg @ $3.24/kg" / "$0.91 NEXTNAME CODE".
+       The price after a weight line belongs to the name above the weight, and the rest of that line is the next name. */
+    {let wm=t.match(/^\W*(\d+[.,]\d{2,3})\s*(kg|lb|[1I]b|k[g9q8]?)(?=\W|Net|NET|$).*?(\d+[.,]\d{2})\s*\/\s*(kg|lb|[1I]b|k[g9q8]?)/i);
+     if(!wm){const w2=t.match(/^\W*(\d+[.,]\d{2,3})\s*(lb|[1I]b)\b.*?\/\s*\.?(\d*[.,]\d{2})/i);if(w2)wm=[w2[0],w2[1],w2[2],w2[3].replace(/^[.,]/,'0.')]}
+     if(wm){const expected=Math.round(+wm[1].replace(',','.')*+wm[3].replace(',','.')*100)/100;
+       const tail=t.match(/(\d+[.,]\d{2,3})\D*$/);
+       const nm=pending||prevName;
+       /* the rate is often misread ("38.75/kg" for "$8.75/kg"): a plain amount printed after the rate is still this item's price */
+       const tv=tail?+tail[1].replace(',','.'):null,afterRate=tail&&t.lastIndexOf(tail[1])>t.indexOf(wm[3])+wm[3].length-1&&tail[1]!==wm[3];
+       if(nm&&tail&&(Math.abs(tv-expected)<=0.02||afterRate)){add(nm.text,nm.conf,tail[1].slice(0,tail[1].search(/[.,]/)+3),nm.cls);markWeighed();pending=null;return}
+       wBuf=nm?{name:nm.text,conf:nm.conf,cls:nm.cls,expected}:null;pending=null;prevName=null;return}
+     if(wBuf){const pm2=t.match(PRICE);
+       if(pm2&&Math.abs(money(pm2[1])-wBuf.expected)<=0.02){add(wBuf.name,wBuf.conf,pm2[1],wBuf.cls);markWeighed();wBuf=null;
+         const rest=t.replace(PRICE,' ').trim();if((rest.match(/[A-Za-z]/g)||[]).length>=4)pending={text:rest,conf,cls:null,code:false};return}}}
+    /* "SELECT EGG" / "SUBTOTAL 4.69" / "TOTAL 56.15": a small amount on the subtotal line belongs to the unpriced name above it */
+    if(END.test(t)&&items.length){const nm=pending||prevName,pe=t.match(PRICE),sum=items.reduce((a,i)=>a+(i.price||0),0);
+      if(nm&&pe&&money(pe[1])<sum*0.25)add(nm.text,nm.conf,pe[1],nm.cls);ended=true;return}
+    /* department headers ("GROCERY", "21-PRODUCE"): not items. A price printed on one belongs to the next name line. */
+    {const bare=t.replace(PRICE,'').trim();
+     if(DEPT.test(bare)){const ph=t.match(PRICE);if(pending&&pending.code)add(pending.text,pending.conf,null,pending.cls);pending=null;prevName=null;carryPrice=ph?ph[1]:null;return}}
+    /* "Saving 0.70  3.99": the second amount is the price of the unpriced name above; under a priced line it is the total for several */
+    {const sv=t.match(/SAV\w*\s+\$?(\d+[.,]\d{2})\s+\$?(\d+[.,]\d{2})\W*$/i);
+     if(sv){const nm=pending||prevName,lastI=items[items.length-1];
+       if(nm){add(nm.text,nm.conf,sv[2],nm.cls);const L=items[items.length-1];if(L&&L.price)L.discount+=money(sv[1]);pending=null;return}
+       if(lastI&&lastI.price&&lastI.qty>1){items[items.length-1].discount+=money(sv[1]);return}
+       if(lastI&&lastI.price){const tot=money(sv[2]);for(let k=2;k<=6;k++)if(Math.abs(lastI.price*k-tot)<=0.02){lastI.qty=k;for(let c=1;c<k;c++)items.push({...lastI,copy:c});break}
+         items[items.length-1].discount+=money(sv[1]);return}}}
     const last=items[items.length-1];
     /* discounts belong to the item above */
+    if(!last&&DISC_WORD.test(t))return;
     if(last&&(DISC_WORD.test(t)||(DISC.test(t)&&!classify(t.replace(DISC,' '))))){
       const pct=t.match(/(\d{1,2})\s?%/);const amt=money(t.replace(/.*?(\d{1,3}\s?[.,]\s?\d{2})\D*$/,'$1'));
       if(pct)last.discountPct=Math.max(last.discountPct||0,+pct[1]/100);
-      if(amt&&(!last.price||amt<last.price))last.discount+=amt;
+      /* "WAS $5.00 YOU SAVED $5.00" under a $0.00 line: the item was free, there is nothing to take off */
+      if(amt&&last.price!==0&&(!last.price||amt<last.price))last.discount+=amt;
       if(MARKDOWN.test(t))last.markdown=true;
       return}
     if(MARKDOWN.test(t)&&last){last.markdown=true}
+    /* price-info and points lines ("$3.99 ea or 3/$9.00", "$2.99 lmt 6, $3.79 ea", "FIBRE1 100 Pts 9.00") are not items.
+       A plain amount at the very end of one is the price of the unpriced name above. */
+    if(PROMO.test(t)&&!/^\W*\d{1,2}\s*@/.test(t)){const tl=t.match(/(?<![$\/\d.,sS])(\d{1,3}[.,]\d{2})\s*[A-Z]?\s*$/);
+      if(tl&&pending){add(pending.text,pending.conf,tl[1],pending.cls);pending=null}
+      return}
     if(!PRICE.test(t)&&(/\b(GROSS|TARE|NET\s*W)/i.test(t)||/^\W*-?\d+[.,]\d{2,3}\s*(kg|k9|lb|ks)\b/i.test(t)))return;
     if(QTY.test(t)){
       // "2 @ $7.89" under a line already priced at $15.78: that line is 2 of the same thing
@@ -701,22 +769,34 @@ function parseReceipt(lines){
       if(!pending&&q&&last&&last.price&&+q[1]>1&&+q[1]<=12){const unit=+(q[2]+'.'+q[3]);
         if(Math.abs(unit*+q[1]-last.price)<0.02){last.price=unit;last.qty=+q[1];for(let k=1;k<+q[1];k++)items.push({...last,copy:k})}return}
       const pm=t.match(PRICE);
-      if(pending&&pm){add(pending.text+' '+pm[1],Math.min(pending.conf,conf),pm[1]);pending=null}
+      if(pending&&pm){const unit=q?q[2]+'.'+q[3]:pm[1];add(pending.text+' '+unit,Math.min(pending.conf,conf),unit,pending.cls);pending=null;const L=items[items.length-1];
+        if(L){L.fromAt=true;const n=q?+q[1]:1;L.lineTotal=Math.round(money(unit)*n*100)/100;if(q&&n>1&&n<=12){L.qty=n;for(let k=1;k<n;k++)items.push({...L,copy:k})}}}
       return}
     if(/\bYOU\b/i.test(t)||SKIP.test(t)||SKIP_GLUED.test(t)){pending=null;return}
     if(notAnItem(t)){pending=null;return}
     const words=t.toUpperCase().replace(/[^A-Z ]/g,' ').split(/\s+/).filter(w=>w.length>=5);
-    if(words.some(w=>NOISE.some(n=>lev(w,n)<=(n.length>=7?2:1)))){pending=null;return}
+    if(words.some(w=>NOISE.some(n=>Math.abs(w.length-n.length)<=1&&lev(w,n)<=(n.length>=7?2:1)))){pending=null;dropped.push({text:t,why:'noise word'});return}
     let pm=t.match(PRICE);if(!pm){const g=t.match(PRICE_GAP);if(g&&/[A-Za-z]{3}/.test(t))pm=[g[0],g[1]+'.'+g[2]]}
     if(!pm){
+      /* a line holding only a tax code ("GPHRJ") belongs to the name above: keep that name waiting */
+      if(!t.replace(/\b[GPMHKU]{0,3}R\.?[JQO0]\b/gi,'').replace(/[^A-Za-z]/g,''))return;
+      if(carryPrice&&(t.match(/[A-Za-z]/g)||[]).length>=4){add(t,conf,carryPrice);carryPrice=null;pending=null;return}
       /* a name with no price: keep it in case the next line carries the weight and price */
       const cls=classify(t);
       if(pending&&pending.code){add(pending.text,pending.conf,null,pending.cls)}
-      pending=cls&&(t.match(/[A-Za-z]/g)||[]).length>=4?{text:t,conf,cls,code:/^\W{0,3}\d{3,8}\s+[A-Za-z]/.test(t)}:null;return}
-    const letters=(t.replace(PRICE,'').replace(UPCTOK,'').match(/[A-Za-z]/g)||[]).length;
+      /* an unclassified name is kept only when it carries a product code ("00000000 4689K"), so store headers are not merged */
+      pending=(cls||(/\d{6,}/.test(t)&&(t.match(/[A-Za-z]/g)||[]).length>=4))&&(t.match(/[A-Za-z]/g)||[]).length>=4?{text:t,conf,cls,code:/^\W{0,3}\d{3,8}\s+[A-Za-z]/.test(t)}:null;
+      prevName=(t.match(/[A-Za-z]/g)||[]).length>=4?{text:t,conf,cls}:null;return}
+    // a weight line ("0.400 kg @ $6.55/kg") carries the per-kg rate, not the item price: keep the name pending for the real price line
+    if(/\d+[.,]\d{2,3}\s*(kg|lb)\b.*@|@.*\/\s*(kg|lb)\b/i.test(t))return;
+    const letters=(t.replace(PRICE,'').replace(UPCTOK,'').replace(/\b[GPMHKU]{0,3}R\.?[JQO0]\b/gi,'').match(/[A-Za-z]/g)||[]).length;
     if(letters<3){if(pending){add(pending.text+' '+pm[1],Math.min(pending.conf,conf),pm[1],pending.cls);pending=null}return}
     if(pending&&pending.code)add(pending.text,pending.conf,null,pending.cls);
-    pending=null;
+    pending=null;carryPrice=null;
+    {const L=items[items.length-1],one=(t.match(/\d{1,3}[.,]\d{2}/g)||[]).length===1;
+     if(one&&L&&L.fromAt&&L.lineTotal&&Math.abs(money(pm[1])-L.lineTotal)<0.005){L.fromAt=false;pending={text:t.replace(PRICE,' ').trim(),conf,cls:classify(t.replace(PRICE,' ')),code:false};return}}
+    {const all=t.match(/\d{1,3}[.,]\d{2}/g)||[],L=items[items.length-1];
+     if(all.length>=2&&L&&L.fromAt&&L.price!=null&&Math.abs(money(all[all.length-1])-L.price)<0.005&&Math.abs(money(all[all.length-2])-L.price)>0.005){add(t.replace(PRICE,' '),conf,all[all.length-2]);return}}
     add(t,conf,pm[1]);
   });
   if(pending&&pending.code&&!ended)add(pending.text,pending.conf,null,pending.cls);
@@ -725,7 +805,7 @@ function parseReceipt(lines){
     const pct=it.discountPct||(it.price&&it.discount?it.discount/(it.price):0);
     it.discountPct=pct;
     if(it.markdown||pct>=0.3){it.clearance=true;it.flagged=true}});
-  return{date,items,dateConf,dateAlt,nonFood}}
+  return{date,items,dateConf,dateAlt,nonFood,nonFoodSum,dropped:dropped.filter(d=>!/\b(off|coupon|savings?|saved)\b/i.test(d.text))}}
 /* Several OCR passes over differently prepared images: keep what they agree on, fill gaps from the others. */
 function sharesWord(a,b){const w=x=>new Set(x.toUpperCase().match(/[A-Z]{4,}/g)||[]);const A=w(a);for(const t of w(b))if(A.has(t))return true;return false}
 function mergeParsed(list){
@@ -734,20 +814,22 @@ function mergeParsed(list){
   const dk=Object.keys(dates).sort((a,b)=>dates[b]-dates[a])[0];
   const groups={};
   list.forEach((r,pi)=>r.items.forEach(it=>{const k=it.price==null?'?'+it.key:it.price.toFixed(2);(groups[k]=groups[k]||{passes:{},items:[]});(groups[k].passes[pi]=groups[k].passes[pi]||[]).push(it);groups[k].items.push(it)}));
-  const out=[];
+  const out=[],extraDropped=[];
   Object.keys(groups).forEach(gk=>{const g=groups[gk];
     const passes=Object.values(g.passes),support=passes.length;
     /* base = the pass that saw the most items at this price; other passes vote on unknown ones */
-    const base=passes.sort((a,b)=>(b.length-a.length)||(b.reduce((x,i)=>x+i.conf,0)-a.reduce((x,i)=>x+i.conf,0)))[0].map(it=>Object.assign({},it,{support}));
+    const wt=a=>a.filter(i=>i.weighed).length;
+    /* a pass whose item at this price was checked against weight x rate knows which name the price belongs to */
+    const base=passes.sort((a,b)=>(wt(b)-wt(a))||(b.length-a.length)||(b.reduce((x,i)=>x+i.conf,0)-a.reduce((x,i)=>x+i.conf,0)))[0].map(it=>Object.assign({},it,{support}));
     const votes={};g.items.forEach(it=>{if(it.key!=='other')votes[it.key]=(votes[it.key]||0)+1});
     const used=new Set(base.map(i=>i.key));
     base.forEach(it=>{if(it.key==='other'){const k=Object.keys(votes).filter(k=>!used.has(k)).sort((a,b)=>votes[b]-votes[a])[0];
       if(k){const src=g.items.filter(i=>i.key===k).sort((a,b)=>b.conf-a.conf)[0];Object.assign(it,src,{support});used.add(k)}}});
-    base.forEach(it=>{if(support===1&&list.length>2&&!(it.key!=='other'&&it.conf>=0.75))return;out.push(it)})});
+    base.forEach(it=>{if(support===1&&list.length>2&&!(it.key!=='other'&&it.conf>=0.75)){extraDropped.push({text:it.raw||it.label,why:'seen in one OCR pass only'});return}out.push(it)})});
   /* an item whose price was unreadable in one pass but read in another is the same item */
   const final=out.filter(it=>!(it.price==null&&out.some(o=>o!==it&&o.price!=null&&o.key===it.key&&sharesWord(o.raw,it.raw))));
   const first=list.find(r=>r.date&&iso(r.date)===dk);
-  return{date:first?first.date:null,items:final,dateConf:first?first.dateConf:100,dateAlt:Object.keys(dates).length>1&&dates[dk]<list.length/2}}
+  return{date:first?first.date:null,items:final,dateConf:first?first.dateConf:100,dateAlt:Object.keys(dates).length>1&&dates[dk]<list.length/2,nonFood:list.flatMap(r=>r.nonFood||[]),dropped:[...list.flatMap(r=>r.dropped||[]),...extraDropped]}}
 function linesFrom(d){
   if(d.lines&&d.lines.length)return d.lines.map(l=>({text:l.text,conf:l.confidence}));
   if(d.blocks){const o=[];d.blocks.forEach(b=>(b.paragraphs||[]).forEach(p=>(p.lines||[]).forEach(l=>o.push({text:l.text,conf:l.confidence}))));if(o.length)return o}
@@ -775,8 +857,8 @@ function status(it){const r=rem(it);
 const flagCls=c=>c<.6?'bad':'warn';
 const sorted=()=>S.inv.filter(i=>!i.used).sort((a,b)=>rem(a)-rem(b));
 /* Product names: the receipt's own wording, with store abbreviations spelled out. The food type is shown underneath. */
-const ABBR={BULK:'Bulk',BLKBARN:'Bulk Barn',NESTS:'Nests',FREE:'Free',OATS:'Oats',FIBER:'Fiber',FIBRE:'Fibre',FLL:'Field',FLD:'Field',GRNS:'Greens',SLD:'Salad',CHI:'Chicken',CRUM:'Drumsticks',DRUM:'Drumsticks',STL:'Stella',PAR:'Parmesan',KFT:'Kraft',SIG:'Signature',RASP:'Raspberry',VIN:'Vinaigrette',DAIR:'Dairyland',CHO:'Chocolate',TAGLIATELLE:'Tagliatelle',BOCCONCINI:'Bocconcini',PC:'PC',PO:'PC',BRWN:'Brown',BRUN:'Brown',CAK:'Cakes',CAKS:'Cakes',CRACKR:'Crackers',CRKR:'Crackers',NT2U:'Nuts to You',PISTA:'Pistachio',IMAG:'Imagine',BRTH:'Broth',CHK:'Chicken',LS:'Low Sodium',SDL:'Seedless',PURP:'Purple',PRESERV:'Preserves',PRESERU:'Preserves',PRSRV:'Preserves',VEG:'Vegetable',NN:'No Name',BLK:'Black',DEMP:"Dempster's",WWH:'Whole Wheat',WW:'Whole Wheat',GRN:'Green',PEP:'Pepper',GRD:'Ground',BF:'Beef',CHD:'Cheddar',SMK:'Smokies',OJ:'Orange Juice',PINEAP:'Pineapple',JU:'Juice',JCE:'Juice',HOMO:'Homo',MED:'Méditerranée',LG:'Large',ORG:'Organic',BNNA:'Bananas',BNN:'Bananas',CHKN:'Chicken',BRST:'Breast',BNLS:'Boneless',SKNLS:'Skinless',MLK:'Milk',YGRT:'Yogurt',YGT:'Yogurt',GRK:'Greek',SPNCH:'Spinach',BBY:'Baby',SLMN:'Salmon',FLT:'Fillet',BRD:'Bread',WHL:'Whole',WHT:'Wheat',TOM:'Tomatoes',GV:'Great Value',KS:'Kirkland Signature',LIBERTE:'Liberté',BRIOCHE:'Brioche',BUN:'Buns',BUNS:'Buns',HMBRG:'Hamburger',HMB:'Hamburger',BGR:'Burger',STRWB:'Strawberries',FRZ:'Frozen',CKD:'Cooked',SLCD:'Sliced',SHRD:'Shredded',MOZZ:'Mozzarella',PARM:'Parmesan',CRM:'Cream',BTR:'Butter',VICKIES:"Vickie's",WELCHS:"Welch's",WELCH:"Welch's",FILET:'Fillet',SLICE:'Slices',TKY:'Turkey',TRKY:'Turkey',SSG:'Sausage',POT:'Potatoes',ONI:'Onions',CUC:'Cucumber',LTTC:'Lettuce',BROC:'Broccoli',MSHRM:'Mushrooms',AVO:'Avocado',APL:'Apples',GRP:'Grapes'};
-const WORDS='GROUND LEAN MEDIUM EXTRA FRESH FROZEN ORGANIC WHOLE WHEAT WHITE BROWN LARGE SMALL BABY GREEN RED YELLOW SWEET SLICED SLICES SMOKED SMOKIES BONELESS SKINLESS BREAST THIGHS FILLET STEAK LOAF BUNS BURGER HOT DOG DOGS CHEDDAR MARBLE CREAM SOUR JUICE ORANGE APPLE PINEAPPLE GRAPE LEMON LIME MILK HOMO SKIM BUTTER YOGURT GREEK VANILLA PLAIN STRAWBERRY STRAWBERRIES BLUEBERRY BLUEBERRIES BANANA BANANAS TOMATO TOMATOES POTATO POTATOES ONION ONIONS PEPPER PEPPERS LETTUCE ROMAINE SPINACH CARROT CARROTS CUCUMBER BROCCOLI MUSHROOM MUSHROOMS CABBAGE GRAPES PEAR PEARS APPLES AVOCADO AVOCADOS BREAD BAGELS TORTILLA TORTILLAS WRAPS PITA RICE PASTA SUGAR FLOUR SALT CHIPS COOKIES CRACKERS SNACKS CHICKEN BEEF PORK LAMB TURKEY SAUSAGE SAUSAGES BACON HAM SALMON TUNA SHRIMP EGGS CHEESE PIZZA WATER SODA POP TEA ICED COFFEE PACK BRIOCHE HAMBURGER MOZZARELLA PARMESAN FETA DELI WINGS DRUMSTICKS ROAST MINCED CHUNKS FRUIT SNACK CEREAL OATS GRANOLA HONEY JAM PEANUT CHOCOLATE FREE RUN RANGE NATURAL CLASSIC ORIGINAL DIET ZERO LIGHT FAMILY SIZE FAIRLIFE NATREL LACTANTIA NEILSON BEATRICE DEMPSTERS WONDER CHRISTIES OASIS TROPICANA SIMPLY NESTEA LIBERTE ACTIVIA OIKOS IOGO DANONE ASTRO KRAFT SCHNEIDERS BURNBRAE GRAY RIDGE KIRKLAND SIGNATURE GREAT VALUE COMPLIMENTS SELECTION SAPUTO ARMSTRONG OLYMPIC SILK ALMOND OAT LAYS DORITOS PRINGLES OREO RITZ GOLDFISH HEINZ CAMPBELLS KELLOGGS CHEERIOS QUAKER DOLE CHIQUITA SUNKIST ZESPRI PRESIDENTS CHOICE KARTAGO VERKA PURFILTRE MAPLE LEAF CRACKER BARREL PHILADELPHIA BABYBEL TROPICANA MINUTE MAID COKE PEPSI SPRITE GATORADE'.split(' ');
+const ABBR={MCRN:'Macaroni',CHS:'Cheese',BLKBRY:'Blackberries',JALEPANO:'Jalapeno',SWT:'Sweet',SLT:'Salty',PNT:'Peanut',CRNBRY:'Cranberry',CRL:'Cereal',KTCHN:'Kitchen',YU:'Yu',MSHRMS:'Mushrooms',HSHRMS:'Mushrooms',PCHSHRMS:'PC Mushrooms',PCMSHRMS:'PC Mushrooms',BULK:'Bulk',BLKBARN:'Bulk Barn',NESTS:'Nests',FREE:'Free',OATS:'Oats',FIBER:'Fiber',FIBRE:'Fibre',FLL:'Field',FLD:'Field',GRNS:'Greens',SLD:'Salad',CHI:'Chicken',CRUM:'Drumsticks',DRUM:'Drumsticks',STL:'Stella',PAR:'Parmesan',KFT:'Kraft',SIG:'Signature',RASP:'Raspberry',VIN:'Vinaigrette',DAIR:'Dairyland',CHO:'Chocolate',TAGLIATELLE:'Tagliatelle',BOCCONCINI:'Bocconcini',PC:'PC',PO:'PC',BRWN:'Brown',BRUN:'Brown',CAK:'Cakes',CAKS:'Cakes',CRACKR:'Crackers',CRKR:'Crackers',NT2U:'Nuts to You',PISTA:'Pistachio',IMAG:'Imagine',BRTH:'Broth',CHK:'Chicken',LS:'Low Sodium',SDL:'Seedless',PURP:'Purple',PRESERV:'Preserves',PRESERU:'Preserves',PRSRV:'Preserves',VEG:'Vegetable',NN:'No Name',BLK:'Black',DEMP:"Dempster's",WWH:'Whole Wheat',WW:'Whole Wheat',GRN:'Green',PEP:'Pepper',GRD:'Ground',BF:'Beef',CHD:'Cheddar',SMK:'Smokies',OJ:'Orange Juice',PINEAP:'Pineapple',JU:'Juice',JCE:'Juice',HOMO:'Homo',MED:'Méditerranée',LG:'Large',ORG:'Organic',BNNA:'Bananas',BNN:'Bananas',CHKN:'Chicken',BRST:'Breast',BNLS:'Boneless',SKNLS:'Skinless',MLK:'Milk',YGRT:'Yogurt',YGT:'Yogurt',GRK:'Greek',SPNCH:'Spinach',BBY:'Baby',SLMN:'Salmon',FLT:'Fillet',BRD:'Bread',WHL:'Whole',WHT:'Wheat',TOM:'Tomatoes',GV:'Great Value',KS:'Kirkland Signature',LIBERTE:'Liberté',BRIOCHE:'Brioche',BUN:'Buns',BUNS:'Buns',HMBRG:'Hamburger',HMB:'Hamburger',BGR:'Burger',STRWB:'Strawberries',FRZ:'Frozen',CKD:'Cooked',SLCD:'Sliced',SHRD:'Shredded',MOZZ:'Mozzarella',PARM:'Parmesan',CRM:'Cream',BTR:'Butter',VICKIES:"Vickie's",WELCHS:"Welch's",WELCH:"Welch's",FILET:'Fillet',SLICE:'Slices',TKY:'Turkey',TRKY:'Turkey',SSG:'Sausage',POT:'Potatoes',ONI:'Onions',CUC:'Cucumber',LTTC:'Lettuce',BROC:'Broccoli',MSHRM:'Mushrooms',AVO:'Avocado',APL:'Apples',GRP:'Grapes'};
+const WORDS='BEET BEETS BLEND FRUIT BEAN BEANS SPROUTS OAT OATS ZERO CURRY GROUND LEAN MEDIUM EXTRA FRESH FROZEN ORGANIC WHOLE WHEAT WHITE BROWN LARGE SMALL BABY GREEN RED YELLOW SWEET SLICED SLICES SMOKED SMOKIES BONELESS SKINLESS BREAST THIGHS FILLET STEAK LOAF BUNS BURGER HOT DOG DOGS CHEDDAR MARBLE CREAM SOUR JUICE ORANGE APPLE PINEAPPLE GRAPE LEMON LIME MILK HOMO SKIM BUTTER YOGURT GREEK VANILLA PLAIN STRAWBERRY STRAWBERRIES BLUEBERRY BLUEBERRIES BANANA BANANAS TOMATO TOMATOES POTATO POTATOES ONION ONIONS PEPPER PEPPERS LETTUCE ROMAINE SPINACH CARROT CARROTS CUCUMBER BROCCOLI MUSHROOM MUSHROOMS CABBAGE GRAPES PEAR PEARS APPLES AVOCADO AVOCADOS BREAD BAGELS TORTILLA TORTILLAS WRAPS PITA RICE PASTA SUGAR FLOUR SALT CHIPS COOKIES CRACKERS SNACKS CHICKEN BEEF PORK LAMB TURKEY SAUSAGE SAUSAGES BACON HAM SALMON TUNA SHRIMP EGGS CHEESE PIZZA WATER SODA POP TEA ICED COFFEE PACK BRIOCHE HAMBURGER MOZZARELLA PARMESAN FETA DELI WINGS DRUMSTICKS ROAST MINCED CHUNKS FRUIT SNACK CEREAL OATS GRANOLA HONEY JAM PEANUT CHOCOLATE FREE RUN RANGE NATURAL CLASSIC ORIGINAL DIET ZERO LIGHT FAMILY SIZE FAIRLIFE NATREL LACTANTIA NEILSON BEATRICE DEMPSTERS WONDER CHRISTIES OASIS TROPICANA SIMPLY NESTEA LIBERTE ACTIVIA OIKOS IOGO DANONE ASTRO KRAFT SCHNEIDERS BURNBRAE GRAY RIDGE KIRKLAND SIGNATURE GREAT VALUE COMPLIMENTS SELECTION SAPUTO ARMSTRONG OLYMPIC SILK ALMOND OAT LAYS DORITOS PRINGLES OREO RITZ GOLDFISH HEINZ CAMPBELLS KELLOGGS CHEERIOS QUAKER DOLE CHIQUITA SUNKIST ZESPRI PRESIDENTS CHOICE KARTAGO VERKA PURFILTRE MAPLE LEAF CRACKER BARREL PHILADELPHIA BABYBEL TROPICANA MINUTE MAID COKE PEPSI SPRITE GATORADE'.split(' ');
 let VOCAB=null;
 function vocab(){if(VOCAB)return VOCAB;VOCAB=new Set(WORDS);FOOD_KEYS.forEach(k=>FOOD[k].kw.forEach(w=>VOCAB.add(w)));Object.keys(ABBR).forEach(k=>VOCAB.add(k));Object.values(ABBR).forEach(v=>v.toUpperCase().replace(/[^A-ZÉ' ]/g,'').split(' ').forEach(w=>w&&VOCAB.add(w)));return VOCAB}
 const tc=w=>w.charAt(0).toUpperCase()+w.slice(1).toLowerCase();
@@ -796,11 +878,19 @@ function splitGlued(w){const V=vocab(),U=w.toUpperCase();if(V.has(U)||U.length>2
 function prettyName(r){
   if(r.nice)return r.nice;
   const low=r.ocr!=null&&r.ocr<0.68;
-  let t=String(r.label||'');
+  // lower-case words on an upper-case receipt line are text showing through from the back of the paper
+  {const raw=String(r.label||'');if((raw.match(/\b[A-Z]{2,}\b/g)||[]).length>=2)r={...r,label:raw.split(/\s+/).filter(w=>!/^[a-z][a-z0-9]*$/.test(w)&&!/^[a-z]+[A-Z]{1,2}[a-z0-9.]*$/.test(w)).join(' ')}}
+  // a zero read inside a word is the letter O ("EAR0 0AT" -> "EARO OAT")
+  let t=String(r.label||'').replace(/(?<=[A-Za-z]{2})0\b|\b0(?=[A-Za-z]{2}\b)/g,'O');
+  // a count run into the word ("3FRUIT BLEND") gets its space back
+  t=t.replace(/\b(\d)([A-Za-z]{3,})\b/g,'$1 $2');
   // word pairs a till abbreviates back to front
   for(const [re,to] of NAME_PHRASES)t=t.replace(re,to);
   // tax and price codes printed after the name ("MRJ", "HRJ", "GST") are not part of it
-  {const w=t.trim().split(/\s+/);while(w.length>1&&(/^[B-DF-HJ-NP-TV-Z]{1,4}$/.test(w[w.length-1])||/^([A-Z]{0,3}R[JQO0]|MA[JI])$/.test(w[w.length-1]))&&!ABBR[w[w.length-1]])w.pop();t=w.join(' ')}
+  {let w=t.trim().split(/\s+/);
+   /* anything after a tax code ("LEEKS MRJ quot") is OCR spill from the price column */
+   {const ix=w.findIndex((x,i)=>i>0&&/^(H?M?R[JQ]|[GH]?R[JQ]|MA[JIJ]|HAJ|URJ)$/.test(x));if(ix>0)w=w.slice(0,ix)}
+   while(w.length>1&&(/^[B-DF-HJ-NP-TV-Z]{1,4}$/.test(w[w.length-1])||/^([A-Z]{0,3}R[JQO0]|MA[JI]|[A-Z]{0,2}[RA]\.?[JQ])$/.test(w[w.length-1]))&&!ABBR[w[w.length-1]])w.pop();t=w.join(' ')}
   t=t.replace(/\b\d{5,}\b/g,' ').replace(/([A-Za-z])\.(?=[A-Za-z0-9])/g,'$1 ').replace(/%(?=[A-Za-z])/g,'% ').replace(/[^A-Za-zÀ-ÿ0-9%.'\/ -]/g,' ');
   const V=vocab(),out=[];
   t.split(/\s+/).filter(Boolean).forEach((w,i,arr)=>{
@@ -1049,6 +1139,7 @@ function reviewScreen(){
   return phone('Check items',live.length+' found','scan',`<div class="note">${open?open+' to check. Tap once per item.':live.length?'All checked. Ready to save.':'No food items found. Add them below or go back.'}</div>
     <div class="note">${esc(dateTxt)}${S.store?' · '+esc(S.store):''}</div>${S.nonFood&&S.nonFood.length?`<div class="note">Left out ${S.nonFood.length} non-food item${S.nonFood.length===1?'':'s'}: ${esc(S.nonFood.slice(0,4).join(', ').toLowerCase())}${S.nonFood.length>4?'…':''}</div>`:''}
     ${unk>2?`<button class="sm" data-a="dropunk">Remove ${unk} unrecognised lines at once</button>`:''}
+    ${S.dropped&&S.dropped.length?`<details class="card"><summary>The OCR read ${S.dropped.length} line${S.dropped.length===1?'':'s'} the app did not add</summary>${S.dropped.map((d,i)=>`<div class="row"><span>${esc(String(d.text).slice(0,60))} <span class="meta">(${esc(d.why)})</span></span><button class="sm" data-a="adddrop" data-v="${i}">Add</button></div>`).join('')}</details>`:''}
     ${flagged}${clear?`<div class="label">Read clearly</div>${clear}`:''}
     <details><summary>What the OCR read</summary><div class="ocrtxt">${esc(S.ocrText)}</div><div id="prepholder"></div></details>
     <div class="card"><div class="label">Missed something?</div><div class="row"><input type="text" id="addname" placeholder="Search item to add" aria-label="Search item to add"><button class="sm" data-a="add">Add</button></div><button class="sm" data-a="bcopen">${svg(P.barcode,'ii')}${S.bcOpen?'Close barcode scanner':'Add by barcode'}</button></div>${S.bcOpen?barcodeBox():''}`,
@@ -1751,18 +1842,32 @@ async function ppRead(src,onProg){
    (benchmarked on real Costco, Walmart and Domino's receipts: 1 pass 74-78%, 3 passes 96% of items right). */
 const PASSES=[{label:'sharpened',opts:{C:8,width:1300}},{label:'shadows removed',opts:{mode:'flat',gain:3,width:1800}},{label:'high contrast',opts:{mode:'flat',gain:3,width:1300,lo:100,hi:215}}];
 const fmtLines=lines=>lines.map(l=>l.text.trim()+'   ['+Math.round(l.conf)+'%]').join('\n');
+/* One misread price (a stray leading digit, "53.16" for "3.16") shows up as the items not adding up to the subtotal.
+   If dropping one item's leading digit makes them add up exactly, that was the misread. */
+function fixByTotal(parsed,sub){
+  if(!sub||!parsed||!parsed.items.length)return;
+  const sum=parsed.items.reduce((a,i)=>a+(i.price||0)-(i.discount||0),0)+(parsed.nonFoodSum||0);
+  if(sub<sum*0.5||Math.abs(sum-sub)<=0.02)return;
+  for(const it of parsed.items){if(!it.price||it.price<10)continue;
+    const s=it.price.toFixed(2),alt=+s.slice(1);
+    if(Math.abs(sum-it.price+alt-sub)<=0.02){it.price=alt;it.priceFixed=true;return}}}
 async function recognizePasses(isPhoto,forceTess){
   if(S.engine==='paddle'&&!forceTess){
     const lines=await withTimeout(ppRead(isPhoto?S.img:S.canvas,p=>setBar(.05+.9*p,p<.25?'Finding the lines of text…':'Reading line by line…')),180000,'Reading the receipt took too long. Try a smaller or sharper photo.');
     const text='--- PaddleOCR ---\n'+fmtLines(lines),parsed=parseReceipt(lines);
-    const sub=findSubtotal(lines.map(l=>l.text).join('\n')),sum=parsed.items.reduce((a,i)=>a+(i.price||0)-(i.discount||0),0);
-    if(!sub||Math.abs(sum-sub)<=Math.max(.06,sub*.01))return{parsed,text};
+    const sub=findSubtotal(lines.map(l=>l.text).join('\n'));fixByTotal(parsed,sub);
+    const sum=parsed.items.reduce((a,i)=>a+(i.price||0)-(i.discount||0),0)+(parsed.nonFoodSum||0);
+    /* a "subtotal" far below the items is a misread line (an item's price printed beside SUBTOTAL), not something to check against */
+    /* many product-code lines with no price: the reader missed the price column, so the older reader gets a try too */
+    const coded=lines.filter(l=>/\d{9,}/.test(l.text)),bare=coded.filter(l=>!PRICE.test(fixLine(l.text))).length,thin=coded.length>=5&&bare>coded.length*0.4;
+    if(!thin&&(!sub||sub<sum*0.5||Math.abs(sum-sub)<=Math.max(.06,sub*.01)))return{parsed,text};
     // the items don't add up: also try the older reader and keep whichever comes closer to the receipt's own total
     try{setBar(.9,'Double-checking against the receipt total…');
       const keep=S.ocr;if(!S.worker){await ensureTesseract()}S.ocr=keep;if(!S.worker)throw 0;
-      const alt=await recognizePasses(isPhoto,true),altSum=alt.parsed.items.reduce((a,i)=>a+(i.price||0)-(i.discount||0),0);
+      const alt=await recognizePasses(isPhoto,true),altSum=alt.parsed.items.reduce((a,i)=>a+(i.price||0)-(i.discount||0),0)+(alt.parsed.nonFoodSum||0);
       S.engine='paddle';
-      if(Math.abs(altSum-sub)<Math.abs(sum-sub))return{parsed:alt.parsed,text:text+'\n'+alt.text}}catch(e){S.engine='paddle'}
+      const priced=r=>r.items.filter(i=>i.price!=null).length;
+      if(thin?priced(alt.parsed)>priced(parsed):(sub&&Math.abs(altSum-sub)<Math.abs(sum-sub)))return{parsed:alt.parsed,text:text+'\n'+alt.text}}catch(e){S.engine='paddle'}
     return{parsed,text}}
   const run=async cv=>{const res=await withTimeout(S.worker.recognize(cv),240000,'Reading the receipt took too long. Try a smaller or sharper photo.');return linesFrom(res.data)};
   try{await S.worker.setParameters({tessedit_pageseg_mode:'6'})}catch(e){}
@@ -1844,7 +1949,7 @@ async function startScan(forceSim){
     await new Promise(r=>setTimeout(r,900))}
   S.run.ocrMs=performance.now()-t0;
   S.store=detectStore(S.ocrText);S.total=findTotal(S.ocrText);S.thumb=makeThumb();
-  const parsed=pre||parseReceipt(lines);S.nonFood=[...(parsed.nonFood||[])];
+  const parsed=pre||parseReceipt(lines);S.nonFood=[...(parsed.nonFood||[])];S.dropped=(parsed.dropped||[]).filter(d=>d&&String(d.text||'').trim()).slice(0,40);
   if(parsed.items.some(i=>i.upc)){setBar(1,'Looking up product codes\u2026');try{parsed.items=await enrichUPC(parsed.items)}catch(e){}}
   let date=parsed.date;S.dateIssue=null;S.dateOK=false;S.lastDateAlt=parsed.dateAlt;
   if(date){const n=diffDays(TODAY,date);
@@ -1924,6 +2029,7 @@ document.addEventListener('click',e=>{
   else if(a==='edit'){const r=S.review.find(x=>x.id===v);if(r.editing){const n=document.getElementById('nm-'+v);if(n&&n.value.trim()&&n.value.trim()!==nm(r))r.nice=n.value.trim();if(r.flagged&&!r.resolved)resolve(v);else r.editing=false}else r.editing=true}
   else if(a==='remove'){const r=S.review.find(x=>x.id===v);r.removed=true;if(S.run)S.run.last=performance.now()}
   else if(a==='dropunk'){S.review.forEach(r=>{if(r.key==='other'&&!r.resolved&&!r.added)r.removed=true});if(S.run)S.run.last=performance.now()}
+  else if(a==='adddrop'){const d=(S.dropped||[])[+v];if(d){addItem(String(d.text),'other',String(d.text));S.dropped.splice(+v,1)}}
   else if(a==='add'){const t=(document.getElementById('addname').value||'').trim();if(t){const m=matchFood(t);addItem(t,m?m.key:'other',t)}}
   else if(a==='camopen'){openCam();return}
   else if(a==='noop')return;
