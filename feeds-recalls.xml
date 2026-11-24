@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:og="http://ogp.me/ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:schema="http://schema.org/" xmlns:sioc="http://rdfs.org/sioc/ns#" xmlns:sioct="http://rdfs.org/sioc/types#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" version="2.0" xml:base="https://recalls-rappels.canada.ca/en">
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:og="http://ogp.me/ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:schema="http://schema.org/" xmlns:sioc="http://rdfs.org/sioc/ns#" xmlns:sioct="http://rdfs.org/sioc/types#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" version="2.0" xml:base="http://rsams-drupal-nginx/en">
   <channel>
     <title>Health and safety recalls and alerts</title>
-    <link>https://recalls-rappels.canada.ca/en</link>
+    <link>http://rsams-drupal-nginx/en</link>
     <description>Canadian Food Inspection Agency</description>
     <language>en</language>
     
     <item>
   <title>Cadbury brand Dairy Milk Oreo Candy (treat size bar) recalled due to undeclared pistachio</title>
-  <link>https://recalls-rappels.canada.ca/en/alert-recall/cadbury-brand-dairy-milk-oreo-candy-treat-size-bar-recalled-due-undeclared-pistachio</link>
+  <link>http://rsams-drupal-nginx/en/alert-recall/cadbury-brand-dairy-milk-oreo-candy-treat-size-bar-recalled-due-undeclared-pistachio</link>
   <description>The affected products&amp;nbsp;are being recalled from the marketplace because they may contain&amp;nbsp;pistachio which is not declared on the label.
 </description>
   <pubDate>2026-11-20T12:00:00</pubDate>
@@ -17,7 +17,7 @@
     </item>
 <item>
   <title>Certain Nora's brand Non-Dairy Frozen Desserts recalled due to undeclared peanut</title>
-  <link>https://recalls-rappels.canada.ca/en/alert-recall/certain-nora-s-brand-non-dairy-frozen-desserts-recalled-due-undeclared-peanut</link>
+  <link>http://rsams-drupal-nginx/en/alert-recall/certain-nora-s-brand-non-dairy-frozen-desserts-recalled-due-undeclared-peanut</link>
   <description>The affected products&amp;nbsp;are being recalled from the marketplace because they contain&amp;nbsp;peanut which is not declared on the label.
 </description>
   <pubDate>2026-11-20T12:00:00</pubDate>
@@ -26,7 +26,7 @@
     </item>
 <item>
   <title>Paras brand Wheat Free Flour recalled due to undeclared wheat</title>
-  <link>https://recalls-rappels.canada.ca/en/alert-recall/paras-brand-wheat-free-flour-recalled-due-undeclared-wheat</link>
+  <link>http://rsams-drupal-nginx/en/alert-recall/paras-brand-wheat-free-flour-recalled-due-undeclared-wheat</link>
   <description>The affected products are being recalled from the marketplace because they contain wheat which is not declared on the label.
 </description>
   <pubDate>2026-11-18T12:00:00</pubDate>
